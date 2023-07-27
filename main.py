@@ -388,6 +388,7 @@ def spam(message):
                         redflag = True
                         time.sleep(30)
 
+
                 else:
                     radiant_team_name = everything.find(class_='title')
                     if re.search(data[0].split(',')[0], radiant_team_name.text):
@@ -573,7 +574,7 @@ def spam(message):
                             # Example usage
                             message_to_send = '                              Счет ' + \
                                               score_list[0] + ' - ' + score_list[
-                                                  1] + '\n' + 'dotapicker победитель - ' + dotapicker_winner + '\n' + 'dotafix.gi победитель  - ' + dotafix_github_winner + '\n' + 'dotatools  победитель - ' + dotatools_dotapicker_winner
+                                                  1] + '\n' + 'dotapicker победитель - ' + dotapicker_winner + '\n' + 'dotafix.gi победитель  - ' + dotafix_github_winner + '\n' + 'dotatools  победитель - ' + dotatools_dotapicker_winner + '\n' + url_dotapicker
                             send_message(message_to_send)
 
                         radiant_pick, dire_pick, counter = dict(), dict(), 0
@@ -599,6 +600,7 @@ def spam(message):
                             send_message('               Пики еще не закончились')
                             flag5 = 0
                         redflag = True
+                        print('               Пики еще не закончились')
                         time.sleep(30)
             pass
         else:
@@ -606,6 +608,7 @@ def spam(message):
                 send_message('                    Сейчас нету активных матчей :С')
                 flag4 = 0
             redflag = True
+            print('                    Сейчас нету активных матчей :С')
             time.sleep(30)
 @bot.message_handler(commands=['stop'])
 def stop():
