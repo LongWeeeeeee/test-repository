@@ -340,6 +340,9 @@ def button_message(message):
 def message_reply(message):
     if message.text == "Анализировать текущие матчи":
         welcome()
+        bot.send_message(message.chat.id, 'Работа завершена')
+        print('Работа завершена')
+
 
 
 bot.infinity_polling()
