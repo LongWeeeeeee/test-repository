@@ -118,6 +118,7 @@ def welcome():
 
 
                     if len(dire_pick) == 5 and len(radiant_pick) == 5:
+                        redflag=False
                     # анализ пиков
                         # счет в матче
                         score = match_url_soup.find(class_='score__scores live').find_all('span')
@@ -305,7 +306,6 @@ def welcome():
                             else:
                                 send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
                         driver.quit()
-                        redflag = False
                     else:
                         if flag2:
                             send_message('               Пики еще не закончились')
