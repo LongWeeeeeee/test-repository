@@ -142,18 +142,9 @@ def live_matches():
                                 url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 send_message(url_dotafix)
                                 driver.get(url_dotafix)
-
-                                try:
-                                    element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
-                                    select_element = driver.find_element(By.ID, 'rankData')
-                                    select = Select(select_element)
-                                    select.select_by_index(9)
-                                except:
-                                    driver.refresh()
-                                    time.sleep(6)
-                                    select_element = driver.find_element(By.ID, 'rankData')
-                                    select = Select(select_element)
-                                    select.select_by_index(9)
+                                element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
+                                select = Select(element)
+                                select.select_by_index(9)
                                 driver.find_element(By.CSS_SELECTOR, '[style="font-size: 20px;"]').click()
                                 alert = Alert(driver)
                                 alert_text = alert.text
