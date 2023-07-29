@@ -31,7 +31,7 @@ def live_matches():
     response = requests.get(url).text
     json_data = json.loads(response)
     for match in json_data['rows']:
-        if match['status'] != 'waiting':
+        if match['status'] == 'online' or 'drafts' or 'draft':
             if match['tournament']['tier'] == 1:
                 best_of = match['best_of']
                 score = match['best_of_score']
