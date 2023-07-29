@@ -32,7 +32,7 @@ def live_matches():
     json_data = json.loads(response)
     for match in json_data['rows']:
         while redflag:
-            if match['status'] == ('online' or 'draft') and match['tournament']['tier'] == 1:
+            if match['status'] == 'online' or match['status'] == 'draft' and match['tournament']['tier'] == 1:
                 best_of = match['best_of']
                 score = match['best_of_score']
                 # radiant_team_name = match['team_radiant']['name']
