@@ -42,7 +42,7 @@ def welcome():
     flag4 = 1
     flag5 = 1
     current_time = datetime.now() + timedelta(minutes=30)
-    while redflag == True or datetime.now() < current_time:
+    while redflag == True:
         live_matches = []
         answ = []
         response = requests.get(url)
@@ -301,27 +301,27 @@ def welcome():
                             send_message('            Ставка РАЗРЕШЕНА')
                         elif dotafix_unsure or dotapicker_unsure:
                             send_message('            Ставка ЗАПРЕЩЕНА')
-                            if radiant_match_duration >= 36 and dire_match_duration >= 36:
-                                send_message('Ставка на ВРЕМЯ РАЗРЕШЕНА')
-                            else:
-                                send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
+                            # if radiant_match_duration >= 36 and dire_match_duration >= 36:
+                            #     send_message('Ставка на ВРЕМЯ РАЗРЕШЕНА')
+                            # else:
+                            #     send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
                         driver.quit()
                     else:
                         if flag2:
                             send_message('               Пики еще не закончились')
                             flag2 = 0
-                        time.sleep(30)
+                        time.sleep(60)
                 else:
                     if flag1:
                         send_message('               Пики еще не начались')
                         flag1 = 0
-                    time.sleep(30)
+                    time.sleep(60)
             pass
         else:
             if flag3:
                 flag3 = 0
                 send_message('                    Сейчас нету активных матчей :С')
-            time.sleep(30)
+            time.sleep(60)
 
 
 @bot.message_handler(commands=['start'])
