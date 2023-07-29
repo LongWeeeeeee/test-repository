@@ -42,7 +42,7 @@ def welcome():
     flag4 = 1
     flag5 = 1
     current_time = datetime.now() + timedelta(minutes=30)
-    while redflag == True or datetime.now() > current_time:
+    while redflag == True or datetime.now() < current_time:
         live_matches = []
         answ = []
         response = requests.get(url)
