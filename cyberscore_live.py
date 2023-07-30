@@ -281,10 +281,13 @@ def live_matches():
                                         pass
                         for i in wr_dict:
                             total_hero = 0
-                            for each in wr_dict[i]:
-                                total_hero += float(each)
+                            if len(wr_dict[i]) == 5:
+                                for each in wr_dict[i]:
+                                    total_hero += float(each)
 
-                            total += total_hero / 5
+                                total += total_hero / 5
+                            else:
+                                send_message('Dota2protracker ERROR')
                         total = total/5
                         if total >= 50:
                             send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(total))
