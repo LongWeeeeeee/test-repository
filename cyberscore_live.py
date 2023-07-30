@@ -91,7 +91,6 @@ def live_matches():
                             dotafix_risk = False
                             redflag = False
                             options = Options()
-                            options.add_argument("window-size=1920,1080")
                             options.add_argument("--start-maximized")
                             options.add_argument("--no-sandbox")
                             driver = webdriver.Chrome(options=options)
