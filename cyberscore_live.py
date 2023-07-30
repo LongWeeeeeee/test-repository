@@ -62,7 +62,7 @@ def live_matches():
                 # json_map = json.loads(map_page.text)
                 # radiant_pick = json_map['pageProps']['initialState']['matches_item']['picks_team_radiant']
                 # пики
-                if dire_pick != None:
+                if dire_pick[4]['hero'] != '':
                     for radiant_hero in radiant_pick:
                         radiant_hero_names.append(radiant_hero['hero']['label'])
                         radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
