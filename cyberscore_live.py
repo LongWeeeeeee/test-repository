@@ -79,6 +79,7 @@ def live_matches():
                         redflag = 0
                         send_message(best_of)
                         send_message(score)
+                        wr_dict = {}
                         dotafix_unsure = False
                         dotafix_sure_flag = False
                         dotapicker_sure_flag = False
@@ -252,6 +253,43 @@ def live_matches():
                             # else:
                             #     send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
                         driver.quit()
+                        # dota2protracker
+                        total = 0
+                        for hero in radiant_hero_names:
+                            wr_dict[hero] = []
+                            for enemy in dire_hero_names:
+                                url_dota2_protracker = f'https://www.dota2protracker.com/hero/{hero}'
+                                response = requests.get(url_dota2_protracker)
+                                soup = BeautifulSoup(response.text, "lxml")
+                                hero_names = soup.find_all('td', class_='td-hero-pic')
+                                wr_percentage = soup.find_all('div', class_='perc-wr')
+                                percent_iter = iter(wr_percentage)
+                                hero_names = [each_hero.get('data-order') for each_hero in hero_names]
+                                for each_hero in hero_names:
+                                    try:
+                                        with_wr = next(percent_iter)
+                                        against_wr = next(percent_iter).text.strip()
+                                        percentage = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                        if enemy == each_hero:
+                                            if hero in wr_dict:
+                                                pre = wr_dict[hero]
+                                                pre.append(percentage)
+                                                wr_dict[hero] = pre
+                                            else:
+                                                wr_dict[hero] = [percentage]
+                                    except:
+                                        pass
+                        for i in wr_dict:
+                            total_hero = 0
+                            for each in wr_dict[i]:
+                                total_hero += float(each)
+
+                            total += total_hero / 5
+                        total = total/5
+                        if total >= 50:
+                            send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(total))
+                        else:
+                            send_message(dire_team_name + ' dota2protracker Winrate: ' + str(100-total))
                         # Анализ игроков
                         dire_players = json_map['team_radiant']['players_items']
                         radiant_players = json_map['team_dire']['players_items']
