@@ -1,3 +1,6 @@
+#сверха прошлых матчей и прошлых встреч
+#Отладка винрейта на старых матчах
+#Проверка того что все правильно работает
 from telebot import types
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
