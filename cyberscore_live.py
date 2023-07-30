@@ -66,7 +66,6 @@ def live_matches():
                     for radiant_hero in radiant_pick:
                         radiant_hero_names.append(radiant_hero['hero']['label'])
                         radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
-
                     for dire_hero in dire_pick:
                         dire_hero_names.append(dire_hero['hero']['label'])
                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
@@ -91,7 +90,7 @@ def live_matches():
                         dotafix_risk = False
                         redflag = False
                         options = Options()
-                        # options.add_argument("window-size=1920,1080")
+                        options.add_argument("window-size=1920,1080")
                         options.add_argument("--start-maximized")
                         options.add_argument("--no-sandbox")
                         driver = webdriver.Chrome(options=options)
@@ -171,9 +170,14 @@ def live_matches():
                         element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
                         select = Select(element)
                         select.select_by_index(8)
-                        driver.refresh()
-                        time.sleep(6)
-                        driver.find_element(By.CSS_SELECTOR, '[style="font-size: 20px;"]').click()
+                        try:
+                            aler_window = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                            aler_window.click()
+                        except:
+                            driver.refresh()
+                            aler_window = WebDriverWait(driver, 15).until(
+                                EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                            aler_window.click()
                         alert = Alert(driver)
                         alert_text = alert.text
                         alert.accept()
@@ -181,8 +185,9 @@ def live_matches():
                         datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
                         if len(datan) != 3:
                             driver.refresh()
-                            time.sleep(10)
-                            driver.find_element(By.CSS_SELECTOR, '[style="font-size: 20px;"]').click()
+                            aler_window = WebDriverWait(driver, 15).until(
+                                EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                            aler_window.click()
                             alert = Alert(driver)
                             alert_text = alert.text
                             alert.accept()
