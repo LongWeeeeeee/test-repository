@@ -166,7 +166,7 @@ def live_matches():
                         driver.get(url_dotafix)
                         element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
                         select = Select(element)
-                        select.select_by_index(9)
+                        select.select_by_index(8)
                         driver.refresh()
                         time.sleep(6)
                         driver.find_element(By.CSS_SELECTOR, '[style="font-size: 20px;"]').click()
