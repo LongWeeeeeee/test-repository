@@ -23,18 +23,6 @@ import json
 bot = telebot.TeleBot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 
 
-def send_message(message):
-    BOT_TOKEN = '6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs'
-    CHAT_ID = '1091698279'
-    url = f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage'
-    payload = {
-        'chat_id': CHAT_ID,
-        'text': message
-    }
-    response = requests.post(url, json=payload)
-    result = json.loads(response.content)
-    return result
-
 
 # лайв матчи
 def live_matches():
@@ -83,7 +71,6 @@ def live_matches():
                             dire_team_name = json_map['team_dire'][
                                 'name']
                             with open('past_matches_analyze.txt', 'r+') as f:
-                                send_message(title)
                                 redflag = 0
                                 wr_dict = {}
                                 wr_dict_with_radiant = {}
@@ -251,8 +238,6 @@ def live_matches():
                                     # total_hero = 0
 
                                     total += sum(wr_dict[i])/5
-                                    if len(wr_dict[i]) != 5:
-                                        send_message('DOTA2PROTRACKER ERROR')
                                 total = total/5
                                 if json_map['winner'] == 'radiant':
                                     pre = result_dict['dota2protracker1']['radiant']
@@ -280,19 +265,4 @@ def live_matches():
                                     pre.append(50 + int(diff*-1))
                                     result_dict['dota2protracker2']['dire'] = pre
                                 json.dump(result_dict, f)
-@bot.message_handler(commands=['button'])
-def button_message(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Анализировать текущие матчи")
-    markup.add(item1)
-
-
-@bot.message_handler(content_types='text')
-def message_reply(message):
-    if message.text == "Анализировать текущие матчи":
-        live_matches()
-        bot.send_message(message.chat.id, 'Работа завершена')
-        print('Работа завершена')
-
-
-bot.infinity_polling()
+live_matches()
