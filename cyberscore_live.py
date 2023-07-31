@@ -103,10 +103,12 @@ def live_matches():
                                     send_message(radiant_team_name + ' лучше ранги на ' + str(difference))
                                 elif difference < 0:
                                     send_message(dire_team_name + ' лучше ранги на ' + str(difference))
+                                else:
+                                    send_message('Ранги неизвестны')
                             send_message(title)
                             redflag = 0
-                            send_message(best_of)
-                            send_message(score)
+                            send_message('Играется бест оф ' + best_of)
+                            send_message('Текущий счет: ' + score)
                             wr_dict = {}
                             wr_dict_with_radiant = {}
                             wr_dict_with_dire = {}
@@ -357,9 +359,9 @@ def live_matches():
                                     send_message('DOTA2PROTRACKER ERROR')
                             total = total/5
                             if total >= 50:
-                                send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(total))
+                                send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(int(total)))
                             else:
-                                send_message(dire_team_name + ' dota2protracker Winrate: ' + str(100-total))
+                                send_message(dire_team_name + ' dota2protracker Winrate: ' + str(int(100-total)))
                             #Another dota2protracker
                             total_dire = 0
                             total_radiant = 0
@@ -369,9 +371,9 @@ def live_matches():
                                 total_radiant += sum(wr_dict_with_radiant[radiant])/4
                             diff = total_radiant/5 - total_dire/5
                             if diff > 0:
-                                send_message('Dota2protracker ВТОРОЙ метод: ' + radiant_team_name + ' ' + str(diff) )
+                                send_message('Dota2protracker ВТОРОЙ метод: ' + radiant_team_name + ' ' + str(50 + (int(diff)) ))
                             elif diff < 0:
-                                send_message('Dota2protracker ВТОРОЙ метод: ' + dire_team_name + ' ' + str(diff*-1) )
+                                send_message('Dota2protracker ВТОРОЙ метод: ' + dire_team_name + ' ' + str(50 + int(diff*-1)) )
                             # Анализ игроков
                             dire_players = json_map['team_radiant']['players_items']
                             radiant_players = json_map['team_dire']['players_items']
