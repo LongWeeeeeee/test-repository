@@ -371,9 +371,9 @@ def live_matches():
                                 total_radiant += sum(wr_dict_with_radiant[radiant])/4
                             diff = total_radiant/5 - total_dire/5
                             if diff > 0:
-                                send_message('Dota2protracker ВТОРОЙ метод: ' + radiant_team_name + ' ' + str(50 + (int(diff)) ))
+                                send_message('Dota2protracker ВТОРОЙ метод Шанс на победу: ' + radiant_team_name + ' ' + str(50 + (int(diff))) + '%')
                             elif diff < 0:
-                                send_message('Dota2protracker ВТОРОЙ метод: ' + dire_team_name + ' ' + str(50 + int(diff*-1)) )
+                                send_message('Dota2protracker ВТОРОЙ метод: Шанс на победу: ' + dire_team_name + ' ' + str(50 + int(diff*-1)) + '%')
                             # Анализ игроков
                             dire_players = json_map['team_radiant']['players_items']
                             radiant_players = json_map['team_dire']['players_items']
