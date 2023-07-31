@@ -88,10 +88,11 @@ def live_matches():
                         dire_team_name = json_map['team_dire'][
                             'name']
                         if not ranks_fail:
-                            if sum(radiant_team_rangs) - sum(dire_team_rangs) > 0:
-                                send_message(radiant_team_name + ' лучше ранги')
-                            elif sum(radiant_team_rangs) - sum(dire_team_rangs) < 0:
-                                send_message(dire_team_name + ' лучше ранги')
+                            difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
+                            if  difference > 0:
+                                send_message(radiant_team_name + ' лучше ранги на ' + difference )
+                            elif difference < 0:
+                                send_message(dire_team_name + ' лучше ранги на ' + difference)
                         # if  radiant_team_name in {'Myth Avenue Gaming', 'Vision Gaming'}:
                         # Пики закончились
                         if len(dire_hero_names) == 5 and len(radiant_hero_names) == 5:
