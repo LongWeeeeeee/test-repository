@@ -287,7 +287,7 @@ def live_matches():
                                 # else:
                                 #     send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
                             driver.quit()
-                            dota2protracker
+                            # dota2protracker
                             total = 0
                             for hero in radiant_hero_names:
                                 wr_dict[hero] = []
