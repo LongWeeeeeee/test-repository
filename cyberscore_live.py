@@ -309,6 +309,7 @@ def live_matches():
                                     total += sum(wr_dict[i])/5
                                 else:
                                     send_message('Dota2protracker ERROR')
+                            total = total/5
                             if total >= 50:
                                 send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(total))
                             else:
