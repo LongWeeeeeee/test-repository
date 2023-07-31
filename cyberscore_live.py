@@ -107,8 +107,8 @@ def live_matches():
                                     send_message('Ранги неизвестны')
                             send_message(title)
                             redflag = 0
-                            send_message('Играется бест оф ' + best_of)
-                            send_message('Текущий счет: ' + score)
+                            send_message('Играется бест оф ' + str(best_of))
+                            send_message('Текущий счет: ' + str(score))
                             wr_dict = {}
                             wr_dict_with_radiant = {}
                             wr_dict_with_dire = {}
