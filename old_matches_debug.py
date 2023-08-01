@@ -35,6 +35,7 @@ def live_matches():
             if match['tournament']['tier'] == 1:
                 for map in match['related_matches']:
                     result_dict['total'] = result_dict['total'] + 1
+                    print(result_dict['total'])
                     map_id = map['id']
                     dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
                     match_url = f'https://cyberscore.live/en/matches/{map_id}/'
@@ -95,7 +96,12 @@ def live_matches():
                                 url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
                                 # Download and specify the path to your chromedriver executable
                                 driver.get(url_dotapicker)
-                                select_element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.NAME, 'component')))
+                                try:
+                                    select_element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.NAME, 'component')))
+                                except:
+                                    driver.refresh()
+                                    select_element = WebDriverWait(driver, 15).until(
+                                        EC.element_to_be_clickable((By.NAME, 'component')))
                                 select = Select(select_element)
                                 select.select_by_index(0)
                                 elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
@@ -163,15 +169,16 @@ def live_matches():
                                 url_dotatools = 'https://dotatools.ru/api/v1/predict_victory?dire_hero_ids=' + dire + '&radiant_hero_ids=' + radiant + '&rank=immortal'
                                 picks = requests.get(url_dotatools)
                                 a = picks.text
+                                print(a)
                                 b = re.findall('[0-9]{1,}\.[0-9]{1,}', a)
                                 #'{"direWr":0.47,"radiantWr":0.53}
                                 if json_map['winner'] == 'radiant':
                                     pre = result_dict['dotatools']['radiant']
-                                    pre.append(b[1])
+                                    pre.append(float(b[1])*100)
                                     result_dict['dotatools']['radiant'] = pre
                                 else:
                                     pre = result_dict['dotatools']['dire']
-                                    pre.append(b[0])
+                                    pre.append(float(b[0])*100)
                                     result_dict['dotatools']['dire'] = pre
                                 driver.quit()
                                 # dota2protracker
