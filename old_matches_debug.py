@@ -73,21 +73,21 @@ def live_matches():
                             dire_team_name = json_map['team_dire'][
                                 'name']
                             with open('dotatools_analyze.txt', 'r+') as f:
-                                redflag = 0
-                                wr_dict = {}
-                                wr_dict_with_radiant = {}
-                                wr_dict_with_dire = {}
-                                dotafix_unsure = False
-                                dotafix_sure_flag = False
-                                dotapicker_sure_flag = False
-                                dotapicker_unsure = False
-                                dotapicker_risk = False
-                                dotafix_risk = False
-                                redflag = False
-                                options = Options()
-                                options.add_argument("--start-maximized")
-                                options.add_argument("--no-sandbox")
-                                driver = webdriver.Chrome(options=options)
+                                # redflag = 0
+                                # wr_dict = {}
+                                # wr_dict_with_radiant = {}
+                                # wr_dict_with_dire = {}
+                                # dotafix_unsure = False
+                                # dotafix_sure_flag = False
+                                # dotapicker_sure_flag = False
+                                # dotapicker_unsure = False
+                                # dotapicker_risk = False
+                                # dotafix_risk = False
+                                # redflag = False
+                                # options = Options()
+                                # options.add_argument("--start-maximized")
+                                # options.add_argument("--no-sandbox")
+                                # driver = webdriver.Chrome(options=options)
 
                                 # dotapicker
                                 # radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
