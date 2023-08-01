@@ -168,11 +168,11 @@ def live_matches():
                                 if json_map['winner'] == 'radiant':
                                     pre = result_dict['dotatools']['radiant']
                                     pre.append(b[1])
-                                    result_dict['dotafix.github']['radiant'] = pre
+                                    result_dict['dotatools']['radiant'] = pre
                                 else:
                                     pre = result_dict['dotatools']['dire']
                                     pre.append(b[0])
-                                    result_dict['dotafix.github']['dire'] = pre
+                                    result_dict['dotatools']['dire'] = pre
                                 driver.quit()
                                 # dota2protracker
                                 total = 0
