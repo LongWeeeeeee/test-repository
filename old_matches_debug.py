@@ -73,21 +73,21 @@ def live_matches():
                             dire_team_name = json_map['team_dire'][
                                 'name']
                             with open('dotatools_analyze.txt', 'r+') as f:
-                                # redflag = 0
-                                # wr_dict = {}
-                                # wr_dict_with_radiant = {}
-                                # wr_dict_with_dire = {}
-                                # dotafix_unsure = False
-                                # dotafix_sure_flag = False
-                                # dotapicker_sure_flag = False
-                                # dotapicker_unsure = False
-                                # dotapicker_risk = False
-                                # dotafix_risk = False
-                                # redflag = False
-                                # options = Options()
-                                # options.add_argument("--start-maximized")
-                                # options.add_argument("--no-sandbox")
-                                # driver = webdriver.Chrome(options=options)
+                                redflag = 0
+                                wr_dict = {}
+                                wr_dict_with_radiant = {}
+                                wr_dict_with_dire = {}
+                                dotafix_unsure = False
+                                dotafix_sure_flag = False
+                                dotapicker_sure_flag = False
+                                dotapicker_unsure = False
+                                dotapicker_risk = False
+                                dotafix_risk = False
+                                redflag = False
+                                options = Options()
+                                options.add_argument("--start-maximized")
+                                options.add_argument("--no-sandbox")
+                                driver = webdriver.Chrome(options=options)
 
                                 # dotapicker
                                 # radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
@@ -121,47 +121,47 @@ def live_matches():
 
                                 # ####dotafix.github
                                 #
-                                # radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
-                                # dire = ''.join(['&e=' + element for element in dire_hero_ids])
-                                # dire = '?' + dire[1:]
-                                # url_dotafix = "https://dotafix.github.io/" + dire + radiant
+                                radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
+                                dire = ''.join(['&e=' + element for element in dire_hero_ids])
+                                dire = '?' + dire[1:]
+                                url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 # send_message(url_dotafix)
-                                # driver.get(url_dotafix)
-                                # element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
-                                # select = Select(element)
-                                # select.select_by_index(8)
-                                # try:
-                                #     aler_window = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                                #     aler_window.click()
-                                # except:
-                                #     driver.refresh()
-                                #     aler_window = WebDriverWait(driver, 15).until(
-                                #         EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                                #     aler_window.click()
-                                # alert = Alert(driver)
-                                # alert_text = alert.text
-                                # alert.accept()
-                                # alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
-                                # datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
-                                # if len(datan) != 3:
-                                #     driver.refresh()
-                                #     aler_window = WebDriverWait(driver, 15).until(
-                                #         EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                                #     aler_window.click()
-                                #     alert = Alert(driver)
-                                #     alert_text = alert.text
-                                #     alert.accept()
-                                #     alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
-                                #     datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
-                                # datan = [int(float(datan_element)) for datan_element in datan]
-                                # if json_map['winner'] == 'radiant':
-                                #     pre = result_dict['dotafix.github']['radiant']
-                                #     pre.append([datan[0], datan[1], datan[2]])
-                                #     result_dict['dotafix.github']['radiant'] = pre
-                                # else:
-                                #     pre = result_dict['dotafix.github']['dire']
-                                #     pre.append([100-datan[0], 100-datan[1], 100-datan[2]])
-                                #     result_dict['dotafix.github']['dire'] = pre
+                                driver.get(url_dotafix)
+                                element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
+                                select = Select(element)
+                                select.select_by_index(8)
+                                try:
+                                    aler_window = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                                    aler_window.click()
+                                except:
+                                    driver.refresh()
+                                    aler_window = WebDriverWait(driver, 15).until(
+                                        EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                                    aler_window.click()
+                                alert = Alert(driver)
+                                alert_text = alert.text
+                                alert.accept()
+                                alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
+                                datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
+                                if len(datan) != 3:
+                                    driver.refresh()
+                                    aler_window = WebDriverWait(driver, 15).until(
+                                        EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
+                                    aler_window.click()
+                                    alert = Alert(driver)
+                                    alert_text = alert.text
+                                    alert.accept()
+                                    alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
+                                    datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
+                                datan = [int(float(datan_element)) for datan_element in datan]
+                                if json_map['winner'] == 'radiant':
+                                    pre = result_dict['dotafix.github']['radiant']
+                                    pre.append([datan[0], datan[1], datan[2]])
+                                    result_dict['dotafix.github']['radiant'] = pre
+                                else:
+                                    pre = result_dict['dotafix.github']['dire']
+                                    pre.append([100-datan[0], 100-datan[1], 100-datan[2]])
+                                    result_dict['dotafix.github']['dire'] = pre
                                 # dotatools:
                                 dire = ''.join([str(element) + ',' for element in dire_hero_ids])
                                 radiant = [str(element) + ',' for element in radiant_hero_ids]
@@ -178,7 +178,7 @@ def live_matches():
                                     pre = result_dict['dotatools']['dire']
                                     pre.append(dotatoools_json['direWr'])
                                     result_dict['dotatools']['dire'] = pre
-                                # driver.quit()
+                                driver.quit()
                                 # # dota2protracker
                                 # total = 0
                                 # for hero in radiant_hero_names:
