@@ -72,7 +72,7 @@ def live_matches():
                             json_map['team_radiant']['name']
                             dire_team_name = json_map['team_dire'][
                                 'name']
-                            with open('dotatools_analyze.txt', 'r+') as f:
+                            with open('dotafix_github_analyze.txt', 'r+') as f:
                                 redflag = 0
                                 wr_dict = {}
                                 wr_dict_with_radiant = {}
