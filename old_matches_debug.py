@@ -72,7 +72,7 @@ def live_matches():
                             json_map['team_radiant']['name']
                             dire_team_name = json_map['team_dire'][
                                 'name']
-                            with open('new_matches_results.txt', 'r+') as f:
+                            with open('new_matches_results_pro.txt', 'r+') as f:
                                 redflag = 0
                                 wr_dict = {}
                                 wr_dict_with_radiant = {}
@@ -129,7 +129,7 @@ def live_matches():
                                 driver.get(url_dotafix)
                                 element = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.ID, 'rankData')))
                                 select = Select(element)
-                                select.select_by_index(8)
+                                select.select_by_index(9)
                                 try:
                                     aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'content_copy')]")))
                                     aler_window.click()
