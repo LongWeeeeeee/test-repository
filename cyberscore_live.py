@@ -145,6 +145,8 @@ def live_matches():
                             elif elements[0] < 0:
                                 send_message('Dotapicker winner: ' + dire_team_name + str(elements[0]))
                                 dotapicker_winner = dire_team_name
+                            else:
+                                send_message('Dotapicker неуверен в победителе')
                             # if elements[0] >= 20 and elements[1] >= 20 and elements_winrate[0] >= 20 and \
                             #         elements_winrate[
                             #             1] >= 20:
