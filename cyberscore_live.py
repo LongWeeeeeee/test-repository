@@ -98,7 +98,7 @@ def live_matches():
                                 if difference > 0:
                                     send_message(radiant_team_name + ' лучше ранги на ' + str(difference))
                                 elif difference < 0:
-                                    send_message(dire_team_name + ' лучше ранги на ' + str(difference))
+                                    send_message(dire_team_name + ' лучше ранги на ' + str(difference*-1))
                                 else:
                                     send_message('Ранги неизвестны')
                             send_message(title)
