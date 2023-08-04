@@ -236,12 +236,12 @@ def live_matches():
                                                     wr_dict_with_radiant[hero] = pre
                                                     pre = 0
 
-                                            for enemy in dire_hero_names:
-                                                if enemy == dota2protracker_hero_name:
-                                                    pre = wr_dict[hero]
-                                                    pre.append(float(percentage))
-                                                    wr_dict[hero] = pre
-                                                    pre = 0
+                                            # for enemy in dire_hero_names:
+                                            #     if enemy == dota2protracker_hero_name:
+                                            #         pre = wr_dict[hero]
+                                            #         pre.append(float(percentage))
+                                            #         wr_dict[hero] = pre
+                                            #         pre = 0
                                         except:
                                             pass
 
@@ -276,26 +276,26 @@ def live_matches():
                                     # total_hero = 0
 
                                     total += sum(wr_dict[i])/5
-                                #радиант вс пиков даер
-                                total = total/5
-                                if json_map['winner'] == 'radiant':
-                                    if total >= 50:
-                                        pre = result_dict['dota2protracker1']['radiant']
-                                        pre.append(int(total))
-                                        result_dict['dota2protracker1']['radiant'] = pre
-                                    else:
-                                        pre = result_dict['dota2protracker1']['radiant']
-                                        pre.append(int(total))
-                                        result_dict['dota2protracker1']['radiant'] = pre
-                                else:
-                                    if total >= 50:
-                                        pre = result_dict['dota2protracker1']['dire']
-                                        pre.append(int(100 - total))
-                                        result_dict['dota2protracker1']['dire'] = pre
-                                    else:
-                                        pre = result_dict['dota2protracker1']['dire']
-                                        pre.append(int(100 - total))
-                                        result_dict['dota2protracker1']['dire'] = pre
+                                # #радиант вс пиков даер
+                                # total = total/5
+                                # if json_map['winner'] == 'radiant':
+                                #     if total >= 50:
+                                #         pre = result_dict['dota2protracker1']['radiant']
+                                #         pre.append(int(total))
+                                #         result_dict['dota2protracker1']['radiant'] = pre
+                                #     else:
+                                #         pre = result_dict['dota2protracker1']['radiant']
+                                #         pre.append(int(total))
+                                #         result_dict['dota2protracker1']['radiant'] = pre
+                                # else:
+                                #     if total >= 50:
+                                #         pre = result_dict['dota2protracker1']['dire']
+                                #         pre.append(int(100 - total))
+                                #         result_dict['dota2protracker1']['dire'] = pre
+                                #     else:
+                                #         pre = result_dict['dota2protracker1']['dire']
+                                #         pre.append(int(100 - total))
+                                #         result_dict['dota2protracker1']['dire'] = pre
 
                                 #Another dota2protracker
                                 total_dire = 0
@@ -317,7 +317,7 @@ def live_matches():
                                     if flag_radiant:
                                         if json_map['winner'] == 'dire':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append(0)
+                                            pre.append('Поражение dotapicker ' + str(elements[0]) + 'dota2protracker ' + str(50 + diff))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
@@ -332,7 +332,7 @@ def live_matches():
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append(0)
+                                            pre.append('Поражение dotapicker ' + str(elements[0]) + 'dota2protracker ' + str((-50 + diff)*-1))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                 # if json_map['winner'] == 'radiant':
                                 #     if diff > 0:
