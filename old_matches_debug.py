@@ -312,7 +312,7 @@ def live_matches():
                                     total_dire += sum(wr_dict_with_dire[dire]) // 4
                                 for radiant in wr_dict_with_radiant:
                                     total_radiant += sum(wr_dict_with_radiant[radiant]) // 4
-                                diff = total_radiant // 5 - total_dire // 5
+                                diff = (total_radiant / 5) - (total_dire / 5)
                                 if diff > 0: #победа radiant
                                     if flag_radiant:
                                         if json_map['winner'] == 'dire':
