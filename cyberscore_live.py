@@ -3,6 +3,7 @@
 #сверха прошлых матчей и прошлых встреч
 #Отладка винрейта на старых матчах
 #Проверка того что все правильно работает
+#ранги неправильно работают
 
 from telebot import types
 from selenium.webdriver.chrome.options import Options
@@ -96,9 +97,9 @@ def live_matches():
                             if not ranks_fail:
                                 difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
                                 if difference > 0:
-                                    send_message(radiant_team_name + ' лучше ранги на ' + str(difference))
+                                    send_message(dire_team_name + ' лучше ранги на ' + str(difference))
                                 elif difference < 0:
-                                    send_message(dire_team_name + ' лучше ранги на ' + str(difference*-1))
+                                    send_message(radiant_team_name + ' лучше ранги на ' + str(difference*-1))
                                 else:
                                     send_message('Ранги неизвестны')
                             send_message(title)
