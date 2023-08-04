@@ -309,10 +309,10 @@ def live_matches():
                                 total_dire = 0
                                 total_radiant = 0
                                 for dire in wr_dict_with_dire:
-                                    total_dire += sum(wr_dict_with_dire[dire]) / 4
+                                    total_dire += sum(wr_dict_with_dire[dire]) // 4
                                 for radiant in wr_dict_with_radiant:
-                                    total_radiant += sum(wr_dict_with_radiant[radiant]) / 4
-                                diff = total_radiant / 5 - total_dire / 5
+                                    total_radiant += sum(wr_dict_with_radiant[radiant]) // 4
+                                diff = total_radiant // 5 - total_dire // 5
                                 if diff > 0: #победа radiant
                                     if flag_radiant:
                                         if json_map['winner'] == 'dire':
@@ -332,7 +332,7 @@ def live_matches():
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append('dotapicker ' + str(elements[0]*-1) + ' dota2protracker ' + str(-50 + diff)*-1)
+                                            pre.append('dotapicker ' + str(elements[0]*-1) + ' dota2protracker ' + str((-50 + diff)*-1))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                 # if json_map['winner'] == 'radiant':
                                 #     if diff > 0:
