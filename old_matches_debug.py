@@ -317,7 +317,7 @@ def live_matches():
                                     if flag_radiant:
                                         if json_map['winner'] == 'dire':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append('dotapicker ' + str(elements[0]) + 'dota2protracker ' + str("%.2f" % (50 + diff)))
+                                            pre.append('dotapicker ' + str(elements[0]) + ' dota2protracker ' + str(50 + diff))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
@@ -332,7 +332,7 @@ def live_matches():
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append('dotapicker ' + str(elements[0]*-1) + 'dota2protracker ' + str("%.2f" % (-50 + diff)*-1))
+                                            pre.append('dotapicker ' + str(elements[0]*-1) + ' dota2protracker ' + str(-50 + diff)*-1)
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                 # if json_map['winner'] == 'radiant':
                                 #     if diff > 0:
