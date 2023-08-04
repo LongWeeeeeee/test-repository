@@ -130,10 +130,10 @@ def live_matches():
                                 select.select_by_index(0)
                                 elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
                                 elements = [int(elements[7].text), int(elements[11].text)]
-                                driver.find_element(By.XPATH,
-                                                    '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
-                                elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                                elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
+                                # driver.find_element(By.XPATH,
+                                #                     '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
+                                # elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
+                                # elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
                                 # if json_map['winner'] == 'radiant':
                                 #     pre = result_dict['dotapicker']['radiant']
                                 #     pre.append([elements[0], elements[1], elements_winrate[0], elements_winrate[1]])
@@ -317,7 +317,7 @@ def live_matches():
                                     if flag_radiant:
                                         if json_map['winner'] == 'dire':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append('Поражение dotapicker ' + str(elements[0]) + 'dota2protracker ' + str(50 + diff))
+                                            pre.append('dotapicker ' + str(elements[0]) + 'dota2protracker ' + str("%.2f" % (50 + diff)))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
@@ -332,7 +332,7 @@ def live_matches():
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                         elif json_map['winner'] == 'radiant':
                                             pre = result_dict['dotapicker + dota2protracker2']
-                                            pre.append('Поражение dotapicker ' + str(elements[0]) + 'dota2protracker ' + str((-50 + diff)*-1))
+                                            pre.append('dotapicker ' + str(elements[0]*-1) + 'dota2protracker ' + str("%.2f" % (-50 + diff)*-1))
                                             result_dict['dotapicker + dota2protracker2'] = pre
                                 # if json_map['winner'] == 'radiant':
                                 #     if diff > 0:
