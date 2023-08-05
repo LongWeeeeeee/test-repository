@@ -141,10 +141,10 @@ def live_matches():
                             # print(answ)
                             # # РАЗОБРАТЬСЯ С ELEMENTS_WINRATE И ПРОСТО ELEMENTS
                             if elements[0] > 0:
-                                send_message('Dotapicker winner: ' + radiant_team_name + str(elements[0]))
+                                send_message('Dotapicker winner: ' + radiant_team_name + ' ' + str(elements[0]))
                                 dotapicker_winner = radiant_team_name
                             elif elements[0] < 0:
-                                send_message('Dotapicker winner: ' + dire_team_name + str(elements[0]))
+                                send_message('Dotapicker winner: ' + dire_team_name + ' ' + str(elements[0]))
                                 dotapicker_winner = dire_team_name
                             else:
                                 send_message('Dotapicker неуверен в победителе')
@@ -302,7 +302,6 @@ def live_matches():
                             for hero in radiant_hero_names:
                                 wr_dict[hero] = []
                                 wr_dict_with_radiant[hero] = []
-
                                 url_dota2_protracker = f'https://www.dota2protracker.com/hero/{hero}'
                                 response = requests.get(url_dota2_protracker)
                                 soup = BeautifulSoup(response.text, "lxml")
@@ -464,7 +463,7 @@ def live_matches():
                                 send_message('Сверка невозможна, cyberscore.live тупит :/')
         if redflag:
                 print('сплю')
-                time.sleep(60)
+                time.sleep(30)
 
 
 @bot.message_handler(commands=['button'])
