@@ -54,19 +54,19 @@ def live_matches():
                         if len(dire_pick) == 5 and dire_pick[4]['hero'] != '':
                             ranks_fail = 0
                             for radiant_hero in radiant_pick:
-                                # Ранги
-                                if not radiant_hero['player']['leaderboard_rank']:
-                                    ranks_fail = True
-                                else:
-                                    radiant_team_rangs.append(radiant_hero['player']['leaderboard_rank'])
+                                # # Ранги
+                                # if not radiant_hero['player']['leaderboard_rank']:
+                                #     ranks_fail = True
+                                # else:
+                                #     radiant_team_rangs.append(radiant_hero['player']['leaderboard_rank'])
                                 radiant_hero_names.append(radiant_hero['hero']['label'])
                                 radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
                             for dire_hero in dire_pick:
                                 # Ранги
-                                if not dire_hero['player']['leaderboard_rank']:
-                                    ranks_fail = True
-                                else:
-                                    dire_team_rangs.append(dire_hero['player']['leaderboard_rank'])
+                                # if not dire_hero['player']['leaderboard_rank']:
+                                #     ranks_fail = True
+                                # else:
+                                #     dire_team_rangs.append(dire_hero['player']['leaderboard_rank'])
                                 dire_hero_names.append(dire_hero['hero']['label'])
                                 dire_hero_ids.append(dire_hero['hero']['id_steam'])
 
@@ -89,36 +89,36 @@ def live_matches():
                                 redflag = False
                                 map_winner = json_map['winner']
                                 result_dict['winner'] = map_winner
-                                if not ranks_fail:
-                                    difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
-                                    result_dict['ranks'] = difference
+                                # if not ranks_fail:
+                                #     difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
+                                #     result_dict['ranks'] = difference
                                 options = Options()
                                 options.add_argument("--start-maximized")
                                 options.add_argument("--no-sandbox")
                                 driver = webdriver.Chrome(options=options)
-                                # # dotapicker
-                                # radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
-                                # dire = ''.join(['/E_' + element.replace(' ', '_') for element in dire_hero_names])
-                                #
-                                # url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
-                                # # Download and specify the path to your chromedriver executable
-                                # driver.get(url_dotapicker)
-                                # try:
-                                #     select_element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.NAME, 'component')))
-                                # except:
-                                #     driver.refresh()
-                                #     select_element = WebDriverWait(driver, 15).until(
-                                #         EC.element_to_be_clickable((By.NAME, 'component')))
-                                # select = Select(select_element)
-                                # select.select_by_index(0)
-                                # elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                                # elements = [int(elements[7].text), int(elements[11].text)]
-                                # driver.find_element(By.XPATH,
-                                #                     '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
-                                # elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                                # elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
-                                # result_dict['dotapicker'] = elements[0], elements[1], elements_winrate[0], elements_winrate[1]
-                                # # ####dotafix.github
+                                # dotapicker
+                                radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
+                                dire = ''.join(['/E_' + element.replace(' ', '_') for element in dire_hero_names])
+
+                                url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
+                                # Download and specify the path to your chromedriver executable
+                                driver.get(url_dotapicker)
+                                try:
+                                    select_element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.NAME, 'component')))
+                                except:
+                                    driver.refresh()
+                                    select_element = WebDriverWait(driver, 15).until(
+                                        EC.element_to_be_clickable((By.NAME, 'component')))
+                                select = Select(select_element)
+                                select.select_by_index(0)
+                                elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
+                                elements = [int(elements[7].text), int(elements[11].text)]
+                                driver.find_element(By.XPATH,
+                                                    '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
+                                elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
+                                elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
+                                result_dict['dotapicker'] = elements[0], elements[1], elements_winrate[0], elements_winrate[1]
+                                # ####dotafix.github
                                 radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
                                 dire = ''.join(['&e=' + element for element in dire_hero_ids])
                                 dire = '?' + dire[1:]
@@ -168,7 +168,7 @@ def live_matches():
                                 url_dotatools = 'https://dotatools.ru/api/v1/predict_victory?dire_hero_ids=' + dire + '&radiant_hero_ids=' + radiant + '&rank=immortal'
                                 data = requests.get(url_dotatools)
                                 data = json.loads(data.text)
-                                result_dict['dotatools'] = data['direWr'], data['radiantWr']
+                                result_dict['dotatools'] = data['radiantWr'], data['direWr']
                                 # '{"direWr":0.47,"radiantWr":0.53}
                                 driver.quit()
                                 # dota2protracker
