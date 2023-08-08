@@ -95,6 +95,7 @@ def live_matches():
                         # if  radiant_team_name in {'Universitario Esports', 'Noping VPN'}:
                         # Пики закончились
                         if len(dire_hero_names) == 5 and len(radiant_hero_names) == 5:
+                            redflag = 0
                             # if not ranks_fail:
                             #     difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
                             #     if difference > 0:
@@ -104,7 +105,7 @@ def live_matches():
                             #     else:
                             #         send_message('Ранги неизвестны')
                             send_message(title)
-                            redflag = 0
+
                             send_message('Играется бест оф ' + str(best_of))
                             send_message('Текущий счет: ' + str(score))
                             wr_dict = {}
@@ -300,10 +301,10 @@ def analyze_results(result_dict):
                 if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 5 and match["dotapicker"][0] <= \
                         result_dict['dotapicker'][0] + 5:
                     w_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] -0.4 and match['dota2protracker1'] <= result_dict['dota2protracker1']+0.4:
+                if match['dota2protracker1'] >= result_dict['dota2protracker1'] -0.8 and match['dota2protracker1'] <= result_dict['dota2protracker1']+0.8:
                     w_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.4 and match['dota2protracker2'] <= \
-                        result_dict['dota2protracker2'] + 0.4:
+                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.8 and match['dota2protracker2'] <= \
+                        result_dict['dota2protracker2'] + 0.8:
                     w_pt2 += 1
 
 
@@ -324,10 +325,10 @@ def analyze_results(result_dict):
                 if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 5 and match["dotapicker"][0] <= \
                         result_dict['dotapicker'][0] + 5:
                     l_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] - 0.4 and match['dota2protracker1'] <= \
-                        result_dict['dota2protracker1'] + 0.4:
+                if match['dota2protracker1'] >= result_dict['dota2protracker1'] - 0.8 and match['dota2protracker1'] <= \
+                        result_dict['dota2protracker1'] + 0.8:
                     l_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.4 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + 0.4:
+                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.8 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + 0.8:
                     l_pt2 += 1
     global_perc = []
     if w_g + l_g >= 10:
@@ -364,7 +365,7 @@ def analyze_results(result_dict):
         send_message('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%')
         send_message(w_pt2 + l_pt2)
     else:
-        send_message('слишком мало матчей для Dotapicker1')
+        send_message('слишком мало матчей для Dotapicker2')
     send_message('общий шанс на победу: ' + str(sum(global_perc) //len(global_perc)))
 
 
