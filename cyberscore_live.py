@@ -58,10 +58,10 @@ def live_matches():
     print("Функция выполняется...")
     redflag = 1
 
-    url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
-    response = requests.get(url).text
-    json_data = json.loads(response)
     while redflag:
+        url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
+        response = requests.get(url).text
+        json_data = json.loads(response)
         for match in json_data['rows']:
             if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 result_dict = {'winner': '', 'player_analyze': '', 'ranks': '', 'dotafix.github': [],
@@ -85,7 +85,7 @@ def live_matches():
                 # radiant_pick = json_map['pageProps']['initialState']['matches_item']['picks_team_radiant']
                 # пики
                 if dire_pick != None:
-                    if len(dire_pick) == 5 and dire_pick[4]['hero'] != '':
+                    if len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
                         ranks_fail = 0
                         for radiant_hero in radiant_pick:
                             # # Ранги
@@ -199,6 +199,7 @@ def live_matches():
                             datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
                             datan = [int(float(datan_element)) for datan_element in datan]
                             result_dict['dotafix.github'] = datan[0], datan[1], datan[2]
+                            driver.quit()
                             # # dotatools:
                             dire = ''.join([str(element) + ',' for element in dire_hero_ids])
                             radiant = [str(element) + ',' for element in radiant_hero_ids]
@@ -208,7 +209,7 @@ def live_matches():
                             data = json.loads(data.text)
                             result_dict['dotatools'] = data['radiantWr'], data['direWr']
                             # '{"direWr":0.47,"radiantWr":0.53}
-                            driver.quit()
+
                             # dota2protracker
                             total = 0
                             for hero in radiant_hero_names:  # 5 циклов
