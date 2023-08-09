@@ -19,6 +19,13 @@ import telebot
 import requests
 from bs4 import BeautifulSoup
 import json
+import threading
+
+# Флаг состояния выполнения функции
+is_running = False
+
+# Мьютекс для блокировки
+lock = threading.Lock()
 
 bot = telebot.TeleBot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 
@@ -37,7 +44,18 @@ def send_message(message):
 
 
 # лайв матчи
+
+
+
 def live_matches():
+    global is_running
+    with lock:
+        if is_running:
+            print("Функция уже выполняется")
+            return
+    is_running = True
+    # Ваш код выполнения функции
+    print("Функция выполняется...")
     redflag = 1
 
     url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
@@ -45,7 +63,7 @@ def live_matches():
     json_data = json.loads(response)
     while redflag:
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 result_dict = {'winner': '', 'player_analyze': '', 'ranks': '', 'dotafix.github': [],
                                'dotatools': '', 'dota2protracker1': '', 'dota2protracker2': ''}
                 best_of = match['best_of']
@@ -104,10 +122,7 @@ def live_matches():
                             #         send_message(radiant_team_name + ' лучше ранги на ' + str(difference*-1))
                             #     else:
                             #         send_message('Ранги неизвестны')
-                            send_message(title)
 
-                            send_message('Играется бест оф ' + str(best_of))
-                            send_message('Текущий счет: ' + str(score))
                             wr_dict = {}
                             wr_dict_with_radiant = {}
                             wr_dict_with_dire = {}
@@ -122,7 +137,7 @@ def live_matches():
                             options.add_argument("--start-maximized")
                             options.add_argument("--no-sandbox")
                             driver = webdriver.Chrome(options=options)
-                            send_message('Вероятность победы ' + radiant_team_name)
+                            send_message(title +'\n' + 'Играется бест оф ' + str(best_of) + '\n' + 'Текущий счет: ' + str(score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                             # dotapicker
                             radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
                             dire = ''.join(['/E_' + element.replace(' ', '_') for element in dire_hero_names])
@@ -273,7 +288,8 @@ def live_matches():
         if redflag:
                 print('сплю')
                 time.sleep(30)
-
+    is_running = False
+    print("Работа завершена")
 def analyze_results(result_dict):
     w_r = 0
     l_r = 0
@@ -287,86 +303,101 @@ def analyze_results(result_dict):
     l_pt = 0
     w_pt2 = 0
     l_pt2 = 0
+    w = 0
+    c = 0
+    dg = 0
+    pt2 = 0
     with open('new_matches_results_pro.txt', 'r') as f:
         json_file = json.load(f)
-    for q in json_file:
-        for match in q:
-            if match['winner'] == 'radiant':
-                # send_message(match["dotafix.github"])
-                if match["dotafix.github"] != []:
-                    if match["dotafix.github"][0] >= result_dict['dotafix.github'][0]-2 and match["dotafix.github"][0] <= result_dict['dotafix.github'][0]+2 and match["dotafix.github"][1] >= result_dict['dotafix.github'][1]-2 and match["dotafix.github"][1] <= result_dict['dotafix.github'][1]+2 and match["dotafix.github"][2] >= result_dict['dotafix.github'][2]-2 and match["dotafix.github"][2] <= result_dict['dotafix.github'][2]+2:
-                        w_g += 1
-                if match["dotatools"][0] == result_dict['dotatools'][0]:
-                    w_t += 1 #винрейт дотатулс с 0.4 победой radiant
-                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 2 and match["dotapicker"][0] <= \
-                        result_dict['dotapicker'][0] + 2:
-                    w_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] -0.2 and match['dota2protracker1'] <= result_dict['dota2protracker1']+ 0.2:
-                    w_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.2 and match['dota2protracker2'] <= \
-                        result_dict['dota2protracker2'] + 0.2:
-                    w_pt2 += 1
-
-
-
-
-            elif match['winner'] == 'dire':
-                # send_message(match["dotafix.github"])
-                if match["dotafix.github"] != []:
-                    if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - 2 and match["dotafix.github"][
-                        0] <= result_dict['dotafix.github'][0] + 2 and match["dotafix.github"][1] >= \
-                            result_dict['dotafix.github'][1] - 2 and match["dotafix.github"][1] <= \
-                            result_dict['dotafix.github'][1] + 2 and match["dotafix.github"][2] >= \
-                            result_dict['dotafix.github'][2] - 2 and match["dotafix.github"][2] <= \
-                            result_dict['dotafix.github'][2] + 2:
-                        l_g += 1
-                if match["dotatools"][0] == result_dict['dotatools'][0]:
-                    l_t += 1
-                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 2 and match["dotapicker"][0] <= \
-                        result_dict['dotapicker'][0] + 2:
-                    l_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] - 0.2 and match['dota2protracker1'] <= \
-                        result_dict['dota2protracker1'] + 0.2:
-                    l_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.2 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + 0.2:
-                    l_pt2 += 1
+    while l_g == 0 or w_g ==0 or w_p == 0 or l_p == 0 or w_pt == 0 or l_pt == 0 or w_pt2 == 0 or l_pt2 == 0:
+        for q in json_file:
+            for match in q:
+                if match['winner'] == 'radiant':
+                    # send_message(match["dotafix.github"])
+                    if match["dotafix.github"] != []:
+                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - dg  and match["dotafix.github"][
+                            0] <= result_dict['dotafix.github'][0] + dg  and match["dotafix.github"][1] >= \
+                                result_dict['dotafix.github'][1] - dg and match["dotafix.github"][1] <= \
+                                result_dict['dotafix.github'][1] + dg and match["dotafix.github"][2] >= \
+                                result_dict['dotafix.github'][2] - dg and match["dotafix.github"][2] <= \
+                                result_dict['dotafix.github'][2] + dg:
+                            w_g += 1
+                    if match["dotatools"][0] == result_dict['dotatools'][0]:
+                        w_t += 1 #винрейт дотатулс с 0.4 победой radiant
+                    if match["dotapicker"][0] >= result_dict['dotapicker'][0] - w and match["dotapicker"][0] <= \
+                            result_dict['dotapicker'][0] + w:
+                        w_p += 1
+                    if match['dota2protracker1'] >= result_dict['dota2protracker1'] - c and match['dota2protracker1'] <= result_dict['dota2protracker1']+ c:
+                        w_pt += 1
+                    if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match['dota2protracker2'] <= \
+                            result_dict['dota2protracker2'] + pt2:
+                        w_pt2 += 1
+                elif match['winner'] == 'dire':
+                    # send_message(match["dotafix.github"])
+                    if match["dotafix.github"] != []:
+                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - dg and match["dotafix.github"][
+                            0] <= result_dict['dotafix.github'][0] + dg and match["dotafix.github"][1] >= \
+                                result_dict['dotafix.github'][1] - dg and match["dotafix.github"][1] <= \
+                                result_dict['dotafix.github'][1] + dg and match["dotafix.github"][2] >= \
+                                result_dict['dotafix.github'][2] - dg and match["dotafix.github"][2] <= \
+                                result_dict['dotafix.github'][2] + dg:
+                            l_g += 1
+                    if match["dotatools"][0] == result_dict['dotatools'][0]:
+                        l_t += 1
+                    if match["dotapicker"][0] >= result_dict['dotapicker'][0] - w and match["dotapicker"][0] <= \
+                            result_dict['dotapicker'][0] + w:
+                        l_p += 1
+                    if match['dota2protracker1'] >= result_dict['dota2protracker1'] - c and match['dota2protracker1'] <= \
+                            result_dict['dota2protracker1'] + c:
+                        l_pt += 1
+                    if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + pt2:
+                        l_pt2 += 1
+        if l_g == 0 or w_g == 0 or w_p == 0 or l_p == 0 or l_pt == 0 or w_pt == 0 or l_pt2 == 0 or w_pt2 == 0 :
+            l_g, w_g, w_p, l_p, l_t, w_t, w_pt, l_pt, w_pt2, l_pt2 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            if l_g == 0 or w_g == 0:
+                dg += 1
+            if w_p == 0 or l_p == 0:
+                w+= 1
+            if w_pt == 0 or l_pt == 0:
+                c+= 0.1
+            if w_pt2 == 0 or l_pt2 == 0:
+                pt2 += 0.1
     global_perc = []
-    if w_g != 0 and  l_g != 0:
-        github_percents = (w_g * 100 / (w_g + l_g))
-        global_perc.append(github_percents)
-        send_message('Github WR: ' + str(github_percents) + '%')
-        send_message(w_g +l_g)
-    else:
-        send_message('слишком мало матчей для Github')
     if w_p != 0 and l_p != 0:
         picker_percents = (w_p * 100 / (w_p + l_p))
         global_perc.append(picker_percents)
-        send_message('Picker WR: ' + str(picker_percents) + '%')
-        send_message(w_p + l_p)
+        if w_t != 0 and l_t != 0:
+            tools_percents = (w_t * 100 / (w_t + l_t))
+            global_perc.append(tools_percents)
+            if w_pt != 0 and l_pt != 0:
+                dota2protracker1_percents = (w_pt * 100 / (w_pt + l_pt))
+                global_perc.append(dota2protracker1_percents)
+                if w_pt2 != 0 and l_pt2 != 0:
+                    dota2protracker2_percents = (w_pt2 * 100 / (w_pt2 + l_pt2))
+                    global_perc.append(dota2protracker2_percents)
+                    if w_g != 0 and l_g != 0:
+                        github_percents = (w_g * 100 / (w_g + l_g))
+                        global_perc.append(github_percents)
+                        send_message(
+                            'Github WR: ' + str(github_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Picker WR: ' + str(picker_percents) + '%' + '\n' + str(w_p + l_p) + '\n' + 'Tools WR: ' + str(
+                                tools_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Dota2protracker1 WR: ' + str(
+                                dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(sum(global_perc) // len(global_perc)))
+                    else:
+                        send_message('слишком мало матчей для Dotafix')
+                else:
+                    send_message('слишком мало матчей для Dota2picker2')
+            else:
+                send_message('слишком мало матчей для Dota2picker1')
+        else:
+            send_message('слишком мало матчей для Tools')
+
     else:
         send_message('слишком мало матчей для dotapicker')
-    if w_t !=0 and l_t != 0:
-        tools_percents = (w_t * 100 / (w_t + l_t))
-        global_perc.append(tools_percents)
-        send_message('Tools WR: ' + str(tools_percents) + '%')
-        send_message(w_t + l_t)
-    else:
-        send_message('слишком мало матчей для Tools')
-    if w_pt !=0 and l_pt != 0:
-        dota2protracker1_percents = (w_pt * 100 / (w_pt + l_pt))
-        global_perc.append(dota2protracker1_percents)
-        send_message('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%')
-        send_message(w_pt + l_pt)
-    else:
-        send_message('слишком мало матчей для Dotapicker1')
-    if w_pt2 != 0 and  l_pt2 != 0:
-        dota2protracker2_percents = (w_pt2 * 100 / (w_pt2 + l_pt2))
-        global_perc.append(dota2protracker2_percents)
-        send_message('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%')
-        send_message(w_pt2 + l_pt2)
-    else:
-        send_message('слишком мало матчей для Dotapicker2')
-    send_message('общий шанс на победу: ' + str(sum(global_perc) //len(global_perc)))
+
+
+
+
+
 
 
 @bot.message_handler(commands=['button'])
@@ -380,7 +411,4 @@ def button_message(message):
 def message_reply(message):
     if message.text == "Анализировать текущие матчи":
         live_matches()
-        send_message('Работа завершена')
-
-
 bot.infinity_polling()
