@@ -382,7 +382,7 @@ def analyze_results(result_dict):
                         send_message(
                             'Github WR: ' + str(github_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Picker WR: ' + str(picker_percents) + '%' + '\n' + str(w_p + l_p) + '\n' + 'Tools WR: ' + str(
                                 tools_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Dota2protracker1 WR: ' + str(
-                                dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(sum(global_perc) // len(global_perc)))
+                                dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(sum(global_perc) // len(global_perc)) + '%')
                     else:
                         send_message('слишком мало матчей для Dotafix')
                 else:
