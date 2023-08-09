@@ -298,13 +298,13 @@ def analyze_results(result_dict):
                         w_g += 1
                 if match["dotatools"][0] == result_dict['dotatools'][0]:
                     w_t += 1 #винрейт дотатулс с 0.4 победой radiant
-                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 5 and match["dotapicker"][0] <= \
-                        result_dict['dotapicker'][0] + 5:
+                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 2 and match["dotapicker"][0] <= \
+                        result_dict['dotapicker'][0] + 2:
                     w_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] -0.8 and match['dota2protracker1'] <= result_dict['dota2protracker1']+0.8:
+                if match['dota2protracker1'] >= result_dict['dota2protracker1'] -0.2 and match['dota2protracker1'] <= result_dict['dota2protracker1']+ 0.2:
                     w_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.8 and match['dota2protracker2'] <= \
-                        result_dict['dota2protracker2'] + 0.8:
+                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.2 and match['dota2protracker2'] <= \
+                        result_dict['dota2protracker2'] + 0.2:
                     w_pt2 += 1
 
 
@@ -322,44 +322,44 @@ def analyze_results(result_dict):
                         l_g += 1
                 if match["dotatools"][0] == result_dict['dotatools'][0]:
                     l_t += 1
-                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 5 and match["dotapicker"][0] <= \
-                        result_dict['dotapicker'][0] + 5:
+                if match["dotapicker"][0] >= result_dict['dotapicker'][0] - 2 and match["dotapicker"][0] <= \
+                        result_dict['dotapicker'][0] + 2:
                     l_p += 1
-                if match['dota2protracker1'] >= result_dict['dota2protracker1'] - 0.8 and match['dota2protracker1'] <= \
-                        result_dict['dota2protracker1'] + 0.8:
+                if match['dota2protracker1'] >= result_dict['dota2protracker1'] - 0.2 and match['dota2protracker1'] <= \
+                        result_dict['dota2protracker1'] + 0.2:
                     l_pt += 1
-                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.8 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + 0.8:
+                if match['dota2protracker2'] >= result_dict['dota2protracker2'] - 0.2 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + 0.2:
                     l_pt2 += 1
     global_perc = []
-    if w_g + l_g >= 10:
+    if w_g != 0 and  l_g != 0:
         github_percents = (w_g * 100 / (w_g + l_g))
         global_perc.append(github_percents)
         send_message('Github WR: ' + str(github_percents) + '%')
         send_message(w_g +l_g)
     else:
         send_message('слишком мало матчей для Github')
-    if w_p + l_p >= 10:
+    if w_p != 0 and l_p != 0:
         picker_percents = (w_p * 100 / (w_p + l_p))
         global_perc.append(picker_percents)
         send_message('Picker WR: ' + str(picker_percents) + '%')
         send_message(w_p + l_p)
     else:
         send_message('слишком мало матчей для dotapicker')
-    if w_t + l_t >= 10:
+    if w_t !=0 and l_t != 0:
         tools_percents = (w_t * 100 / (w_t + l_t))
         global_perc.append(tools_percents)
         send_message('Tools WR: ' + str(tools_percents) + '%')
         send_message(w_t + l_t)
     else:
         send_message('слишком мало матчей для Tools')
-    if w_pt + l_pt >= 10:
+    if w_pt !=0 and l_pt != 0:
         dota2protracker1_percents = (w_pt * 100 / (w_pt + l_pt))
         global_perc.append(dota2protracker1_percents)
         send_message('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%')
         send_message(w_pt + l_pt)
     else:
         send_message('слишком мало матчей для Dotapicker1')
-    if w_pt2 + l_pt2 >= 10:
+    if w_pt2 != 0 and  l_pt2 != 0:
         dota2protracker2_percents = (w_pt2 * 100 / (w_pt2 + l_pt2))
         global_perc.append(dota2protracker2_percents)
         send_message('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%')
