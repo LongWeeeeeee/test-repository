@@ -63,15 +63,16 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {3}:
                 result_dict = {'winner': '', 'player_analyze': '', 'ranks': '', 'dotafix.github': [],
                                'dotatools': '', 'dota2protracker1': '', 'dota2protracker2': ''}
+                map_id = match['id']
                 best_of = match['best_of']
                 score = match['best_of_score']
                 radiant_team_name = match['team_radiant']['name']
                 dire_team_name = match['team_dire']['name']
                 dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
-                map_id = match['id']
+
                 match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                 match_data = requests.get(match_url).text
                 soup = BeautifulSoup(match_data, 'lxml')
@@ -109,7 +110,6 @@ def live_matches():
                         json_map['team_radiant']['name']
                         dire_team_name = json_map['team_dire'][
                             'name']
-
                         # if  radiant_team_name in {'Universitario Esports', 'Noping VPN'}:
                         # Пики закончились
                         if len(dire_hero_names) == 5 and len(radiant_hero_names) == 5:
@@ -284,7 +284,6 @@ def live_matches():
                             diff = total_radiant / 5 - total_dire / 5
                             result_dict['dota2protracker2'] = diff
                             #{'dota2protracker1': 48.476, 'dota2protracker2': -2.9150000000000063, 'dotafix.github': (47, 50, 52), 'dotapicker': (10, 7, -37, -46), 'dotatools': (0.4, 0.6), 'player_analyze': '', 'ranks': '', 'winner': ''}
-                            print(result_dict)
                             analyze_results(result_dict)
         if redflag:
                 print('сплю')
@@ -308,6 +307,7 @@ def analyze_results(result_dict):
     c = 0
     dg = 0
     pt2 = 0
+    t = 0
     with open('new_matches_results_pro.txt', 'r') as f:
         json_file = json.load(f)
     while l_g == 0 or w_g ==0 or w_p == 0 or l_p == 0 or w_pt == 0 or l_pt == 0 or w_pt2 == 0 or l_pt2 == 0:
@@ -343,7 +343,7 @@ def analyze_results(result_dict):
                                 result_dict['dotafix.github'][2] - dg and match["dotafix.github"][2] <= \
                                 result_dict['dotafix.github'][2] + dg:
                             l_g += 1
-                    if match["dotatools"][0] == result_dict['dotatools'][0]:
+                    if match["dotatools"][0] >= result_dict['dotatools'][0] - t and match["dotatools"][0] <= result_dict['dotatools'][0] + t :
                         l_t += 1
                     if match["dotapicker"][0] >= result_dict['dotapicker'][0] - w and match["dotapicker"][0] <= \
                             result_dict['dotapicker'][0] + w:
@@ -353,7 +353,7 @@ def analyze_results(result_dict):
                         l_pt += 1
                     if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match['dota2protracker2'] <= result_dict['dota2protracker2'] + pt2:
                         l_pt2 += 1
-        if l_g == 0 or w_g == 0 or w_p == 0 or l_p == 0 or l_pt == 0 or w_pt == 0 or l_pt2 == 0 or w_pt2 == 0 :
+        if l_g == 0 or w_g == 0 or w_p == 0 or l_p == 0 or l_pt == 0 or w_pt == 0 or l_pt2 == 0 or w_pt2 == 0 or l_t == 0 or w_t == 0:
             l_g, w_g, w_p, l_p, l_t, w_t, w_pt, l_pt, w_pt2, l_pt2 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             if l_g == 0 or w_g == 0:
                 dg += 1
@@ -363,6 +363,8 @@ def analyze_results(result_dict):
                 c+= 0.1
             if w_pt2 == 0 or l_pt2 == 0:
                 pt2 += 0.1
+            if l_t == 0 or w_t == 0:
+                t+= 0.01
     global_perc = []
     if w_p != 0 and l_p != 0:
         picker_percents = (w_p * 100 / (w_p + l_p))
@@ -383,6 +385,7 @@ def analyze_results(result_dict):
                             'Github WR: ' + str(github_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Picker WR: ' + str(picker_percents) + '%' + '\n' + str(w_p + l_p) + '\n' + 'Tools WR: ' + str(
                                 tools_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Dota2protracker1 WR: ' + str(
                                 dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(sum(global_perc) // len(global_perc)) + '%')
+                        send_message(result_dict)
                     else:
                         send_message('слишком мало матчей для Dotafix')
                 else:
