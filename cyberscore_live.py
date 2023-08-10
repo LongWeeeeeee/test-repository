@@ -63,7 +63,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 result_dict = {'winner': '', 'player_analyze': '', 'ranks': '', 'dotafix.github': [],
                                'dotatools': '', 'dota2protracker1': '', 'dota2protracker2': ''}
                 map_id = match['id']
