@@ -381,11 +381,15 @@ def analyze_results(result_dict):
                     if w_g != 0 and l_g != 0:
                         github_percents = (w_g * 100 / (w_g + l_g))
                         global_perc.append(github_percents)
-                        send_message(
-                            'Github WR: ' + str(github_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Picker WR: ' + str(picker_percents) + '%' + '\n' + str(w_p + l_p) + '\n' + 'Tools WR: ' + str(
-                                tools_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Dota2protracker1 WR: ' + str(
-                                dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(sum(global_perc) // len(global_perc)) + '%')
-                        send_message(result_dict)
+                        global_perc = sum(global_perc) // len(global_perc)
+                        if global_perc >=60 or global_perc <= 40:
+                            send_message(
+                                'Github WR: ' + str(github_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Picker WR: ' + str(picker_percents) + '%' + '\n' + str(w_p + l_p) + '\n' + 'Tools WR: ' + str(
+                                    tools_percents) + '%' + '\n' + str(w_t + l_t) + '\n' + 'Dota2protracker1 WR: ' + str(
+                                    dota2protracker1_percents) + '%' + '\n' + str(w_pt + l_pt) + '\n' + 'Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(w_pt2 + l_pt2) + '\n' + 'Общий шанс на победу: ' + str(global_perc) + '%')
+                            send_message(result_dict)
+                        else:
+                            send_message('Ставка хуйня')
                     else:
                         send_message('слишком мало матчей для Dotafix')
                 else:
