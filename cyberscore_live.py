@@ -406,7 +406,7 @@ def analyze_results(result_dict):
         # dota2protracker2_percents = (wins_looses['w_pt2'] * 100 / (wins_looses['w_pt2'] + wins_looses['l_pt2']))
         # global_perc.append(dota2protracker2_percents)
         # print('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(wins_looses['w_pt2'] + wins_looses['l_pt2']))
-        if len(global_perc) > 2:
+        if len(global_perc) >= 2:
             total = sum(global_perc) // len(global_perc)
             send_message(result_dict)
             send_message('Общий шанс на победу: ' + str(total) + '%')
