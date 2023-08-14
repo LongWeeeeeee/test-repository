@@ -26,10 +26,6 @@ bot = telebot.TeleBot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 
 # лайв матчи
 def live_matches():
-    counter = 0
-    # result_dict = {'total': 0, 'player_analyze': [], 'ranks': {'radiant':[], 'dire':[]}, 'dotapicker + dota2protracker2': [], 'dotafix.github': {'radiant':[], 'dire':[]}, 'dotatools': {'radiant':[], 'dire':[]}, 'dota2protracker1': {'radiant':[], 'dire':[]}, 'dota2protracker2': {'radiant':[], 'dire':[]}}
-
-
     for page in range(500):
         url = f'https://api.cyberscore.live/api/v1/matches/?limit=50&page={page + 1}&past=1'
         response = requests.get(url).text
@@ -40,15 +36,12 @@ def live_matches():
                     map_id = map['id']
                     with open('new_matches_results_pro_copy.json', 'r+') as f:
                         file = json.load(f)
+                        print('Записей в базе: ' + str(len(file[0])))
                         if map_id not in file[0]:
                             file[0].append(map_id)
-                            f.seek(0)
-                            json.dump(file, f)
                             result_dict = {'winner': '', 'player_analyze': '', 'ranks': '', 'dotafix.github': [],
                                            'dotatools': '', 'dota2protracker1': '', 'dota2protracker2': ''}
-                            counter += 1
-                            print(counter)
-                            dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
+                            dire_hero_names,  dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
                             match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                             match_data = requests.get(match_url).text
                             soup = BeautifulSoup(match_data, 'lxml')
@@ -257,7 +250,6 @@ def live_matches():
                                     result_dict['dota2protracker2'] = diff
                                     # 3 вариант
                                     result_dict['dota2protracker3'] = (sum(solo_radiant) / 5) - (sum(solo_dire) / 5)
-
                                     file[1].append(result_dict)
                                     f.seek(0)
                                     json.dump(file, f)
