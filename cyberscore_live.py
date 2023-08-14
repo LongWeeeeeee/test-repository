@@ -61,7 +61,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 map_id = match['id']
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
@@ -114,34 +114,6 @@ def live_matches():
                                     options.add_argument("--start-maximized")
                                     options.add_argument("--no-sandbox")
                                     driver = webdriver.Chrome(options=options)
-                                    # dotapicker
-                                    radiant = ''.join(['/T_' + element.replace(' ', '_').replace('Outworld_Destroyer',
-                                                                                                 'Outworld_Devourer').replace("Nature's_Prophet", 'Natures_Prophet')
-                                                       for element in radiant_hero_names])
-                                    dire = ''.join(['/E_' + element.replace(' ', '_').replace('Outworld_Destroyer',
-                                                                                              'Outworld_Devourer').replace("Nature's_Prophet", 'Natures_Prophet') for
-                                                    element in dire_hero_names])
-                                    url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
-                                    # Download and specify the path to your chromedriver executable
-                                    driver.get(url_dotapicker)
-                                    try:
-                                        select_element = WebDriverWait(driver, 15).until(
-                                            EC.element_to_be_clickable((By.NAME, 'component')))
-                                    except:
-                                        driver.refresh()
-                                        select_element = WebDriverWait(driver, 15).until(
-                                            EC.element_to_be_clickable((By.NAME, 'component')))
-                                    select = Select(select_element)
-                                    select.select_by_index(0)
-                                    elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                                    elements = [int(elements[7].text), int(elements[11].text)]
-                                    driver.find_element(By.XPATH,
-                                                        '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
-                                    elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                                    elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
-                                    if elements[0] >= 42 or elements[0] <= -42:
-                                        result_dict['dotapicker'] = elements[0], elements[1], elements_winrate[0], \
-                                    elements_winrate[1]
                                     # ####dotafix.github
                                     radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
                                     dire = ''.join(['&e=' + element for element in dire_hero_ids])
@@ -185,104 +157,6 @@ def live_matches():
                                         if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (datan[1] >= 54 or datan[0] <= 46):
                                             result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                     driver.quit()
-                                    # dotatools:
-                                    dire = ''.join([str(element) + ',' for element in dire_hero_ids])
-                                    radiant = [str(element) + ',' for element in radiant_hero_ids]
-                                    radiant = ''.join(radiant[:1])
-                                    url_dotatools = 'https://dotatools.ru/api/v1/predict_victory?dire_hero_ids=' + dire + '&radiant_hero_ids=' + radiant + '&rank=immortal'
-                                    data = requests.get(url_dotatools)
-                                    data = json.loads(data.text)
-                                    if data['radiantWr']*100 >= 54 or data['radiantWr']*100 <= 46:
-                                        result_dict['dotatools'] = {'Radiant': data['radiantWr']*100, 'Dire': data['direWr']*100}
-                                    # '{"direWr":0.47,"radiantWr":0.53}
-
-                                    # dota2protracker
-                                    total = 0
-                                    solo_radiant = []
-                                    solo_dire = []
-                                    for hero in radiant_hero_names:  # 5 циклов
-                                        wr_dict_with_radiant[hero] = []
-                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{hero}'
-                                        response = requests.get(url_dota2_protracker)
-                                        soup = BeautifulSoup(response.text, "lxml")
-                                        solo_winrate_soup = soup.find('div', class_='player-hero-header').text
-                                        solo_winrate = re.findall(r'\d+(?:\.\d+)?', solo_winrate_soup)
-                                        solo_radiant.append(float(solo_winrate[2]))
-                                        hero_names = soup.find_all('td', class_='td-hero-pic')
-                                        wr_percentage = soup.find_all('div', class_='perc-wr')
-                                        percent_iter = iter(wr_percentage)
-                                        hero_names = [dota2protracker_hero_name.get('data-order') for
-                                                      dota2protracker_hero_name
-                                                      in hero_names]
-                                        for dota2protracker_hero_name in hero_names:  # перебор героев дотапротрекера
-
-                                            try:
-                                                with_wr = next(percent_iter).text.strip()
-                                                against_wr = next(percent_iter).text.strip()
-                                                percentage = re.match('[0-9]{1,}\.[0-9]{1,}',
-                                                                      against_wr).group()  # процент победы с
-                                                percentage_with = re.match('[0-9]{1,}\.[0-9]{1,}',
-                                                                           with_wr).group()  # процент победы против
-
-                                                # radiant vs dire
-                                                for enemy in dire_hero_names:
-                                                    if enemy == dota2protracker_hero_name:
-                                                        wr_dict.setdefault(hero, []).append(float(percentage))
-                                                for another_hero in radiant_hero_names:
-                                                    if another_hero != hero and another_hero == dota2protracker_hero_name:
-                                                        pre = wr_dict_with_radiant[hero]
-                                                        pre.append(float(percentage_with))
-                                                        wr_dict_with_radiant[hero] = pre
-                                                        pre = 0
-                                            except:
-                                                pass
-                                    for enemy in dire_hero_names:
-                                        wr_dict_with_radiant[enemy] = []
-                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{enemy}'
-                                        response = requests.get(url_dota2_protracker)
-                                        soup = BeautifulSoup(response.text, "lxml")
-                                        solo_winrate_soup = soup.find('div', class_='player-hero-header').text
-                                        solo_winrate = re.findall(r'\d+(?:\.\d+)?', solo_winrate_soup)
-                                        solo_dire.append(float(solo_winrate[2]))
-                                        hero_names = soup.find_all('td', class_='td-hero-pic')
-                                        wr_percentage = soup.find_all('div', class_='perc-wr')
-                                        percent_iter = iter(wr_percentage)
-                                        hero_names = [dota2protracker_hero_name.get('data-order') for
-                                                      dota2protracker_hero_name
-                                                      in hero_names]
-
-                                        if enemy not in wr_dict_with_dire:
-                                            wr_dict_with_dire[enemy] = []
-                                        for dota2protracker_hero_name in hero_names:
-                                            try:
-                                                with_wr = next(percent_iter).text.strip()
-                                                against_wr = next(percent_iter).text.strip()
-                                                percentage_with = re.match('[0-9]{1,}\.[0-9]{1,}', with_wr).group()
-                                                if dota2protracker_hero_name in dire_hero_names and dota2protracker_hero_name != enemy:
-                                                    pre = wr_dict_with_dire[enemy]
-                                                    pre.append(float(percentage_with))
-                                                    wr_dict_with_dire[enemy] = pre
-                                                    pre = 0
-                                            except:
-                                                pass
-                                    # #радиант вс пиков даер
-                                    for ally in wr_dict:
-                                        total += sum(wr_dict[ally]) / 25
-                                    if 50-total >= 0.2 or 50-total <= -0.2:
-                                        result_dict['dota2protracker1'] = 50-total
-                                    # # #Another dota2protracker
-                                    # total_dire = 0
-                                    # total_radiant = 0
-                                    # for dire in wr_dict_with_dire:
-                                    #     total_dire += sum(wr_dict_with_dire[dire]) / 4
-                                    # for radiant in wr_dict_with_radiant:
-                                    #     total_radiant += sum(wr_dict_with_radiant[radiant]) / 4
-                                    # diff = total_radiant / 5 - total_dire / 5
-                                    # result_dict['dota2protracker2'] = diff
-                                    #Третий dota2protracker
-
-                                    diff = sum(solo_radiant)-sum(solo_dire)
-                                    result_dict['dota2protracker3'] = diff
                                     ids.append(map_id)
                                     f.seek(0)
                                     json.dump(ids, f)
@@ -387,36 +261,36 @@ def analyze_results(result_dict):
                 for key in wins_looses:
                     wins_looses[key] = 0
         global_perc = []
-        if result_dict["dotapicker"] != []:
-            picker_percents = (wins_looses['w_p'] * 100 / (wins_looses['w_p'] + wins_looses['l_p']))
-            global_perc.append(picker_percents)
-            print('Picker WR: ' + str(picker_percents) + '%' + '\n' + str(wins_looses['w_p'] + wins_looses['l_p']))
+        # if result_dict["dotapicker"] != []:
+        #     picker_percents = (wins_looses['w_p'] * 100 / (wins_looses['w_p'] + wins_looses['l_p']))
+        #     global_perc.append(picker_percents)
+        #     print('Picker WR: ' + str(picker_percents) + '%' + '\n' + str(wins_looses['w_p'] + wins_looses['l_p']))
         if result_dict["dotafix.github"] != []:
             github_percents = (wins_looses['w_g'] * 100 / (wins_looses['w_g'] + wins_looses['l_g']))
             global_perc.append(github_percents)
-            print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_p']))
-        if result_dict["dotatools"] != []:
-            tools_percents = (wins_looses['w_t'] * 100 / (wins_looses['w_t'] + wins_looses['l_t']))
-            global_perc.append(tools_percents)
-            print('Tools WR: ' + str(tools_percents) + '%' + '\n' + str(wins_looses['w_t'] + wins_looses['l_t']))
-        if result_dict["dota2protracker1"] != []:
-            dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
-            global_perc.append(dota2protracker1_percents)
-            print('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%' + '\n' + str(wins_looses['w_pt'] + wins_looses['l_pt']))
+            print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_g']))
+        # if result_dict["dotatools"] != []:
+        #     tools_percents = (wins_looses['w_t'] * 100 / (wins_looses['w_t'] + wins_looses['l_t']))
+        #     global_perc.append(tools_percents)
+        #     print('Tools WR: ' + str(tools_percents) + '%' + '\n' + str(wins_looses['w_t'] + wins_looses['l_t']))
+        # if result_dict["dota2protracker1"] != []:
+        #     dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
+        #     global_perc.append(dota2protracker1_percents)
+        #     print('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%' + '\n' + str(wins_looses['w_pt'] + wins_looses['l_pt']))
         # dota2protracker2_percents = (wins_looses['w_pt2'] * 100 / (wins_looses['w_pt2'] + wins_looses['l_pt2']))
         # global_perc.append(dota2protracker2_percents)
         # print('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(wins_looses['w_pt2'] + wins_looses['l_pt2']))
-        if len(global_perc) >= 2:
-            total = sum(global_perc) // len(global_perc)
-            send_message(result_dict)
-            send_message('Общий шанс на победу: ' + str(total) + '%')
-        elif global_perc != []:
-            send_message('Недостаточно материала')
-            total = sum(global_perc) // len(global_perc)
-            send_message(result_dict)
-            send_message('Общий шанс на победу: ' + str(total) + '%')
-        else:
-            send_message('Ставка невозможна')
+        # if len(global_perc) >= 2:
+        #     total = sum(global_perc) // len(global_perc)
+        #     send_message(result_dict)
+        #     send_message('Общий шанс на победу: ' + str(total) + '%')
+        # elif global_perc != []:
+        #     send_message('Недостаточно материала')
+        #     total = sum(global_perc) // len(global_perc)
+        #     send_message(result_dict)
+        #     send_message('Общий шанс на победу: ' + str(total) + '%')
+        # else:
+        #     send_message('Ставка невозможна')
 
 
 
