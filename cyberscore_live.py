@@ -56,7 +56,6 @@ def live_matches():
     is_running = True
     # Ваш код выполнения функции
     print("Функция выполняется...")
-
     while True:
         url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
         response = requests.get(url).text
@@ -64,12 +63,13 @@ def live_matches():
         for match in json_data['rows']:
             if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 map_id = match['id']
-                with open('new_matches_results_pro_copy.json', 'r+') as f:
-                    file = json.load(f)
-                    if map_id not in file[0]:
-                        result_dict = {}
+                with open('map_id_check.txt', 'r+') as f:
+                    ids = json.load(f)
+                    if map_id not in ids:
+                        result_dict = {"winner": [], "player_analyze": [], "ranks": [], "dotafix.github": [], "dotatools": [], "dota2protracker1": [], "dota2protracker2": [], "dotapicker": [], "dota2protracker3": []}
                         best_of = match['best_of']
                         score = match['best_of_score']
+
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
@@ -88,7 +88,7 @@ def live_matches():
                         # пики
                         if dire_pick != None:
                             if len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
-                                ranks_fail = 0
+                                redflag = 0
                                 for radiant_hero in radiant_pick:
                                     radiant_hero_names.append(radiant_hero['hero']['label'])
                                     radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
@@ -101,6 +101,9 @@ def live_matches():
                                 json_map['team_radiant']['name']
                                 dire_team_name = json_map['team_dire'][
                                     'name']
+                                send_message(
+                                    title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+
                                 # Пики закончились
                                 if len(dire_hero_names) == 5 and len(radiant_hero_names) == 5:
                                     wr_dict = {}
@@ -113,10 +116,10 @@ def live_matches():
                                     driver = webdriver.Chrome(options=options)
                                     # dotapicker
                                     radiant = ''.join(['/T_' + element.replace(' ', '_').replace('Outworld_Destroyer',
-                                                                                                 'Outworld_Devourer')
+                                                                                                 'Outworld_Devourer').replace("Nature's_Prophet", 'Natures_Prophet')
                                                        for element in radiant_hero_names])
                                     dire = ''.join(['/E_' + element.replace(' ', '_').replace('Outworld_Destroyer',
-                                                                                              'Outworld_Devourer') for
+                                                                                              'Outworld_Devourer').replace("Nature's_Prophet", 'Natures_Prophet') for
                                                     element in dire_hero_names])
                                     url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
                                     # Download and specify the path to your chromedriver executable
@@ -136,7 +139,8 @@ def live_matches():
                                                         '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
                                     elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
                                     elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
-                                    result_dict['dotapicker'] = elements[0], elements[1], elements_winrate[0], \
+                                    if elements[0] >= 42 or elements[0] <= -42:
+                                        result_dict['dotapicker'] = elements[0], elements[1], elements_winrate[0], \
                                     elements_winrate[1]
                                     # ####dotafix.github
                                     radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
@@ -178,7 +182,8 @@ def live_matches():
                                         print(url_dotafix)
                                     else:
                                         datan = [float(datan_element) for datan_element in datan]
-                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                        if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (datan[1] >= 54 or datan[0] <= 46):
+                                            result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                     driver.quit()
                                     # dotatools:
                                     dire = ''.join([str(element) + ',' for element in dire_hero_ids])
@@ -187,7 +192,8 @@ def live_matches():
                                     url_dotatools = 'https://dotatools.ru/api/v1/predict_victory?dire_hero_ids=' + dire + '&radiant_hero_ids=' + radiant + '&rank=immortal'
                                     data = requests.get(url_dotatools)
                                     data = json.loads(data.text)
-                                    result_dict['dotatools'] = {'Radiant': data['radiantWr'], 'Dire': data['direWr']}
+                                    if data['radiantWr']*100 >= 54 or data['radiantWr']*100 <= 46:
+                                        result_dict['dotatools'] = {'Radiant': data['radiantWr']*100, 'Dire': data['direWr']*100}
                                     # '{"direWr":0.47,"radiantWr":0.53}
 
                                     # dota2protracker
@@ -262,27 +268,32 @@ def live_matches():
                                     # #радиант вс пиков даер
                                     for ally in wr_dict:
                                         total += sum(wr_dict[ally]) / 25
-                                    result_dict['dota2protracker1'] = total
-                                    # #Another dota2protracker
-                                    total_dire = 0
-                                    total_radiant = 0
-                                    for dire in wr_dict_with_dire:
-                                        total_dire += sum(wr_dict_with_dire[dire]) / 4
-                                    for radiant in wr_dict_with_radiant:
-                                        total_radiant += sum(wr_dict_with_radiant[radiant]) / 4
-                                    diff = total_radiant / 5 - total_dire / 5
-                                    result_dict['dota2protracker2'] = diff
-                                    # 3 вариант
-                                    result_dict['dota2protracker3'] = (sum(solo_radiant) / 5) - (sum(solo_dire) / 5)
-                                    file[0].append(map_id)
+                                    if 50-total >= 0.2 or 50-total <= -0.2:
+                                        result_dict['dota2protracker1'] = 50-total
+                                    # # #Another dota2protracker
+                                    # total_dire = 0
+                                    # total_radiant = 0
+                                    # for dire in wr_dict_with_dire:
+                                    #     total_dire += sum(wr_dict_with_dire[dire]) / 4
+                                    # for radiant in wr_dict_with_radiant:
+                                    #     total_radiant += sum(wr_dict_with_radiant[radiant]) / 4
+                                    # diff = total_radiant / 5 - total_dire / 5
+                                    # result_dict['dota2protracker2'] = diff
+                                    #Третий dota2protracker
+
+                                    diff = sum(solo_radiant)-sum(solo_dire)
+                                    result_dict['dota2protracker3'] = diff
+                                    ids.append(map_id)
                                     f.seek(0)
-                                    json.dump(file, f)
-                                    file[1].append(result_dict)
-                                    f.seek(0)
-                                    json.dump(file, f)
-                                    analyze_results(result_dict)
+                                    json.dump(ids, f)
+                                    if result_dict["dotapicker"] == [] and result_dict["dotafix.github"] == [] and result_dict["dotatools"] == [] and result_dict["dota2protracker1"] == []:
+                                        send_message('Недостаточно материала')
+                                    else:
+                                        analyze_results(result_dict)
                     else:
-                        break
+                        pass
+
+
         print('сплю')
         time.sleep(60)
     is_running = False
@@ -296,121 +307,118 @@ def analyze_results(result_dict):
     pt2 = 0
     pt3 = 0
     counter = 0
-    flag = False
+    flag = True
     wins_looses = {"w_g": 0, "l_g": 0, "w_p": 0, "l_p": 0, "w_t": 0, "l_t": 0, "w_pt": 0, "l_pt": 0, "w_pt2": 0,
                    "l_pt2": 0, "w_pt3": 0, "l_pt3": 0}
     counter = 0
     with open('new_matches_results_pro_copy.json', 'r') as f:
         json_file = json.load(f)  # 912
-        while 0 in wins_looses.values():
+        while flag:
             counter += 1
             print(counter)
             for match in json_file[1]:
-                if match['winner'] == 'radiant':
-                    # print(match["dotafix.github"])
-                    if match["dotafix.github"] != []:
+                if match["winner"] == 'radiant':
+                    if result_dict['dotafix.github'] != []:
                         if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
                                 match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
                                 and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
                                 match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
                                 and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
                                 match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
-                            wins_looses['w_g'] += 1
-                    if match["dotatools"]['Radiant'] >= result_dict['dotatools']['Radiant'] - t and match["dotatools"][
-                        'Radiant'] <= result_dict['dotatools']['Radiant'] + t:
-                        wins_looses['w_t'] += 1
-                    if match["dotapicker"][0] >= result_dict['dotapicker'][0] - p and match["dotapicker"][0] <= \
-                            result_dict['dotapicker'][0] + p:
-                        wins_looses['w_p'] += 1
-                    if match['dota2protracker1'] >= result_dict['dota2protracker1'] - pt and match[
-                        'dota2protracker1'] <= \
-                            result_dict['dota2protracker1'] + pt:
-                        wins_looses['w_pt'] += 1
-                    if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match[
-                        'dota2protracker2'] <= \
-                            result_dict['dota2protracker2'] + pt2:
-                        wins_looses['w_pt2'] += 1
-                    if match['dota2protracker3'] >= result_dict['dota2protracker3'] - pt3 and match[
-                        'dota2protracker3'] <= \
-                            result_dict['dota2protracker3'] + pt3:
-                        wins_looses['w_pt3'] += 1
+                                wins_looses['w_g'] += 1
+                    if result_dict["dotatools"] != []:
+                        if match["dotatools"]['Radiant'] >= result_dict['dotatools']['Radiant'] - t and \
+                                match["dotatools"]['Radiant'] <= result_dict['dotatools']['Radiant'] + t:
+                            wins_looses['w_t'] += 1
+                    if result_dict["dotapicker"] != []:
+                        if match["dotapicker"][0] >= result_dict['dotapicker'][0] - p and match["dotapicker"][0] <= \
+                                result_dict['dotapicker'][0] + p:
+                            wins_looses['w_p'] += 1
+                    if result_dict["dota2protracker1"] != []:
+                        if match['dota2protracker1'] >= result_dict['dota2protracker1'] - pt and match[
+                            'dota2protracker1'] <= result_dict['dota2protracker1'] + pt:
+                            wins_looses['w_pt'] += 1
+                    # if result_dict["dota2protracker2"] != []:
+                    #     if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match[
+                    #         'dota2protracker2'] <= result_dict['dota2protracker2'] + pt2:
+                            wins_looses['w_pt2'] += 1
                 elif match['winner'] == 'dire':
-                    # print(match["dotafix.github"])
-                    if match["dotafix.github"] != []:
-                        if match["dotafix.github"] != []:
-                            if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
-                                    match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
-                                    and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
-                                    match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
-                                    and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
-                                    match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
-                                wins_looses['l_g'] += 1
-                    if match["dotatools"]['Radiant'] >= result_dict['dotatools']['Radiant'] - t and match["dotatools"][
-                        'Radiant'] <= result_dict['dotatools']['Radiant'] + t:
-                        wins_looses['l_t'] += 1
-                    if match["dotapicker"][0] >= result_dict['dotapicker'][0] - p and match["dotapicker"][0] <= \
-                            result_dict['dotapicker'][0] + p:
-                        wins_looses['l_p'] += 1
-                    if match['dota2protracker1'] >= result_dict['dota2protracker1'] - pt and match[
-                        'dota2protracker1'] <= result_dict['dota2protracker1'] + pt:
-                        wins_looses['l_pt'] += 1
-                    if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match[
-                        'dota2protracker2'] <= result_dict['dota2protracker2'] + pt2:
-                        wins_looses['l_pt2'] += 1
-                    if match['dota2protracker3'] >= result_dict['dota2protracker3'] - pt3 and match[
-                        'dota2protracker3'] <= result_dict['dota2protracker3'] + pt3:
-                        wins_looses['l_pt3'] += 1
+                    if result_dict['dotafix.github'] != []:
+                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
+                                match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
+                                and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
+                                match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
+                                and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
+                                match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
+                            wins_looses['l_g'] += 1
+                    if result_dict["dotatools"] != []:
+                        if match["dotatools"]['Radiant'] >= result_dict['dotatools']['Radiant'] - t and \
+                                match["dotatools"]['Radiant'] <= result_dict['dotatools']['Radiant'] + t:
+                            wins_looses['l_t'] += 1
+                    if result_dict["dotapicker"] != []:
+                        if match["dotapicker"][0] >= result_dict['dotapicker'][0] - p and match["dotapicker"][0] <= \
+                                result_dict['dotapicker'][0] + p:
+                            wins_looses['l_p'] += 1
+                    if result_dict["dota2protracker1"] != []:
+                        if match['dota2protracker1'] >= result_dict['dota2protracker1'] - pt and match[
+                            'dota2protracker1'] <= result_dict['dota2protracker1'] + pt:
+                            wins_looses['l_pt'] += 1
+                    # if result_dict["dota2protracker2"] != []:
+                    #     if match['dota2protracker2'] >= result_dict['dota2protracker2'] - pt2 and match[
+                    #         'dota2protracker2'] <= result_dict['dota2protracker2'] + pt2:
+                    #         wins_looses['l_pt2'] += 1
             flag = False
-            if wins_looses['l_g'] + wins_looses['w_g'] < 20:
+            if (wins_looses['l_g'] == 0 or wins_looses['w_g'] == 0) and result_dict["dotafix.github"] != []:
                 g += 1
                 flag = True
-            if wins_looses['l_p'] + wins_looses['w_p'] < 20:
+            if (wins_looses['l_p'] == 0 or wins_looses['w_p'] == 0) and result_dict["dotapicker"] != []:
                 p += 1
                 flag = True
-            if wins_looses['l_t'] + wins_looses['w_t'] < 20:
+            if (wins_looses['l_t'] == 0 or wins_looses['w_t'] == 0) and result_dict["dotatools"] != []:
                 t += 0.01
                 flag = True
-            if wins_looses['l_pt'] + wins_looses['w_pt'] < 20:
+            if (wins_looses['l_pt'] == 0 or wins_looses['w_pt'] == 0) and result_dict["dota2protracker1"] != []:
                 pt += 0.1
                 flag = True
-            if wins_looses['l_pt2'] + wins_looses['w_pt2'] < 20:
-                pt2 += 0.1
-                flag = True
-            if wins_looses['l_pt3'] + wins_looses['w_pt3'] < 20:
-                pt3 += 0.1
-                flag = True
-
+            # if wins_looses['l_pt2'] == 0 or wins_looses['w_pt2'] == 0:
+            #     pt2 += 0.1
+            #     flag = True
             if flag:
                 for key in wins_looses:
                     wins_looses[key] = 0
         global_perc = []
-        picker_percents = (wins_looses['w_p'] * 100 / (wins_looses['w_p'] + wins_looses['l_p']))
-        global_perc.append(picker_percents)
-        print('Picker WR: ' + str(picker_percents) + '%' + '\n' + str(wins_looses['w_p'] + wins_looses['l_p']))
-        github_percents = (wins_looses['w_g'] * 100 / (wins_looses['w_g'] + wins_looses['l_p']))
-        global_perc.append(github_percents)
-        print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_p']))
-        tools_percents = (wins_looses['w_t'] * 100 / (wins_looses['w_t'] + wins_looses['l_t']))
-        global_perc.append(tools_percents)
-        print('Tools WR: ' + str(tools_percents) + '%' + '\n' + str(wins_looses['w_t'] + wins_looses['l_t']))
-        dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
-        global_perc.append(dota2protracker1_percents)
-        print('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%' + '\n' + str(
-            wins_looses['w_pt'] + wins_looses['l_pt']))
-        dota2protracker2_percents = (wins_looses['w_pt2'] * 100 / (wins_looses['w_pt2'] + wins_looses['l_pt2']))
-        global_perc.append(dota2protracker2_percents)
-        print('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(
-            wins_looses['w_pt2'] + wins_looses['l_pt2']))
-        dota2protracker3_percents = (wins_looses['w_pt3'] * 100 / (wins_looses['w_pt3'] + wins_looses['l_pt3']))
-        global_perc.append(dota2protracker3_percents)
-        print('Dota2protracker3 WR: ' + str(dota2protracker3_percents) + '%' + '\n' + str(
-            wins_looses['w_pt3'] + wins_looses['l_pt3']))
-        total = sum(global_perc) // len(global_perc)
-        print('Общий шанс на победу: ' + str(total) + '%')
-        if total >= 60 or total <= 40:
+        if result_dict["dotapicker"] != []:
+            picker_percents = (wins_looses['w_p'] * 100 / (wins_looses['w_p'] + wins_looses['l_p']))
+            global_perc.append(picker_percents)
+            print('Picker WR: ' + str(picker_percents) + '%' + '\n' + str(wins_looses['w_p'] + wins_looses['l_p']))
+        if result_dict["dotafix.github"] != []:
+            github_percents = (wins_looses['w_g'] * 100 / (wins_looses['w_g'] + wins_looses['l_g']))
+            global_perc.append(github_percents)
+            print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_p']))
+        if result_dict["dotatools"] != []:
+            tools_percents = (wins_looses['w_t'] * 100 / (wins_looses['w_t'] + wins_looses['l_t']))
+            global_perc.append(tools_percents)
+            print('Tools WR: ' + str(tools_percents) + '%' + '\n' + str(wins_looses['w_t'] + wins_looses['l_t']))
+        if result_dict["dota2protracker1"] != []:
+            dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
+            global_perc.append(dota2protracker1_percents)
+            print('Dota2protracker1 WR: ' + str(dota2protracker1_percents) + '%' + '\n' + str(wins_looses['w_pt'] + wins_looses['l_pt']))
+        # dota2protracker2_percents = (wins_looses['w_pt2'] * 100 / (wins_looses['w_pt2'] + wins_looses['l_pt2']))
+        # global_perc.append(dota2protracker2_percents)
+        # print('Dota2protracker2 WR: ' + str(dota2protracker2_percents) + '%' + '\n' + str(wins_looses['w_pt2'] + wins_looses['l_pt2']))
+        if len(global_perc) > 2:
+            total = sum(global_perc) // len(global_perc)
+            send_message(result_dict)
+            send_message('Общий шанс на победу: ' + str(total) + '%')
+        elif global_perc != []:
+            send_message('Недостаточно материала')
+            total = sum(global_perc) // len(global_perc)
+            send_message(result_dict)
             send_message('Общий шанс на победу: ' + str(total) + '%')
         else:
-            send_message('Ставка невалидная')
+            send_message('Ставка невозможна')
+
+
 
 
 
