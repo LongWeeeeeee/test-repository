@@ -61,7 +61,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2}:
                 map_id = match['id']
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
