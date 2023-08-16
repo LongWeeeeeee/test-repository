@@ -201,7 +201,7 @@ def live_matches():
                                 f.seek(0)
                                 json.dump(ids, f)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
-                                    analyze_results(result_dict)
+                                    analyze_results(result_dict, dire_team_name, radiant_team_name)
                                 else:
                                     send_message('Недостаточно материала')
                                     analyze_results(result_dict, dire_team_name, radiant_team_name)
