@@ -69,7 +69,7 @@ def live_matches():
                         result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": []}
                         best_of = match['best_of']
                         score = match['best_of_score']
-                        matchups = {}
+                        matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [], 'radiant_pos2': [], 'radiant_pos3': []}
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
@@ -93,27 +93,30 @@ def live_matches():
                                 for radiant_hero in radiant_pick:
                                     for q in range(5):
                                         radiant_player = json_map['team_radiant']['players_items'][q]
-                                        if radiant_player['player']["game_name"] == radiant_hero['player'][
-                                            "game_name"] and radiant_player['player']['role'] == 1:
+                                        if radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                            "game_name"].lower() and radiant_player['player']['role'] == 1:
                                             matchups['radiant_pos1'] = radiant_hero['hero']['label']
-                                        elif radiant_player['player']["game_name"] == radiant_hero['player'][
-                                            "game_name"] and radiant_player['player']['role'] == 2:
+                                        elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                            "game_name"].lower() and radiant_player['player']['role'] == 2:
                                             matchups['radiant_pos2'] = radiant_hero['hero']['label']
-                                        elif radiant_player['player']["game_name"] == radiant_hero['player'][
-                                            "game_name"] and radiant_player['player']['role'] == 3:
+                                        elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                            "game_name"].lower() and radiant_player['player']['role'] == 3:
                                             matchups['radiant_pos3'] = radiant_hero['hero']['label']
                                     radiant_hero_names.append(radiant_hero['hero']['label'])
                                     radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
                                 for dire_hero in dire_pick:
                                     for q in range(5):
                                         dire_player = json_map['team_dire']['players_items'][q]
-                                        if dire_player['player']["game_name"] == dire_hero['player']["game_name"] and \
+                                        if dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                            "game_name"].lower() and \
                                                 dire_player['player']['role'] == 1:
                                             matchups['dire_pos1'] = dire_hero['hero']['label']
-                                        elif dire_player['player']["game_name"] == dire_hero['player']["game_name"] and \
+                                        elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                            "game_name"].lower() and \
                                                 dire_player['player']['role'] == 2:
                                             matchups['dire_pos2'] = dire_hero['hero']['label']
-                                        elif dire_player['player']["game_name"] == dire_hero['player']["game_name"] and \
+                                        elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                            "game_name"].lower() and \
                                                 dire_player['player']['role'] == 3:
                                             matchups['dire_pos3'] = dire_hero['hero']['label']
                                     dire_hero_names.append(dire_hero['hero']['label'])
@@ -178,7 +181,7 @@ def live_matches():
                                         result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                 driver.quit()
                                 # protracker
-                                if len(matchups) == 6:
+                                if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != []:
                                     radiant_pos1_vs_team = 0
                                     dire_pos1_vs_team = 0
                                     radiant_pos1_vs_cores = 0
@@ -202,46 +205,49 @@ def live_matches():
                                             if dota2protracker_hero_name == matchups['dire_pos1']:
                                                 # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                                                 result_dict['protracker_pos1'] = int(float(against_wr))
-                                            if dota2protracker_hero_name in dire_hero_names:
-                                                radiant_pos1_vs_team += int(float(against_wr))
-                                            if dota2protracker_hero_name in {matchups['dire_pos1'],
-                                                                             matchups['dire_pos2'],
-                                                                             matchups['dire_pos3']}:
-                                                radiant_pos1_vs_cores += int(float(against_wr))
+                                            if len(matchups) == 6:
+                                                if dota2protracker_hero_name in dire_hero_names:
+                                                    radiant_pos1_vs_team += int(float(against_wr))
+                                                if dota2protracker_hero_name in {matchups['dire_pos1'],
+                                                                                 matchups['dire_pos2'],
+                                                                                 matchups['dire_pos3']}:
+                                                    radiant_pos1_vs_cores += int(float(against_wr))
 
                                         except:
                                             pass
-                                    radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
-                                    dire_1 = matchups['dire_pos1'].replace(' ', '%20')
-                                    url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
-                                    response = requests.get(url_dota2_protracker)
-                                    soup = BeautifulSoup(response.text, "lxml")
-                                    hero_names = soup.find_all('td', class_='td-hero-pic')
-                                    wr_percentage = soup.find_all('div', class_='perc-wr')
-                                    hero_names = [dota2protracker_hero_name.get('data-order') for
-                                                  dota2protracker_hero_name
-                                                  in hero_names]
-                                    percent_iter = iter(wr_percentage)
-                                    for dota2protracker_hero_name in hero_names:
-                                        try:
-                                            with_wr = next(percent_iter).text.strip()
-                                            against_wr = next(percent_iter).text.strip()
-                                            against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
-                                            if dota2protracker_hero_name in radiant_hero_names:
-                                                dire_pos1_vs_team += int(float(against_wr))
-                                            if dota2protracker_hero_name in {matchups['radiant_pos1'],
-                                                                             matchups['radiant_pos2'],
-                                                                             matchups['radiant_pos3']}:
-                                                dire_pos1_vs_cores += int(float(against_wr))
-                                        except:
-                                            pass
-                                # pos1 vs team
-                                diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
-                                result_dict['pos1_vs_team'] = diff
-                                # pos1 vs cores
-                                diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-                                result_dict['pos1_vs_cores'] = diff
-                                #
+                                        if len(match_url) == 6:
+                                            radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
+                                            dire_1 = matchups['dire_pos1'].replace(' ', '%20')
+                                            url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
+                                            response = requests.get(url_dota2_protracker)
+                                            soup = BeautifulSoup(response.text, "lxml")
+                                            hero_names = soup.find_all('td', class_='td-hero-pic')
+                                            wr_percentage = soup.find_all('div', class_='perc-wr')
+                                            hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                          dota2protracker_hero_name
+                                                          in hero_names]
+                                            percent_iter = iter(wr_percentage)
+                                            for dota2protracker_hero_name in hero_names:
+                                                try:
+                                                    with_wr = next(percent_iter).text.strip()
+                                                    against_wr = next(percent_iter).text.strip()
+                                                    against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                    if dota2protracker_hero_name in radiant_hero_names:
+                                                        dire_pos1_vs_team += int(float(against_wr))
+                                                    if dota2protracker_hero_name in {matchups['radiant_pos1'],
+                                                                                     matchups['radiant_pos2'],
+                                                                                     matchups['radiant_pos3']}:
+                                                        dire_pos1_vs_cores += int(float(against_wr))
+                                                except:
+                                                    pass
+                                    if len(matchups) == 6:
+                                        # pos1 vs team
+                                        diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
+                                        result_dict['pos1_vs_team'] = diff
+                                        # pos1 vs cores
+                                        diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
+                                        result_dict['pos1_vs_cores'] = diff
+                                        #
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
