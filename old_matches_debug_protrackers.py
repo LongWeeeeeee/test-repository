@@ -55,8 +55,6 @@ def live_matches():
                             best_of = match['best_of']
                             score = match['best_of_score']
                             matchups = {}
-                            radiant_team_name = match['team_radiant']['name']
-                            dire_team_name = match['team_dire']['name']
                             dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
 
                             match_url = f'https://cyberscore.live/en/matches/{map_id}/'
