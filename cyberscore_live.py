@@ -187,7 +187,6 @@ def live_matches():
                                     radiant_pos1_vs_cores = 0
                                     dire_pos1_vs_cores = 0
                                     radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
-                                    radiant_2 = matchups['radiant_pos2'].replace(' ', '%20')
                                     url_dota2_protracker = f'https://www.dota2protracker.com/hero/{radiant_1}'
                                     response = requests.get(url_dota2_protracker)
                                     soup = BeautifulSoup(response.text, "lxml")
