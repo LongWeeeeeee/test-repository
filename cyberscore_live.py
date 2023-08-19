@@ -246,12 +246,12 @@ def live_matches():
                                                 pass
                                         # pos1 vs team
                                         diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
-                                        if diff > 3 or diff < -3:
+                                        # if diff > 3 or diff < -3:
                                         result_dict['pos1_vs_team'] = diff
                                         # pos1 vs cores
                                         diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-                                        if diff > 1 or diff < -1
-                                            result_dict['pos1_vs_cores'] = diff
+                                        # if diff > 1 or diff < -1
+                                        result_dict['pos1_vs_cores'] = diff
                                                 #
                                     ids.append(map_id)
                                     f.seek(0)
