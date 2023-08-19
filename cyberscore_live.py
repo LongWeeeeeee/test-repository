@@ -251,9 +251,9 @@ def live_matches():
                                         diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
                                         result_dict['pos1_vs_cores'] = diff
                                                 #
-                                    # ids.append(map_id)
-                                    # f.seek(0)
-                                    # json.dump(ids, f)
+                                    ids.append(map_id)
+                                    f.seek(0)
+                                    json.dump(ids, f)
                                     if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                         send_message(result_dict)
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
