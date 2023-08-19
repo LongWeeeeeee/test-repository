@@ -260,12 +260,12 @@ def live_matches():
                                         if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and \
                                                 result_dict["dotafix.github"][2] > 50 \
-                                                and result_dict['protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 50 and result_dict['pos1_vs_cores'] > 50:
+                                                and result_dict['protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
                                             send_message('Победитель: ' + radiant_team_name)
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                             1] < 50 and \
                                                 result_dict["dotafix.github"][2] < 50 \
-                                                and result_dict['protracker_pos1'] < 50 and result_dict['pos1_vs_team'] < 50 and result_dict['pos1_vs_cores'] < 50:
+                                                and result_dict['protracker_pos1'] < 50 and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
                                             send_message('Победитель: ' + dire_team_name)
                                     elif result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
                                         send_message('Недостаточно материала')
