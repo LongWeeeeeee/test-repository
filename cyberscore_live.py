@@ -202,8 +202,8 @@ def live_matches():
                                             against_wr = next(percent_iter).text.strip()
                                             against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
                                             if dota2protracker_hero_name == matchups['dire_pos1']:
-                                                # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
-                                                result_dict['protracker_pos1'] = int(float(against_wr))
+                                                if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                    result_dict['protracker_pos1'] = int(float(against_wr))
                                             if len(matchups) == 6:
                                                 if dota2protracker_hero_name in dire_hero_names:
                                                     radiant_pos1_vs_team += int(float(against_wr))
@@ -240,6 +240,7 @@ def live_matches():
                                                 except:
                                                     pass
                                     if len(matchups) == 6:
+
                                         # pos1 vs team
                                         diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
                                         result_dict['pos1_vs_team'] = diff
