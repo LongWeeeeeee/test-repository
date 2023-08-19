@@ -180,9 +180,9 @@ def live_matches():
                                         print(url_dotafix)
                                     else:
                                         datan = [float(datan_element) for datan_element in datan]
-                                        if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
-                                                datan[1] >= 54 or datan[0] <= 46):
-                                            result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                        # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                        #         datan[1] >= 54 or datan[0] <= 46):
+                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                     driver.quit()
                                     # protracker
                                     if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != []:
@@ -246,10 +246,12 @@ def live_matches():
                                                 pass
                                         # pos1 vs team
                                         diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
+                                        if diff > 3 or diff < -3:
                                         result_dict['pos1_vs_team'] = diff
                                         # pos1 vs cores
                                         diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-                                        result_dict['pos1_vs_cores'] = diff
+                                        if diff > 1 or diff < -1
+                                            result_dict['pos1_vs_cores'] = diff
                                                 #
                                     ids.append(map_id)
                                     f.seek(0)
@@ -258,14 +260,14 @@ def live_matches():
                                         send_message(result_dict)
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
-                                            1] > 50 and \
-                                                result_dict["dotafix.github"][2] > 50 \
-                                                and result_dict['protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                            1] > 54 and \
+                                                result_dict["dotafix.github"][2] > 54 \
+                                                and result_dict['protracker_pos1'] > 53 and result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
                                             send_message('Победитель: ' + radiant_team_name)
-                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
-                                            1] < 50 and \
-                                                result_dict["dotafix.github"][2] < 50 \
-                                                and result_dict['protracker_pos1'] < 50 and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                        elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
+                                            1] < 46 and \
+                                                result_dict["dotafix.github"][2] < 46 \
+                                                and result_dict['protracker_pos1'] < 47 and result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
                                             send_message('Победитель: ' + dire_team_name)
                                     elif result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
                                         send_message('Недостаточно материала')
