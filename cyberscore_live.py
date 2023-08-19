@@ -266,6 +266,8 @@ def live_matches():
                                             send_message('Победитель: ' + dire_team_name)
                                     elif result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
                                         send_message('Недостаточно материала')
+                                        send_message(datan)
+                                        send_message(matchups)
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
                                     else:
                                         send_message('Недостаточно материала')
