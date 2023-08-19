@@ -132,7 +132,7 @@ def live_matches():
                                         'name']
                                     map_winner = json_map['winner']
                                     result_dict['winner'] = map_winner
-                                    send_message('ТУРНИК ТИР ' + match['tournament']['tier'] + '\n' + title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
+                                    send_message('ТУРНИК ТИР ' + str(match['tournament']['tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
 
                                     options = Options()
