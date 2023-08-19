@@ -60,7 +60,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 map_id = match['id']
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
@@ -132,8 +132,7 @@ def live_matches():
                                         'name']
                                     map_winner = json_map['winner']
                                     result_dict['winner'] = map_winner
-                                    send_message(
-                                        title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
+                                    send_message('ТУРНИК ТИР ' + match['tournament']['tier'] + '\n' + title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
 
                                     options = Options()
@@ -218,40 +217,40 @@ def live_matches():
 
                                             except:
                                                 pass
-                                    if [] not in [matchups['dire_pos2'], matchups['dire_pos3'], matchups['radiant_pos2'], matchups['radiant_pos3']]:
-                                        radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
-                                        dire_1 = matchups['dire_pos1'].replace(' ', '%20')
-                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
-                                        response = requests.get(url_dota2_protracker)
-                                        soup = BeautifulSoup(response.text, "lxml")
-                                        hero_names = soup.find_all('td', class_='td-hero-pic')
-                                        wr_percentage = soup.find_all('div', class_='perc-wr')
-                                        hero_names = [dota2protracker_hero_name.get('data-order') for
-                                                      dota2protracker_hero_name
-                                                      in hero_names]
-                                        percent_iter = iter(wr_percentage)
-                                        for dota2protracker_hero_name in hero_names:
-                                            try:
-                                                with_wr = next(percent_iter).text.strip()
-                                                against_wr = next(percent_iter).text.strip()
-                                                against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
-                                                if [] not in matchups.values():
-                                                    if dota2protracker_hero_name in radiant_hero_names:
-                                                        dire_pos1_vs_team += int(float(against_wr))
-                                                if dota2protracker_hero_name in {matchups['radiant_pos1'],
-                                                                                 matchups['radiant_pos2'],
-                                                                                 matchups['radiant_pos3']}:
-                                                    dire_pos1_vs_cores += int(float(against_wr))
-                                            except:
-                                                pass
-                                        # pos1 vs team
-                                        diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
-                                        # if diff > 3 or diff < -3:
-                                        result_dict['pos1_vs_team'] = diff
-                                        # pos1 vs cores
-                                        diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-                                        # if diff > 1 or diff < -1
-                                        result_dict['pos1_vs_cores'] = diff
+                                        if [] not in [matchups['dire_pos2'], matchups['dire_pos3'], matchups['radiant_pos2'], matchups['radiant_pos3']]:
+                                            radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
+                                            dire_1 = matchups['dire_pos1'].replace(' ', '%20')
+                                            url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
+                                            response = requests.get(url_dota2_protracker)
+                                            soup = BeautifulSoup(response.text, "lxml")
+                                            hero_names = soup.find_all('td', class_='td-hero-pic')
+                                            wr_percentage = soup.find_all('div', class_='perc-wr')
+                                            hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                          dota2protracker_hero_name
+                                                          in hero_names]
+                                            percent_iter = iter(wr_percentage)
+                                            for dota2protracker_hero_name in hero_names:
+                                                try:
+                                                    with_wr = next(percent_iter).text.strip()
+                                                    against_wr = next(percent_iter).text.strip()
+                                                    against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                    if [] not in matchups.values():
+                                                        if dota2protracker_hero_name in radiant_hero_names:
+                                                            dire_pos1_vs_team += int(float(against_wr))
+                                                    if dota2protracker_hero_name in {matchups['radiant_pos1'],
+                                                                                     matchups['radiant_pos2'],
+                                                                                     matchups['radiant_pos3']}:
+                                                        dire_pos1_vs_cores += int(float(against_wr))
+                                                except:
+                                                    pass
+                                            # pos1 vs team
+                                            diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
+                                            # if diff > 3 or diff < -3:
+                                            result_dict['pos1_vs_team'] = diff
+                                            # pos1 vs cores
+                                            diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
+                                            # if diff > 1 or diff < -1
+                                            result_dict['pos1_vs_cores'] = diff
                                                 #
                                     ids.append(map_id)
                                     f.seek(0)
