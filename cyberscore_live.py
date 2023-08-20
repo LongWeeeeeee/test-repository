@@ -224,19 +224,19 @@ def live_matches():
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
                                     radiant_values = 0
                                     dire_values = 0
-                                    if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
-                                        for values in ranks_dire.values():
-                                            dire_values += int(values)
-                                        for values in ranks_radiant.values():
-                                            radiant_values += int(values)
-
-                                        diff = radiant_values - dire_values
-                                        if diff > 0:
-                                            send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                                radiant_values - dire_values))
-                                        elif diff < 0:
-                                            send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                                radiant_values - dire_values))
+                                    # if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
+                                    #     for values in ranks_dire.values():
+                                    #         dire_values += int(values)
+                                    #     for values in ranks_radiant.values():
+                                    #         radiant_values += int(values)
+                                    #
+                                    #     diff = radiant_values - dire_values
+                                    #     if diff > 0:
+                                    #         send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                    #             radiant_values - dire_values))
+                                    #     elif diff < 0:
+                                    #         send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                    #             radiant_values - dire_values))
                                     title = json_map['title']
                                     radiant_team_name = \
                                         json_map['team_radiant']['name']
