@@ -186,7 +186,7 @@ def live_matches():
                                                     matchups['dire_pos1'] = dire_hero['hero']['label']
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
-                                                            if 1 in pos_rank:
+                                                            if 1 in pos_rank and ranks_radiant[guy] != '-':
                                                                 pos_rank[1].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
@@ -194,7 +194,7 @@ def live_matches():
                                                     matchups['dire_pos2'] = dire_hero['hero']['label']
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
-                                                            if 2 in pos_rank:
+                                                            if 2 in pos_rank and ranks_radiant[guy] != '-':
                                                                 pos_rank[2].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
@@ -202,21 +202,21 @@ def live_matches():
                                                     matchups['dire_pos3'] = dire_hero['hero']['label']
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
-                                                            if 3 in pos_rank:
+                                                            if 3 in pos_rank and ranks_radiant[guy] != '-':
                                                                 pos_rank[3].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 4:
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
-                                                            if 4 in pos_rank:
+                                                            if 4 in pos_rank and ranks_radiant[guy] != '-':
                                                                 pos_rank[4].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 5:
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
-                                                            if 5 in pos_rank:
+                                                            if 5 in pos_rank and ranks_radiant[guy] != '-':
                                                                 pos_rank[5].append(ranks_dire[guy])
                                             except:
                                                 pass
