@@ -369,9 +369,9 @@ def live_matches():
                                             # if diff > 1 or diff < -1
                                             result_dict['pos1_vs_cores'] = diff
                                             #
-                                    # ids.append(map_id)
-                                    # f.seek(0)
-                                    # json.dump(ids, f)
+                                    ids.append(map_id)
+                                    f.seek(0)
+                                    json.dump(ids, f)
 
                                     if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
@@ -397,10 +397,10 @@ def live_matches():
                                         send_message(datan)
                                         send_message(matchups)
                                         send_message(result_dict)
-                        # else:
-                            # ids.append(map_id)
-                            # f.seek(0)
-                            # json.dump(ids, f)
+                        else:
+                            ids.append(map_id)
+                            f.seek(0)
+                            json.dump(ids, f)
         print('сплю')
         time.sleep(60)
     is_running = False
