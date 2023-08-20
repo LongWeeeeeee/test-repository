@@ -373,7 +373,6 @@ def live_matches():
                                     json.dump(ids, f)
 
                                     if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
-                                        send_message(result_dict)
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         if result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
                                             1] > 54 and \
