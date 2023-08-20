@@ -65,6 +65,9 @@ def live_matches():
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
                     if map_id not in ids:
+                        ranks_radiant = {}
+                        ranks_dire = {}
+                        pos_rank = {}
                         result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [], "pos1_vs_cores": []}
                         best_of = match['best_of']
                         score = match['best_of_score']
@@ -72,6 +75,32 @@ def live_matches():
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
+                        # ranks
+                        dltv = requests.get('https://dltv.org/matches').text
+                        soup = BeautifulSoup(dltv, 'lxml')
+                        dltv = soup.find_all('div', class_='live__matches-item')
+                        for match_dltv in dltv:
+                            id = match_dltv.get('data-series-id')
+                            map = requests.get(f'https://dltv.org/matches/{id}').text
+                            map_soup = BeautifulSoup(map, 'lxml')
+                            teams = map_soup.find_all('div', class_='lineups__team')
+                            for team in teams:
+                                name_and_rank = team.find('span', class_='lineups__team-title__name')
+                                name = name_and_rank.contents[1].text
+                                if name == radiant_team_name:
+                                    ranks = team.find_all('div', class_='rank')
+                                    players = team.find_all('div', class_='player__name-name')
+                                    for q in range(len(players)):
+                                        ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
+                                elif name == dire_team_name:
+                                    ranks = team.find_all('div', class_='rank')
+                                    players = team.find_all('div', class_='player__name-name')
+                                    for q in range(len(players)):
+                                        ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
+
+                            pass
+
+                                #могу парсить ранг глобальный
 
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                         match_data = requests.get(match_url).text
@@ -97,13 +126,34 @@ def live_matches():
                                                 if radiant_player['player']["game_name"].lower() == radiant_hero['player'][
                                                     "game_name"].lower() and radiant_player['player']['role'] == 1:
                                                     matchups['radiant_pos1'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[1] = [ranks_radiant[guy]]
                                                 elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
                                                     "game_name"].lower() and radiant_player['player']['role'] == 2:
                                                     matchups['radiant_pos2'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[2] = [ranks_radiant[guy]]
                                                 elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
                                                     "game_name"].lower() and radiant_player['player']['role'] == 3:
                                                     matchups['radiant_pos3'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[3] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 4:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[4] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 5:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[5] = [ranks_radiant[guy]]
+
                                             except: pass
+
                                         radiant_hero_names.append(radiant_hero['hero']['label'])
                                         radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
                                     for dire_hero in dire_pick:
@@ -114,17 +164,55 @@ def live_matches():
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 1:
                                                     matchups['dire_pos1'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 1 in pos_rank:
+                                                                pos_rank[1].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 2:
                                                     matchups['dire_pos2'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 2 in pos_rank:
+                                                                pos_rank[2].append(ranks_dire[guy])
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 3:
                                                     matchups['dire_pos3'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 3 in pos_rank:
+                                                                pos_rank[3].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 4:
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 4 in pos_rank:
+                                                                pos_rank[4].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 5:
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 5 in pos_rank:
+                                                                pos_rank[5].append(ranks_dire[guy])
                                             except: pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
+                                    radiant_values = 0
+                                    dire_values = 0
+                                    if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
+                                        for values in pos_rank.values():
+                                            if len(values) == 2:
+                                                radiant_values+= int(values[0])
+                                                dire_values += int(values[1])
+                                        diff = radiant_values - dire_values
+                                        if diff > 0:
+                                            send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
+                                        elif diff < 0:
+                                            send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
                                     title = json_map['title']
                                     radiant_team_name = \
                                         json_map['team_radiant']['name']
