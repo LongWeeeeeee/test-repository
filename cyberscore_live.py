@@ -65,51 +65,48 @@ def live_matches():
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
                     if map_id not in ids:
-                        ranks_radiant = {}
-                        ranks_dire = {}
-                        pos_rank = {}
-                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [],
-                                       "pos1_vs_cores": []}
-                        best_of = match['best_of']
-                        score = match['best_of_score']
-                        matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [],
-                                    'radiant_pos2': [], 'radiant_pos3': []}
-                        radiant_team_name = match['team_radiant']['name']
-                        dire_team_name = match['team_dire']['name']
-                        dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
-                        # ranks
-                        dltv = requests.get('https://dltv.org/matches').text
-                        soup = BeautifulSoup(dltv, 'lxml')
-                        dltv = soup.find_all('div', class_='live__matches-item')
-                        for match_dltv in dltv:
-                            id = match_dltv.get('data-series-id')
-                            map = requests.get(f'https://dltv.org/matches/{id}').text
-                            map_soup = BeautifulSoup(map, 'lxml')
-                            teams = map_soup.find_all('div', class_='lineups__team')
-                            for team in teams:
-                                name_and_rank = team.find('span', class_='lineups__team-title__name')
-                                name = name_and_rank.contents[1].text
-                                if name == radiant_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
-                                elif name == dire_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
-
-                            pass
-
-                            # могу парсить ранг глобальный
-
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                         match_data = requests.get(match_url).text
                         soup = BeautifulSoup(match_data, 'lxml')
                         match_soup = soup.find('script', id='__NEXT_DATA__')
                         json_map = json.loads(match_soup.text)['props']['pageProps']['initialState']['matches_item']
                         if 'ESportsBattle' not in json_map['tournament']['name']:
+                            ranks_radiant = {}
+                            ranks_dire = {}
+                            pos_rank = {}
+                            result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [],
+                                           "pos1_vs_team": [],
+                                           "pos1_vs_cores": []}
+                            best_of = match['best_of']
+                            score = match['best_of_score']
+                            matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [],
+                                        'radiant_pos2': [], 'radiant_pos3': []}
+                            radiant_team_name = match['team_radiant']['name']
+                            dire_team_name = match['team_dire']['name']
+                            dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
+                            # ranks
+                            dltv = requests.get('https://dltv.org/matches').text
+                            soup = BeautifulSoup(dltv, 'lxml')
+                            dltv = soup.find_all('div', class_='live__matches-item')
+                            for match_dltv in dltv:
+                                id = match_dltv.get('data-series-id')
+                                map = requests.get(f'https://dltv.org/matches/{id}').text
+                                map_soup = BeautifulSoup(map, 'lxml')
+                                teams = map_soup.find_all('div', class_='lineups__team')
+                                for team in teams:
+                                    name_and_rank = team.find('span', class_='lineups__team-title__name')
+                                    name = name_and_rank.contents[1].text
+                                    if name == radiant_team_name:
+                                        ranks = team.find_all('div', class_='rank')
+                                        players = team.find_all('div', class_='player__name-name')
+                                        for q in range(len(players)):
+                                            ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
+                                    elif name == dire_team_name:
+                                        ranks = team.find_all('div', class_='rank')
+                                        players = team.find_all('div', class_='player__name-name')
+                                        for q in range(len(players)):
+                                            ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
+                                # могу парсить ранг глобальный
                             radiant_pick = json_map['picks_team_radiant']
                             dire_pick = json_map['picks_team_dire']
                             # map_winner = json_map['winner']
@@ -400,6 +397,10 @@ def live_matches():
                                         send_message(datan)
                                         send_message(matchups)
                                         send_message(result_dict)
+                        else:
+                            ids.append(map_id)
+                            f.seek(0)
+                            json.dump(ids, f)
         print('сплю')
         time.sleep(60)
     is_running = False
