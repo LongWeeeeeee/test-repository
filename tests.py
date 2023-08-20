@@ -1,11 +1,9 @@
-# шторм клок тайд монки диз
-# шторм + клок шторм + тайд шторм + монки шторм + диз
-# клок + шторм клок + тайд клок + монки клок + диз
-# тайд + шторм тайд + клок тайд + монки тайд + диз
-# монки + шторм
+# Структура приложения: Анализ пиков + анализ игроков + анализ команды
+#можно также попробовать собирать другую статистику такую как продолжительность матча и все такое
 #сверха прошлых матчей и прошлых встреч
 #Отладка винрейта на старых матчах
 #Проверка того что все правильно работает
+#ранги неправильно работают
 
 from telebot import types
 from selenium.webdriver.chrome.options import Options
@@ -21,6 +19,13 @@ import telebot
 import requests
 from bs4 import BeautifulSoup
 import json
+import threading
+
+# Флаг состояния выполнения функции
+is_running = False
+
+# Мьютекс для блокировки
+lock = threading.Lock()
 
 bot = telebot.TeleBot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 
@@ -39,407 +44,397 @@ def send_message(message):
 
 
 # лайв матчи
+
+
 def live_matches():
-    redflag = 1
-
-    url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
-    response = requests.get(url).text
-    json_data = json.loads(response)
-    while redflag:
+    global is_running
+    with lock:
+        if is_running:
+            print("Функция уже выполняется")
+            return
+    is_running = True
+    # Ваш код выполнения функции
+    print("Функция выполняется...")
+    while True:
+        url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
+        response = requests.get(url).text
+        json_data = json.loads(response)
         for match in json_data['rows']:
-            # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
-            if match['status'] in {'online', 'draft'}:
-                best_of = match['best_of']
-                score = match['best_of_score']
-                # radiant_team_name = match['team_radiant']['name']
-                # dire_team_name = match['team_dire']['name']
-                dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
                 map_id = match['id']
-                match_url = f'https://cyberscore.live/en/matches/{map_id}/'
-                match_data = requests.get(match_url).text
-                soup = BeautifulSoup(match_data, 'lxml')
-                match_soup = soup.find('script', id='__NEXT_DATA__')
-                json_map = json.loads(match_soup.text)['props']['pageProps']['initialState']['matches_item']
-                radiant_pick = json_map['picks_team_radiant']
-                dire_pick = json_map['picks_team_dire']
-                # url_map = f'https://cyberscore.live/_next/data/uc8FSlRmVi4jLOPn5R_t6/en/matches/{map_id}.json?id={map_id}'
-                # map_page = requests.get(url_map)
-                # json_map = json.loads(map_page.text)
-                # radiant_pick = json_map['pageProps']['initialState']['matches_item']['picks_team_radiant']
-                # пики
-                if dire_pick != None:
-                    if len(dire_pick) == 5 and dire_pick[4]['hero'] != '':
-                        ranks_fail = 0
-                        for radiant_hero in radiant_pick:
-                            # Ранги
-                            if not radiant_hero['player']['leaderboard_rank']:
-                                ranks_fail = True
-                            else:
-                                radiant_team_rangs.append(radiant_hero['player']['leaderboard_rank'])
-                            radiant_hero_names.append(radiant_hero['hero']['label'])
-                            radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
-                        for dire_hero in dire_pick:
-                            # Ранги
-                            if not dire_hero['player']['leaderboard_rank']:
-                                ranks_fail = True
-                            else:
-                               dire_team_rangs.append(dire_hero['player']['leaderboard_rank'])
-                            dire_hero_names.append(dire_hero['hero']['label'])
-                            dire_hero_ids.append(dire_hero['hero']['id_steam'])
+                with open('map_id_check.txt', 'r+') as f:
+                    ids = json.load(f)
+                    if map_id not in ids:
+                        ranks_radiant = {}
+                        ranks_dire = {}
+                        pos_rank = {}
+                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [], "pos1_vs_cores": []}
+                        best_of = match['best_of']
+                        score = match['best_of_score']
+                        matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [], 'radiant_pos2': [], 'radiant_pos3': []}
+                        radiant_team_name = match['team_radiant']['name']
+                        dire_team_name = match['team_dire']['name']
+                        dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
+                        # ranks
+                        dltv = requests.get('https://dltv.org/matches').text
+                        soup = BeautifulSoup(dltv, 'lxml')
+                        dltv = soup.find_all('div', class_='live__matches-item')
+                        for match_dltv in dltv:
+                            id = match_dltv.get('data-series-id')
+                            map = requests.get(f'https://dltv.org/matches/{id}').text
+                            map_soup = BeautifulSoup(map, 'lxml')
+                            teams = map_soup.find_all('div', class_='lineups__team')
+                            for team in teams:
+                                name_and_rank = team.find('span', class_='lineups__team-title__name')
+                                name = name_and_rank.contents[1].text
+                                if name == radiant_team_name:
+                                    ranks = team.find_all('div', class_='rank')
+                                    players = team.find_all('div', class_='player__name-name')
+                                    for q in range(len(players)):
+                                        ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
+                                elif name == dire_team_name:
+                                    ranks = team.find_all('div', class_='rank')
+                                    players = team.find_all('div', class_='player__name-name')
+                                    for q in range(len(players)):
+                                        ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
 
-                        title = json_map['title']
-                        radiant_team_name = \
-                        json_map['team_radiant']['name']
-                        dire_team_name = json_map['team_dire'][
-                            'name']
+                            pass
 
-                        # if  radiant_team_name in {'Army Geniuses', 'IHC Esports'}:
-                        # Пики закончились
-                        if len(dire_hero_names) == 5 and len(radiant_hero_names) == 5:
-                            if not ranks_fail:
-                                difference = sum(radiant_team_rangs) - sum(dire_team_rangs)
-                                if difference > 0:
-                                    send_message(radiant_team_name + ' лучше ранги на ' + str(difference))
-                                elif difference < 0:
-                                    send_message(dire_team_name + ' лучше ранги на ' + str(difference))
-                            send_message(title)
-                            redflag = 0
-                            send_message(best_of)
-                            send_message(score)
-                            wr_dict = {}
-                            wr_dict_with_radiant = {}
-                            wr_dict_with_dire = {}
-                            dotafix_unsure = False
-                            dotafix_sure_flag = False
-                            dotapicker_sure_flag = False
-                            dotapicker_unsure = False
-                            dotapicker_risk = False
-                            dotafix_risk = False
-                            redflag = False
-                            # options = Options()
-                            # options.add_argument("--start-maximized")
-                            # options.add_argument("--no-sandbox")
-                            # driver = webdriver.Chrome(options=options)
+                                #могу парсить ранг глобальный
 
-                            # # dotapicker
-                            # radiant = ''.join(['/T_' + element.replace(' ', '_') for element in radiant_hero_names])
-                            # dire = ''.join(['/E_' + element.replace(' ', '_') for element in dire_hero_names])
-                            #
-                            # url_dotapicker = "https://dotapicker.com/herocounter#!" + dire + radiant + "/S_0_matchups"
-                            # send_message(url_dotapicker)
-                            # # Download and specify the path to your chromedriver executable
-                            # driver.get(url_dotapicker)
-                            # select_element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.NAME, 'component')))
-                            # select = Select(select_element)
-                            # select.select_by_index(0)
-                            # elements = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                            # elements = [int(elements[7].text), int(elements[11].text)]
-                            # driver.find_element(By.XPATH,
-                            #                     '/html/body/div[2]/div/div[2]/div[2]/div[1]/div[2]/div[3]').click()
-                            # elements_winrate = driver.find_elements(By.CSS_SELECTOR, '[align="middle"]')
-                            # elements_winrate = [int(elements_winrate[7].text), int(elements_winrate[11].text)]
-                            # # print(answ)
-                            # # РАЗОБРАТЬСЯ С ELEMENTS_WINRATE И ПРОСТО ELEMENTS
-                            # if elements[0] >= 20 and elements[1] >= 20 and elements_winrate[0] >= 20 and \
-                            #         elements_winrate[
-                            #             1] >= 20:
-                            #     send_message('dotapicker.com УВЕРЕН что победит ' + radiant_team_name)
-                            #     dotapicker_winner = radiant_team_name
-                            #     dotapicker_sure_flag = 1
-                            #
-                            # elif elements[0] >= 10 and elements[1] >= 10 and elements_winrate[0] > 10 and \
-                            #         elements_winrate[
-                            #             1] > 10:
-                            #     send_message('dotapicker.com считает что скорее всего победит ' + radiant_team_name)
-                            #     dotapicker_winner = radiant_team_name
-                            # elif elements[0] > 0 and elements[1] > 0 and elements_winrate[0] > 0 and elements_winrate[
-                            #     1] > 0:
-                            #     send_message(
-                            #         'dotapicker.com РИСКОВО считает что скорее всего победит ' + radiant_team_name)
-                            #     dotapicker_winner = radiant_team_name
-                            #     dotapicker_risk = 1
-                            # elif elements[0] <= -20 and elements[1] <= -20 and elements_winrate[0] <= -20 and \
-                            #         elements_winrate[
-                            #             1] <= -20:
-                            #     send_message('dotapicker.com УВЕРЕН что победит ' + dire_team_name)
-                            #     dotapicker_winner = dire_team_name
-                            #     dotapicker_sure_flag = 1
-                            # elif elements[0] <= -10 and elements[1] <= -10 and elements_winrate[0] <= -10 and \
-                            #         elements_winrate[
-                            #             1] <= -10:
-                            #     send_message('dotapicker.com считает что скорее всего победит ' + dire_team_name)
-                            #     dotapicker_winner = dire_team_name
-                            # elif elements[0] < 0 and elements[1] < 0 and elements_winrate[0] < 0 and elements_winrate[
-                            #     1] < 0:
-                            #     send_message(
-                            #         'dotapicker.com РИСКОВО считает что скорее всего победит ' + dire_team_name)
-                            #     dotapicker_winner = dire_team_name
-                            #     dotapicker_risk = 1
-                            # #
-                            # else:
-                            #     dotapicker_unsure = True
-                            #     dotapicker_winner = 'неуверен ' + radiant_team_name + ': Counterpick = ' + str(
-                            #         elements[0]) + ' WR ' + str(
-                            #         elements_winrate[0]) + ' Synergy = ' + str(elements[1]) + ' WR ' + str(
-                            #         elements_winrate[1])
-                            #     send_message('dotapicker.com неуверен в победителе ' + dotapicker_winner)
-                            #
-                            # ####dotafix.github
-                            #
-                            # radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
-                            # dire = ''.join(['&e=' + element for element in dire_hero_ids])
-                            # dire = '?' + dire[1:]
-                            # url_dotafix = "https://dotafix.github.io/" + dire + radiant
-                            # send_message(url_dotafix)
-                            # driver.get(url_dotafix)
-                            # element = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.ID, 'rankData')))
-                            # select = Select(element)
-                            # select.select_by_index(8)
-                            # try:
-                            #     aler_window = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                            #     aler_window.click()
-                            # except:
-                            #     driver.refresh()
-                            #     aler_window = WebDriverWait(driver, 15).until(
-                            #         EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                            #     aler_window.click()
-                            # alert = Alert(driver)
-                            # alert_text = alert.text
-                            # alert.accept()
-                            # alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
-                            # datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
-                            # if len(datan) != 3:
-                            #     driver.refresh()
-                            #     aler_window = WebDriverWait(driver, 15).until(
-                            #         EC.element_to_be_clickable((By.CSS_SELECTOR, '[style="font-size: 20px;"]')))
-                            #     aler_window.click()
-                            #     alert = Alert(driver)
-                            #     alert_text = alert.text
-                            #     alert.accept()
-                            #     alert_text_1 = alert_text.split("The following was copied to the clipboard:")[1].strip()
-                            #     datan = re.findall('[0-9]{1,}\.[0-9]{1,}', alert_text_1)
-                            # datan = [int(float(datan_element)) for datan_element in datan]
-                            # if datan[0] <= 40 and datan[1] <= 40 and datan[2] <= 40:
-                            #     send_message('dotafix.github.io УВЕРЕН что победит ' + dire_team_name)
-                            #     dotafix_github_winner = dire_team_name
-                            #     dotafix_sure_flag = True
-                            # elif datan[0] <= 45 and datan[1] <= 45 and datan[2] <= 45:
-                            #     send_message('dotafix.github.io думает что победит ' + dire_team_name)
-                            #     dotafix_github_winner = dire_team_name
-                            # elif datan[0] < 50 and datan[1] < 50 and datan[2] < 50:
-                            #     send_message('dotafix.github.io РИСКОВО думает что победит ' + dire_team_name)
-                            #     dotafix_github_winner = dire_team_name
-                            #     dotafix_risk = True
-                            #
-                            # elif datan[0] >= 60 and datan[1] >= 60 and datan[2] >= 60:
-                            #     send_message('dotafix.github.io УВЕРЕН что победит ' + radiant_team_name)
-                            #     dotafix_github_winner = radiant_team_name
-                            #     dotafix_sure_flag = True
-                            # elif datan[0] >= 55 and datan[1] >= 45 and datan[2] >= 55:
-                            #     send_message('dotafix.github.io думает что победит ' + radiant_team_name)
-                            #     dotafix_github_winner = radiant_team_name
-                            # elif datan[0] > 50 and datan[1] > 50 and datan[2] > 50:
-                            #     send_message('dotafix.github.io РИСКОВО думает что победит ' + radiant_team_name)
-                            #     dotafix_github_winner = radiant_team_name
-                            #     dotafix_risk = True
-                            # else:
-                            #     dotafix_github_unsure = True
-                            #     dotafix_github_winner = 'НЕУВЕРЕН ' + radiant_team_name + ' Winrate: Early ' + str(
-                            #         datan[0]) + 'Mid ' + str(
-                            #         datan[1]) + 'Late ' + str(datan[2])
-                            #     send_message('dotafix.github.io неуверен в победителе ' + dotafix_github_winner)
-                            #
-                            # # dotatools:
-                            # dire = ''.join([str(element) + ',' for element in dire_hero_ids])
-                            # radiant = [str(element) + ',' for element in radiant_hero_ids]
-                            # radiant = ''.join(radiant[:1])
-                            # url_dotatools = 'https://dotatools.ru/api/v1/predict_victory?dire_hero_ids=' + dire + '&radiant_hero_ids=' + radiant + '&rank=immortal'
-                            # picks = requests.get(url_dotatools)
-                            # a = picks.text
-                            # b = re.findall('[0-9]\.[0-9]', a)
-                            # if b[0] > b[1]:
-                            #     send_message('dotatools считает что победит ' + dire_team_name)
-                            #     dotatools_dotapicker_winner = dire_team_name
-                            # elif b[0] < b[1]:
-                            #     send_message('dotatools считает что победит ' + radiant_team_name)
-                            #     dotatools_dotapicker_winner = radiant_team_name
-                            #
-                            # else:
-                            #     send_message('dotatools неуверен в победителе')
-                            #     dotatools_dotapicker_winner = 'неуверен в победителе'
-                            #
-                            # radiant_pick, dire_pick, counter = dict(), dict(), 0
-                            # if dotafix_github_winner == dotapicker_winner and (
-                            #         dotapicker_sure_flag and dotafix_sure_flag):
-                            #     send_message('            ALL IN BABYYYY')
-                            # elif dotafix_github_winner == dotapicker_winner and (
-                            #         dotapicker_sure_flag or dotafix_sure_flag):
-                            #     send_message('            Алгоритмы уверены. КРУПНАЯ Ставка РАЗРЕШЕНА')
-                            # elif dotapicker_winner == dotafix_github_winner and (dotafix_risk or dotapicker_risk):
-                            #     send_message('            Малая РИСКОВАЯ Ставка РАЗРЕШЕНА')
-                            # elif dotapicker_winner == dotafix_github_winner:
-                            #     send_message('            Ставка РАЗРЕШЕНА')
-                            # elif dotafix_unsure or dotapicker_unsure:
-                            #     send_message('            Ставка ЗАПРЕЩЕНА')
-                            #     # if radiant_match_duration >= 36 and dire_match_duration >= 36:
-                            #     #     send_message('Ставка на ВРЕМЯ РАЗРЕШЕНА')
-                            #     # else:
-                            #     #     send_message('Ставка на время ТАКЖЕ ЗАПРЕЩЕНА')
-                            # driver.quit()
-                            # dota2protracker
-                            total = 0
-                            for hero in radiant_hero_names:
-                                wr_dict[hero] = []
-                                wr_dict_with_radiant[hero] = []
+                        match_url = f'https://cyberscore.live/en/matches/{map_id}/'
+                        match_data = requests.get(match_url).text
+                        soup = BeautifulSoup(match_data, 'lxml')
+                        match_soup = soup.find('script', id='__NEXT_DATA__')
+                        json_map = json.loads(match_soup.text)['props']['pageProps']['initialState']['matches_item']
+                        if 'ESportsBattle' not in json_map['tournament']['name']:
+                            radiant_pick = json_map['picks_team_radiant']
+                            dire_pick = json_map['picks_team_dire']
+                            # map_winner = json_map['winner']
+                            # result_dict['winner'] = map_winner
+                            # url_map = f'https://cyberscore.live/_next/data/uc8FSlRmVi4jLOPn5R_t6/en/matches/{map_id}.json?id={map_id}'
+                            # map_page = requests.get(url_map)
+                            # json_map = json.loads(map_page.text)
+                            # radiant_pick = json_map['pageProps']['initialState']['matches_item']['picks_team_radiant']
+                            # пики
+                            if dire_pick != None:
+                                if len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
+                                    for radiant_hero in radiant_pick:
+                                        for q in range(5):
+                                            try:
+                                                radiant_player = json_map['team_radiant']['players_items'][q]
+                                                if radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 1:
+                                                    matchups['radiant_pos1'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[1] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 2:
+                                                    matchups['radiant_pos2'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[2] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 3:
+                                                    matchups['radiant_pos3'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[3] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 4:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[4] = [ranks_radiant[guy]]
+                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
+                                                    "game_name"].lower() and radiant_player['player']['role'] == 5:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            pos_rank[5] = [ranks_radiant[guy]]
 
-                                url_dota2_protracker = f'https://www.dota2protracker.com/hero/{hero}'
-                                response = requests.get(url_dota2_protracker)
-                                soup = BeautifulSoup(response.text, "lxml")
-                                hero_names = soup.find_all('td', class_='td-hero-pic')
-                                wr_percentage = soup.find_all('div', class_='perc-wr')
-                                percent_iter = iter(wr_percentage)
-                                hero_names = [each_hero.get('data-order') for each_hero in hero_names]
-                                for each_hero in hero_names:
+                                            except: pass
+
+                                        radiant_hero_names.append(radiant_hero['hero']['label'])
+                                        radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
+                                    for dire_hero in dire_pick:
+                                        for q in range(5):
+                                            try:
+                                                dire_player = json_map['team_dire']['players_items'][q]
+                                                if dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 1:
+                                                    matchups['dire_pos1'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 1 in pos_rank:
+                                                                pos_rank[1].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 2:
+                                                    matchups['dire_pos2'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 2 in pos_rank:
+                                                                pos_rank[2].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 3:
+                                                    matchups['dire_pos3'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 3 in pos_rank:
+                                                                pos_rank[3].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 4:
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 4 in pos_rank:
+                                                                pos_rank[4].append(ranks_dire[guy])
+                                                elif dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == 5:
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if 5 in pos_rank:
+                                                                pos_rank[5].append(ranks_dire[guy])
+                                            except: pass
+                                        dire_hero_names.append(dire_hero['hero']['label'])
+                                        dire_hero_ids.append(dire_hero['hero']['id_steam'])
+                                    radiant_values = 0
+                                    dire_values = 0
+                                    if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
+                                        for values in pos_rank.values():
+                                            if len(values) == 2:
+                                                radiant_values+= int(values[0])
+                                                dire_values += int(values[1])
+                                        diff = radiant_values - dire_values
+                                        if diff > 0:
+                                            send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
+                                        elif diff < 0:
+                                            send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
+                                    title = json_map['title']
+                                    radiant_team_name = \
+                                        json_map['team_radiant']['name']
+                                    dire_team_name = json_map['team_dire'][
+                                        'name']
+                                    map_winner = json_map['winner']
+                                    result_dict['winner'] = map_winner
+                                    send_message('ТУРНИК ТИР ' + str(match['tournament']['tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
+                                            score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+
+                                    options = Options()
+                                    options.add_argument("--start-maximized")
+                                    options.add_argument("--no-sandbox")
+                                    driver = webdriver.Chrome(options=options)
+                                    ####dotafix.github
+                                    radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
+                                    dire = ''.join(['&e=' + element for element in dire_hero_ids])
+                                    dire = '?' + dire[1:]
+                                    url_dotafix = "https://dotafix.github.io/" + dire + radiant
+                                    # send_message(url_dotafix)
+                                    driver.get(url_dotafix)
+                                    time.sleep(5)
                                     try:
-                                        with_wr = next(percent_iter).text.strip()
-                                        against_wr = next(percent_iter).text.strip()
-                                        percentage = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
-                                        percentage_with = re.match('[0-9]{1,}\.[0-9]{1,}', with_wr).group()
-                                        for another_hero in radiant_hero_names:
-                                            if another_hero != hero and another_hero == each_hero:
-                                                pre = wr_dict_with_radiant[hero]
-                                                pre.append(float(percentage_with))
-                                                wr_dict_with_radiant[hero] = pre
-                                                pre = 0
-
-                                        for enemy in dire_hero_names:
-                                            if enemy == each_hero:
-                                                pre = wr_dict[hero]
-                                                pre.append(float(percentage))
-                                                wr_dict[hero] = pre
-                                                pre = 0
-                                            if enemy not in wr_dict_with_dire:
-                                                wr_dict_with_dire[enemy] = []
-                                            else:
-                                                if each_hero in dire_hero_names and each_hero != enemy:
-                                                    pre = wr_dict_with_dire[enemy]
-                                                    pre.append(float(percentage_with))
-                                                    wr_dict_with_dire[enemy] = pre
-                                                    pre = 0
-
+                                        element = WebDriverWait(driver, 30).until(
+                                            EC.element_to_be_clickable((By.ID, 'rankData')))
+                                        select = Select(element)
+                                        select.select_by_index(9)
+                                        time.sleep(5)
+                                        aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                            (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        # time.sleep(5)
+                                        aler_window.click()
+                                        alert = Alert(driver)
+                                        alert_text = alert.text
+                                        alert.accept()
                                     except:
-                                        pass
-                            for i in wr_dict:
-                                # total_hero = 0
-                                if len(wr_dict[i]) == 5:
-                                    total += sum(wr_dict[i])/5
-                                else:
-                                    send_message('Dota2protracker ERROR')
-                            total = total/5
-                            if total >= 50:
-                                send_message(radiant_team_name + ' dota2protracker Winrate: ' + str(total))
-                            else:
-                                send_message(dire_team_name + ' dota2protracker Winrate: ' + str(100-total))
-                            #Another dota2protracker
-
-                            # Анализ игроков
-                            dire_players = json_map['team_radiant']['players_items']
-                            radiant_players = json_map['team_dire']['players_items']
-                            if radiant_players[1]['player']['gpm'] != 0 and radiant_players[1]['player']['xpm'] and radiant_players[0]['player']['gpm'] != 0 and radiant_players[0]['player']['xpm'] != 0 and radiant_players[3]['player']['gpm'] != 0 and radiant_players[3]['player']['xpm'] != 0 and dire_players[1]['player']['gpm'] != 0 and dire_players[1]['player']['xpm'] and dire_players[0]['player']['gpm'] != 0 and dire_players[0]['player']['xpm'] != 0 and dire_players[3]['player']['gpm'] != 0 and dire_players[3]['player']['xpm'] != 0:
-                                    if (float(radiant_players[1]['player']['gpm']) - float(
-                                            dire_players[1]['player']['gpm']) > 20) and (
-                                            float(radiant_players[1]['player']['xpm']) - float(
-                                        dire_players[1]['player']['xpm']) > 20):
-                                        # мидер сильнее редиант
-                                        if (float(radiant_players[0]['player']['gpm']) - float(
-                                                dire_players[0]['player']['gpm']) > 20) and (
-                                                float(radiant_players[0]['player']['xpm']) - float(
-                                            dire_players[0]['player']['xpm']) > 20):
-                                            # кор и мидер сильнее. Тима сильнее
-                                            team_analyze_winner = radiant_team_name
-                                        elif (float(radiant_players[0]['player']['gpm']) - float(
-                                                dire_players[0]['player']['gpm']) < 20) and (
-                                                float(radiant_players[0]['player']['xpm']) - float(
-                                            dire_players[0]['player']['xpm']) < 20):
-                                            # мидер сильнее кор слабее
-                                            team_analyze_winner = 0
-                                        else:
-                                            # мидер сильнее коры паритет
-                                            if (float(radiant_players[3]['player']['gpm']) - float(
-                                                    dire_players[3]['player']['gpm']) < 20) and (
-                                                    float(radiant_players[3]['player']['xpm']) - float(
-                                                dire_players[3]['player']['xpm']) < 20):
-                                                # dire хард слабее
-                                                team_analyze_winner = 0
-                                            elif (float(radiant_players[3]['player']['gpm']) - float(
-                                                    dire_players[3]['player']['gpm']) > 20) and (
-                                                    float(radiant_players[3]['player']['xpm']) - float(
-                                                dire_players[3]['player']['xpm']) > 20):
-                                                # dire хард сильнее
-                                                team_analyze_winner = radiant_team_name
-                                            else:
-                                                team_analyze_winner = radiant_team_name
-
-                                    elif (float(radiant_players[1]['player']['gpm']) - float(
-                                            dire_players[1]['player']['gpm']) < 20) and (
-                                            float(radiant_players[3]['player']['xpm']) - float(
-                                        dire_players[3]['player']['xpm']) < 20):
-                                        # мидер сильнее dire
-                                        if (float(radiant_players[0]['player']['gpm']) - float(
-                                                dire_players[0]['player']['gpm']) > 20) and (
-                                                float(radiant_players[0]['player']['xpm']) - float(
-                                            dire_players[0]['player']['xpm']) > 20):
-                                            # мид даер сильнее кор слабее
-                                            team_analyze_winner = 0
-                                        elif (float(radiant_players[0]['player']['gpm']) - float(
-                                                dire_players[0]['player']['gpm']) < 20) and (
-                                                float(radiant_players[0]['player']['xpm']) - float(
-                                            dire_players[0]['player']['xpm']) < 20):
-                                            # мидер сильнее кор сильнее
-                                            team_analyze_winner = dire_team_name
-                                        else:
-                                            # мидер сильнее коры паритет
-                                            if (float(radiant_players[3]['player']['gpm']) - float(
-                                                    dire_players[3]['player']['gpm']) < 20) and (
-                                                    float(radiant_players[3]['player']['xpm']) - float(
-                                                dire_players[3]['player']['xpm']) < 20):
-                                                # dire хард сильнее
-                                                team_analyze_winner = dire_team_name
-                                            elif (float(radiant_players[3]['player']['gpm']) - float(
-                                                    dire_players[3]['player']['gpm']) > 20) and (
-                                                    float(radiant_players[3]['player']['xpm']) - float(
-                                                dire_players[3]['player']['xpm']) > 20):
-                                                # dire хард слабее
-                                                team_analyze_winner = 0
-                                            else:
-                                                team_analyze_winner = dire_team_name
+                                        driver.refresh()
+                                        element = WebDriverWait(driver, 30).until(
+                                            EC.element_to_be_clickable((By.ID, 'rankData')))
+                                        select = Select(element)
+                                        select.select_by_index(9)
+                                        time.sleep(5)
+                                        aler_window = WebDriverWait(driver, 30).until(
+                                            EC.element_to_be_clickable(
+                                                (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        aler_window.click()
+                                        alert = Alert(driver)
+                                        alert_text = alert.text
+                                        alert.accept()
+                                    datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                    if len(datan) != 3:
+                                        print(url_dotafix)
                                     else:
-                                        # мидеры паритет
-                                        team_analyze_winner = 0
-                                    if team_analyze_winner == 0:
-                                        send_message('Команды равны по статам')
+                                        datan = [float(datan_element) for datan_element in datan]
+                                        # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                        #         datan[1] >= 54 or datan[0] <= 46):
+                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                    driver.quit()
+                                    # protracker
+                                    if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != []:
+                                        radiant_pos1_vs_team = 0
+                                        dire_pos1_vs_team = 0
+                                        radiant_pos1_vs_cores = 0
+                                        dire_pos1_vs_cores = 0
+                                        radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
+                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{radiant_1}'
+                                        response = requests.get(url_dota2_protracker)
+                                        soup = BeautifulSoup(response.text, "lxml")
+                                        hero_names = soup.find_all('td', class_='td-hero-pic')
+                                        wr_percentage = soup.find_all('div', class_='perc-wr')
+                                        hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                      dota2protracker_hero_name
+                                                      in hero_names]
+                                        percent_iter = iter(wr_percentage)
+                                        for dota2protracker_hero_name in hero_names:
+                                            try:
+                                                with_wr = next(percent_iter).text.strip()
+                                                against_wr = next(percent_iter).text.strip()
+                                                against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                if dota2protracker_hero_name == matchups['dire_pos1']:
+                                                    # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                    result_dict['protracker_pos1'] = int(float(against_wr))
+                                                if [] not in matchups.values():
+                                                    if dota2protracker_hero_name in dire_hero_names:
+                                                        radiant_pos1_vs_team += int(float(against_wr))
+                                                    if dota2protracker_hero_name in {matchups['dire_pos1'],
+                                                                                     matchups['dire_pos2'],
+                                                                                     matchups['dire_pos3']}:
+                                                        radiant_pos1_vs_cores += int(float(against_wr))
+
+                                            except:
+                                                pass
+                                        if [] not in [matchups['dire_pos2'], matchups['dire_pos3'], matchups['radiant_pos2'], matchups['radiant_pos3']]:
+                                            radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
+                                            dire_1 = matchups['dire_pos1'].replace(' ', '%20')
+                                            url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
+                                            response = requests.get(url_dota2_protracker)
+                                            soup = BeautifulSoup(response.text, "lxml")
+                                            hero_names = soup.find_all('td', class_='td-hero-pic')
+                                            wr_percentage = soup.find_all('div', class_='perc-wr')
+                                            hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                          dota2protracker_hero_name
+                                                          in hero_names]
+                                            percent_iter = iter(wr_percentage)
+                                            for dota2protracker_hero_name in hero_names:
+                                                try:
+                                                    with_wr = next(percent_iter).text.strip()
+                                                    against_wr = next(percent_iter).text.strip()
+                                                    against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                    if [] not in matchups.values():
+                                                        if dota2protracker_hero_name in radiant_hero_names:
+                                                            dire_pos1_vs_team += int(float(against_wr))
+                                                    if dota2protracker_hero_name in {matchups['radiant_pos1'],
+                                                                                     matchups['radiant_pos2'],
+                                                                                     matchups['radiant_pos3']}:
+                                                        dire_pos1_vs_cores += int(float(against_wr))
+                                                except:
+                                                    pass
+                                            # pos1 vs team
+                                            diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
+                                            # if diff > 3 or diff < -3:
+                                            result_dict['pos1_vs_team'] = diff
+                                            # pos1 vs cores
+                                            diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
+                                            # if diff > 1 or diff < -1
+                                            result_dict['pos1_vs_cores'] = diff
+                                                #
+                                    ids.append(map_id)
+                                    f.seek(0)
+                                    json.dump(ids, f)
+                                    if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
+                                        send_message(result_dict)
+                                        analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                            1] > 54 and \
+                                                result_dict["dotafix.github"][2] > 54 \
+                                                and result_dict['protracker_pos1'] > 53 and result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                            send_message('Победитель: ' + radiant_team_name)
+                                        elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
+                                            1] < 46 and \
+                                                result_dict["dotafix.github"][2] < 46 \
+                                                and result_dict['protracker_pos1'] < 47 and result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                            send_message('Победитель: ' + dire_team_name)
+                                    elif result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
+                                        send_message('Недостаточно материала')
+                                        send_message(datan)
+                                        send_message(matchups)
+                                        analyze_results(result_dict, dire_team_name, radiant_team_name)
                                     else:
-                                        send_message('По результатам сверки команд сильнее оказалась: ' + team_analyze_winner)
-                            else:
-                                send_message('Сверка невозможна, cyberscore.live тупит :/')
-        if redflag:
-            print('сплю')
-            time.sleep(60)
-
-
-@bot.message_handler(commands=['button'])
-def button_message(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Анализировать текущие матчи")
-    markup.add(item1)
-
-
-@bot.message_handler(content_types='text')
-def message_reply(message):
-    if message.text == "Анализировать текущие матчи":
-        live_matches()
-        bot.send_message(message.chat.id, 'Работа завершена')
-        print('Работа завершена')
-
-
-bot.infinity_polling()
+                                        send_message('Недостаточно материала')
+                                        send_message(datan)
+                                        send_message(matchups)
+                                        send_message(result_dict)
+        print('сплю')
+        time.sleep(60)
+    is_running = False
+    print("Работа завершена")
+def analyze_results(result_dict, dire_team_name, radiant_team_name):
+    g = 0
+    p = 0
+    t = 0
+    c = 0
+    pt = 0
+    pt2 = 0
+    pt3 = 0
+    counter = 0
+    flag = True
+    wins_looses = {"w_g": 0, "l_g": 0, "w_p": 0, "l_p": 0, "w_t": 0, "l_t": 0, "w_pt": 0, "l_pt": 0, "w_pt2": 0,
+                   "l_pt2": 0, "w_pt3": 0, "l_pt3": 0}
+    counter = 0
+    with open('protrackers.json', 'r') as f:
+        json_file = json.load(f)  # 912
+        while flag:
+            counter += 1
+            print(counter)
+            for match in json_file[1]:
+                if match["winner"] == 'radiant':
+                    if result_dict['dotafix.github'] != [] and match['dotafix.github'] != []:
+                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
+                                match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
+                                and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
+                                match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
+                                and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
+                                match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
+                            wins_looses['w_g'] += 1
+                    if result_dict['protracker_pos1'] != []:
+                        if float(match['protracker_pos1']) >= result_dict['protracker_pos1'] - pt and float(
+                                match['protracker_pos1']) <= result_dict['protracker_pos1'] + pt:
+                            wins_looses['w_pt'] += 1
+                elif match['winner'] == 'dire':
+                    if result_dict['dotafix.github'] != [] and match['dotafix.github'] != []:
+                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
+                                match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
+                                and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
+                                match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
+                                and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
+                                match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
+                            wins_looses['l_g'] += 1
+                    if result_dict['protracker_pos1'] != []:
+                        if float(match['protracker_pos1']) >= result_dict['protracker_pos1'] - pt and float(
+                                match['protracker_pos1']) <= result_dict['protracker_pos1'] + pt:
+                            wins_looses['l_pt'] += 1
+            flag = False
+            if (wins_looses['l_g'] + wins_looses['w_g'] < 20) and result_dict["dotafix.github"] != []:
+                g += 1
+                flag = True
+            if (wins_looses['l_pt'] + wins_looses['w_pt'] < 14) and result_dict["protracker_pos1"] != []:
+                pt += 0.1
+                flag = True
+            if flag:
+                for key in wins_looses:
+                    wins_looses[key] = 0
+        global_perc = []
+        if result_dict["dotafix.github"] != []:
+            github_percents = (wins_looses['w_g'] * 100 / (wins_looses['w_g'] + wins_looses['l_g']))
+            global_perc.append(github_percents)
+            print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_g']))
+        if result_dict["protracker_pos1"] != []:
+            dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
+            global_perc.append(dota2protracker1_percents)
+            print('Protracker_pos1: ' + str(dota2protracker1_percents) + '%' + '\n' + str(wins_looses['w_pt'] + wins_looses['l_pt']))
+        total = sum(global_perc) // len(global_perc)
+        send_message(result_dict)
+        send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
+live_matches()

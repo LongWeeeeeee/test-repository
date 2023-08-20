@@ -4,6 +4,8 @@
 #Отладка винрейта на старых матчах
 #Проверка того что все правильно работает
 #ранги неправильно работают
+#kda xpm gpm и прошлые встречи к сверке рангов
+
 
 from telebot import types
 from selenium.webdriver.chrome.options import Options
@@ -438,15 +440,15 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
         send_message(result_dict)
         send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
 live_matches()
-# @bot.message_handler(commands=['button'])
-# def button_message(message):
-#     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-#     item1 = types.KeyboardButton("Анализировать текущие матчи")
-#     markup.add(item1)
-#
-#
-# @bot.message_handler(content_types='text')
-# def message_reply(message):
-#     if message.text == "Анализировать текущие матчи":
-#         live_matches()
-# bot.infinity_polling()
+@bot.message_handler(commands=['button'])
+def button_message(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item1 = types.KeyboardButton("Анализировать текущие матчи")
+    markup.add(item1)
+
+
+@bot.message_handler(content_types='text')
+def message_reply(message):
+    if message.text == "Анализировать текущие матчи":
+        live_matches()
+bot.infinity_polling()
