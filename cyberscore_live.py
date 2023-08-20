@@ -225,10 +225,11 @@ def live_matches():
                                     radiant_values = 0
                                     dire_values = 0
                                     if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
-                                        for values in pos_rank.values():
-                                            if len(values) == 2:
-                                                radiant_values += int(values[0])
-                                                dire_values += int(values[1])
+                                        for values in ranks_dire.values():
+                                            dire_values += int(values)
+                                        for values in ranks_radiant.values():
+                                            radiant_values += int(values)
+
                                         diff = radiant_values - dire_values
                                         if diff > 0:
                                             send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
@@ -368,9 +369,9 @@ def live_matches():
                                             # if diff > 1 or diff < -1
                                             result_dict['pos1_vs_cores'] = diff
                                             #
-                                    ids.append(map_id)
-                                    f.seek(0)
-                                    json.dump(ids, f)
+                                    # ids.append(map_id)
+                                    # f.seek(0)
+                                    # json.dump(ids, f)
 
                                     if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
@@ -396,10 +397,10 @@ def live_matches():
                                         send_message(datan)
                                         send_message(matchups)
                                         send_message(result_dict)
-                        else:
-                            ids.append(map_id)
-                            f.seek(0)
-                            json.dump(ids, f)
+                        # else:
+                            # ids.append(map_id)
+                            # f.seek(0)
+                            # json.dump(ids, f)
         print('сплю')
         time.sleep(60)
     is_running = False
