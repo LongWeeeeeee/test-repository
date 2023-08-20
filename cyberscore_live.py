@@ -1,11 +1,9 @@
 # Структура приложения: Анализ пиков + анализ игроков + анализ команды
-#можно также попробовать собирать другую статистику такую как продолжительность матча и все такое
-#сверха прошлых матчей и прошлых встреч
-#Отладка винрейта на старых матчах
-#Проверка того что все правильно работает
-#ранги неправильно работают
-#kda xpm gpm и прошлые встречи к сверке рангов
-
+# можно также попробовать собирать другую статистику такую как продолжительность матча и все такое
+# сверха прошлых матчей и прошлых встреч
+# Отладка винрейта на старых матчах
+# Проверка того что все правильно работает
+# ранги неправильно работают
 
 from telebot import types
 from selenium.webdriver.chrome.options import Options
@@ -62,7 +60,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1,2,3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
                 map_id = match['id']
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
@@ -70,10 +68,12 @@ def live_matches():
                         ranks_radiant = {}
                         ranks_dire = {}
                         pos_rank = {}
-                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [], "pos1_vs_cores": []}
+                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [],
+                                       "pos1_vs_cores": []}
                         best_of = match['best_of']
                         score = match['best_of_score']
-                        matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [], 'radiant_pos2': [], 'radiant_pos3': []}
+                        matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [],
+                                    'radiant_pos2': [], 'radiant_pos3': []}
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
@@ -102,7 +102,7 @@ def live_matches():
 
                             pass
 
-                                #могу парсить ранг глобальный
+                            # могу парсить ранг глобальный
 
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                         match_data = requests.get(match_url).text
@@ -125,36 +125,57 @@ def live_matches():
                                         for q in range(5):
                                             try:
                                                 radiant_player = json_map['team_radiant']['players_items'][q]
-                                                if radiant_player['player']["game_name"].lower() == radiant_hero['player'][
-                                                    "game_name"].lower() and radiant_player['player']['role'] == 1:
+                                                if radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == 1:
                                                     matchups['radiant_pos1'] = radiant_hero['hero']['label']
                                                     for guy in ranks_radiant:
                                                         if guy == radiant_player['player']["game_name"].lower():
-                                                            pos_rank[1] = [ranks_radiant[guy]]
-                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
-                                                    "game_name"].lower() and radiant_player['player']['role'] == 2:
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[1] = [ranks_radiant[guy]]
+
+                                                elif radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == 2:
                                                     matchups['radiant_pos2'] = radiant_hero['hero']['label']
                                                     for guy in ranks_radiant:
                                                         if guy == radiant_player['player']["game_name"].lower():
-                                                            pos_rank[2] = [ranks_radiant[guy]]
-                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
-                                                    "game_name"].lower() and radiant_player['player']['role'] == 3:
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[2] = [ranks_radiant[guy]]
+
+                                                elif radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == 3:
                                                     matchups['radiant_pos3'] = radiant_hero['hero']['label']
                                                     for guy in ranks_radiant:
                                                         if guy == radiant_player['player']["game_name"].lower():
-                                                            pos_rank[3] = [ranks_radiant[guy]]
-                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
-                                                    "game_name"].lower() and radiant_player['player']['role'] == 4:
-                                                    for guy in ranks_radiant:
-                                                        if guy == radiant_player['player']["game_name"].lower():
-                                                            pos_rank[4] = [ranks_radiant[guy]]
-                                                elif radiant_player['player']["game_name"].lower() == radiant_hero['player'][
-                                                    "game_name"].lower() and radiant_player['player']['role'] == 5:
-                                                    for guy in ranks_radiant:
-                                                        if guy == radiant_player['player']["game_name"].lower():
-                                                            pos_rank[5] = [ranks_radiant[guy]]
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[3] = [ranks_radiant[guy]]
 
-                                            except: pass
+                                                elif radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == 4:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[4] = [ranks_radiant[guy]]
+
+                                                elif radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == 5:
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[5] = [ranks_radiant[guy]]
+
+
+                                            except:
+                                                pass
 
                                         radiant_hero_names.append(radiant_hero['hero']['label'])
                                         radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
@@ -200,7 +221,8 @@ def live_matches():
                                                         if guy == dire_player['player']["game_name"].lower():
                                                             if 5 in pos_rank:
                                                                 pos_rank[5].append(ranks_dire[guy])
-                                            except: pass
+                                            except:
+                                                pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
                                     radiant_values = 0
@@ -208,13 +230,15 @@ def live_matches():
                                     if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
                                         for values in pos_rank.values():
                                             if len(values) == 2:
-                                                radiant_values+= int(values[0])
+                                                radiant_values += int(values[0])
                                                 dire_values += int(values[1])
                                         diff = radiant_values - dire_values
                                         if diff > 0:
-                                            send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
+                                            send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                                radiant_values - dire_values))
                                         elif diff < 0:
-                                            send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(radiant_values- dire_values))
+                                            send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                                radiant_values - dire_values))
                                     title = json_map['title']
                                     radiant_team_name = \
                                         json_map['team_radiant']['name']
@@ -222,8 +246,10 @@ def live_matches():
                                         'name']
                                     map_winner = json_map['winner']
                                     result_dict['winner'] = map_winner
-                                    send_message('ТУРНИК ТИР ' + str(match['tournament']['tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(best_of) + '\n' + 'Текущий счет: ' + str(
-                                            score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                    send_message('ТУРНИК ТИР ' + str(
+                                        match['tournament']['tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                        best_of) + '\n' + 'Текущий счет: ' + str(
+                                        score) + '\n' + 'Вероятность победы ' + radiant_team_name)
 
                                     options = Options()
                                     options.add_argument("--start-maximized")
@@ -307,7 +333,8 @@ def live_matches():
 
                                             except:
                                                 pass
-                                        if [] not in [matchups['dire_pos2'], matchups['dire_pos3'], matchups['radiant_pos2'], matchups['radiant_pos3']]:
+                                        if [] not in [matchups['dire_pos2'], matchups['dire_pos3'],
+                                                      matchups['radiant_pos2'], matchups['radiant_pos3']]:
                                             radiant_1 = matchups['radiant_pos1'].replace(' ', '%20')
                                             dire_1 = matchups['dire_pos1'].replace(' ', '%20')
                                             url_dota2_protracker = f'https://www.dota2protracker.com/hero/{dire_1}'
@@ -341,7 +368,7 @@ def live_matches():
                                             diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
                                             # if diff > 1 or diff < -1
                                             result_dict['pos1_vs_cores'] = diff
-                                                #
+                                            #
                                     ids.append(map_id)
                                     f.seek(0)
                                     json.dump(ids, f)
@@ -351,12 +378,14 @@ def live_matches():
                                         if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 54 and \
                                                 result_dict["dotafix.github"][2] > 54 \
-                                                and result_dict['protracker_pos1'] > 53 and result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                                and result_dict['protracker_pos1'] > 53 and result_dict[
+                                            'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
                                             send_message('Победитель: ' + radiant_team_name)
                                         elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
                                             1] < 46 and \
                                                 result_dict["dotafix.github"][2] < 46 \
-                                                and result_dict['protracker_pos1'] < 47 and result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                                and result_dict['protracker_pos1'] < 47 and result_dict[
+                                            'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
                                             send_message('Победитель: ' + dire_team_name)
                                     elif result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
                                         send_message('Недостаточно материала')
@@ -372,6 +401,8 @@ def live_matches():
         time.sleep(60)
     is_running = False
     print("Работа завершена")
+
+
 def analyze_results(result_dict, dire_team_name, radiant_team_name):
     g = 0
     p = 0
@@ -435,7 +466,8 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
         if result_dict["protracker_pos1"] != []:
             dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
             global_perc.append(dota2protracker1_percents)
-            print('Protracker_pos1: ' + str(dota2protracker1_percents) + '%' + '\n' + str(wins_looses['w_pt'] + wins_looses['l_pt']))
+            print('Protracker_pos1: ' + str(dota2protracker1_percents) + '%' + '\n' + str(
+                wins_looses['w_pt'] + wins_looses['l_pt']))
         total = sum(global_perc) // len(global_perc)
         send_message(result_dict)
         send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
