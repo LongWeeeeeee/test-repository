@@ -65,7 +65,7 @@ def live_matches():
                 with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
                     if map_id not in ids:
-                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": []}
+                        result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [], "pos1_vs_team": [], "pos1_vs_cores": []}
                         best_of = match['best_of']
                         score = match['best_of_score']
                         matchups = {'dire_pos1': [], 'dire_pos3': [], 'dire_pos2': [], 'radiant_pos1': [], 'radiant_pos2': [], 'radiant_pos3': []}
