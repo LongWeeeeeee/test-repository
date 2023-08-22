@@ -364,7 +364,7 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
-
+                                send_message(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
 
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
@@ -388,8 +388,7 @@ def live_matches():
                                     elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                         1] < 50 and \
                                             result_dict["dotafix.github"][2] < 50 \
-                                            and result_dict['protracker_pos1'] < 50 and result_dict[
-                                        'pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                            and result_dict['protracker_pos1'] < 50:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
