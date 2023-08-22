@@ -364,6 +364,7 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
+                                print(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                         1] > 50 and \
