@@ -243,13 +243,6 @@ def live_matches():
                                     'name']
                                 map_winner = json_map['winner']
                                 result_dict['winner'] = map_winner
-                                if 'ESportsBattle' not in json_map['tournament']['name']:
-                                    send_message('ТУРНИК ТИР ' + str(
-                                        match['tournament'][
-                                            'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                        best_of) + '\n' + 'Текущий счет: ' + str(
-                                        score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-
                                 options = Options()
                                 options.add_argument("--start-maximized")
                                 options.add_argument("--no-sandbox")
@@ -373,30 +366,43 @@ def live_matches():
                                 json.dump(ids, f)
 
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
-                                    analyze_results(result_dict, dire_team_name, radiant_team_name)
-                                    if result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
-                                        1] > 54 and \
-                                            result_dict["dotafix.github"][2] > 54 \
-                                            and result_dict['protracker_pos1'] > 53 and result_dict[
-                                        'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
-                                        send_message('Победитель: ' + radiant_team_name)
-                                    elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
-                                        1] < 46 and \
-                                            result_dict["dotafix.github"][2] < 46 \
-                                            and result_dict['protracker_pos1'] < 47 and result_dict[
-                                        'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
-                                        send_message('Победитель: ' + dire_team_name)
-                                elif 'ESportsBattle' not in json_map['tournament']['name']:
-                                    if result_dict["dotafix.github"] != [] or result_dict['protracker_pos1'] != []:
-                                        send_message('Недостаточно материала')
-                                        send_message(datan)
-                                        send_message(matchups)
+
+                                    if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                        1] > 50 and \
+                                            result_dict["dotafix.github"][2] > 50 \
+                                            and result_dict['protracker_pos1'] > 50 and result_dict[
+                                        'pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                        send_message('ТУРНИК ТИР ' + str(
+                                            match['tournament'][
+                                                'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                            best_of) + '\n' + 'Текущий счет: ' + str(
+                                            score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         analyze_results(result_dict, dire_team_name, radiant_team_name)
-                                    else:
-                                        send_message('Недостаточно материала')
-                                        send_message(datan)
-                                        send_message(matchups)
-                                        send_message(result_dict)
+                                        send_message('Пик лучше у ' + radiant_team_name)
+                                        if result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
+                                            1] > 54 and \
+                                                result_dict["dotafix.github"][2] > 54 \
+                                                and result_dict['protracker_pos1'] > 53 and result_dict[
+                                            'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                            send_message('Победитель: ' + radiant_team_name)
+                                    elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
+                                        1] < 50 and \
+                                            result_dict["dotafix.github"][2] < 50 \
+                                            and result_dict['protracker_pos1'] < 50 and result_dict[
+                                        'pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                        send_message('ТУРНИК ТИР ' + str(
+                                            match['tournament'][
+                                                'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                            best_of) + '\n' + 'Текущий счет: ' + str(
+                                            score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                        analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        send_message('Пик лучше у  ' + dire_team_name)
+                                        if result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
+                                            1] < 46 and \
+                                             result_dict["dotafix.github"][2] < 46 \
+                                             and result_dict['protracker_pos1'] < 47 and result_dict[
+                                                 'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                            send_message('Победитель: ' + dire_team_name)
         print('сплю')
         time.sleep(60)
     is_running = False
