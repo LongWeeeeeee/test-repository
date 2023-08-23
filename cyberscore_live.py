@@ -369,7 +369,7 @@ def live_matches():
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                         1] > 50 and \
                                             result_dict["dotafix.github"][2] > 50 \
-                                            and result_dict['protracker_pos1'] > 50:
+                                            and result_dict['protracker_pos1'] >= 50:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
@@ -394,7 +394,7 @@ def live_matches():
                                     if result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                         1] < 50 and \
                                             result_dict["dotafix.github"][2] < 50 \
-                                            and result_dict['protracker_pos1'] < 50:
+                                            and result_dict['protracker_pos1'] <= 50:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
