@@ -4,7 +4,7 @@
 # Отладка винрейта на старых матчах
 # Проверка того что все правильно работает
 # ранги неправильно работают
-
+import sys, os
 from telebot import types
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
@@ -62,7 +62,13 @@ def live_matches():
         for match in json_data['rows']:
             if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
                 map_id = match['id']
-                with open('map_id_check.txt', 'r+') as f:
+                exe_path = os.path.dirname(sys.executable)
+
+                # Объединяем путь к исполняемому файлу с относительным путем к файлу
+                file_path = os.path.join(exe_path, 'map_id_check.txt')
+
+                with open(file_path, 'r+') as f:
+                # with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
                     if map_id not in ids:
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
@@ -254,7 +260,7 @@ def live_matches():
                                 url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 # send_message(url_dotafix)
                                 driver.get(url_dotafix)
-                                time.sleep(5)
+                                time.sleep(10)
                                 try:
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
@@ -274,7 +280,7 @@ def live_matches():
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
                                     select.select_by_index(9)
-                                    time.sleep(5)
+                                    time.sleep(10)
                                     aler_window = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable(
                                             (By.XPATH, "//*[contains(text(), 'content_copy')]")))
@@ -283,6 +289,37 @@ def live_matches():
                                     alert_text = alert.text
                                     alert.accept()
                                 datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                if datan[1] == datan[2] and datan[2] == datan[3]:
+                                    driver.get(url_dotafix)
+                                    time.sleep(10)
+                                    try:
+                                        element = WebDriverWait(driver, 40).until(
+                                            EC.element_to_be_clickable((By.ID, 'rankData')))
+                                        select = Select(element)
+                                        select.select_by_index(9)
+                                        time.sleep(5)
+                                        aler_window = WebDriverWait(driver, 40).until(EC.element_to_be_clickable(
+                                            (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        # time.sleep(5)
+                                        aler_window.click()
+                                        alert = Alert(driver)
+                                        alert_text = alert.text
+                                        alert.accept()
+                                    except:
+                                        driver.refresh()
+                                        element = WebDriverWait(driver, 40).until(
+                                            EC.element_to_be_clickable((By.ID, 'rankData')))
+                                        select = Select(element)
+                                        select.select_by_index(9)
+                                        time.sleep(10)
+                                        aler_window = WebDriverWait(driver, 40).until(
+                                            EC.element_to_be_clickable(
+                                                (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        aler_window.click()
+                                        alert = Alert(driver)
+                                        alert_text = alert.text
+                                        alert.accept()
+                                    datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
                                 if len(datan) != 3:
                                     print(url_dotafix)
                                 else:
@@ -352,6 +389,7 @@ def live_matches():
                                                     dire_pos1_vs_cores += int(float(against_wr))
                                             except:
                                                 pass
+
                                         # pos1 vs team
                                         diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
                                         # if diff > 3 or diff < -3:
@@ -364,12 +402,14 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
+                                print('ТУРНИК ТИР ' + str(match['tournament'][
+                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                    best_of) + '\n' + 'Текущий счет: ' + str(
+                                    score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                 print(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
-                                        1] > 50 and \
-                                            result_dict["dotafix.github"][2] > 50 \
-                                            and result_dict['protracker_pos1'] >= 50:
+                                        1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] >= 50:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
@@ -393,8 +433,7 @@ def live_matches():
 
                                     if result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                         1] < 50 and \
-                                            result_dict["dotafix.github"][2] < 50 \
-                                            and result_dict['protracker_pos1'] <= 50:
+                                            result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] <= 50:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
@@ -434,7 +473,13 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
     wins_looses = {"w_g": 0, "l_g": 0, "w_p": 0, "l_p": 0, "w_t": 0, "l_t": 0, "w_pt": 0, "l_pt": 0, "w_pt2": 0,
                    "l_pt2": 0, "w_pt3": 0, "l_pt3": 0}
     counter = 0
-    with open('protrackers.json', 'r') as f:
+    exe_path = os.path.dirname(sys.executable)
+
+    # Объединяем путь к исполняемому файлу с относительным путем к файлу
+    file_path = os.path.join(exe_path, 'protrackers.json')
+
+    with open(file_path, 'r') as f:
+    # with open('protrackers.json', 'r') as f:
         json_file = json.load(f)  # 912
         while flag:
             counter += 1
