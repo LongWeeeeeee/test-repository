@@ -62,13 +62,13 @@ def live_matches():
         for match in json_data['rows']:
             if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
                 map_id = match['id']
-                exe_path = os.path.dirname(sys.executable)
-
-                # Объединяем путь к исполняемому файлу с относительным путем к файлу
-                file_path = os.path.join(exe_path, 'map_id_check.txt')
-
-                with open(file_path, 'r+') as f:
-                # with open('map_id_check.txt', 'r+') as f:
+                # exe_path = os.path.dirname(sys.executable)
+                #
+                # # Объединяем путь к исполняемому файлу с относительным путем к файлу
+                # file_path = os.path.join(exe_path, 'map_id_check.txt')
+                #
+                # with open(file_path, 'r+') as f:
+                with open('map_id_check.txt', 'r+') as f:
                     ids = json.load(f)
                     if map_id not in ids:
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
@@ -473,13 +473,13 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
     wins_looses = {"w_g": 0, "l_g": 0, "w_p": 0, "l_p": 0, "w_t": 0, "l_t": 0, "w_pt": 0, "l_pt": 0, "w_pt2": 0,
                    "l_pt2": 0, "w_pt3": 0, "l_pt3": 0}
     counter = 0
-    exe_path = os.path.dirname(sys.executable)
-
-    # Объединяем путь к исполняемому файлу с относительным путем к файлу
-    file_path = os.path.join(exe_path, 'protrackers.json')
-
-    with open(file_path, 'r') as f:
-    # with open('protrackers.json', 'r') as f:
+    # exe_path = os.path.dirname(sys.executable)
+    #
+    # # Объединяем путь к исполняемому файлу с относительным путем к файлу
+    # file_path = os.path.join(exe_path, 'protrackers.json')
+    #
+    # with open(file_path, 'r') as f:
+    with open('protrackers.json', 'r') as f:
         json_file = json.load(f)  # 912
         while flag:
             counter += 1
