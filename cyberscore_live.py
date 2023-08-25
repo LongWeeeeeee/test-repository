@@ -227,7 +227,6 @@ def live_matches():
                                             pass
                                     dire_hero_names.append(dire_hero['hero']['label'])
                                     dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                if matchups
                                 radiant_values = 0
                                 dire_values = 0
                                 # if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
