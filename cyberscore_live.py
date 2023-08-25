@@ -20,7 +20,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import threading
-
+bad_heroes = {'Monkey King':114, "Nature's Prophet":53, 'Lina':25, 'Bristleback':99, 'Necrophos':36}
 # Флаг состояния выполнения функции
 is_running = False
 
@@ -227,6 +227,7 @@ def live_matches():
                                             pass
                                     dire_hero_names.append(dire_hero['hero']['label'])
                                     dire_hero_ids.append(dire_hero['hero']['id_steam'])
+                                if matchups
                                 radiant_values = 0
                                 dire_values = 0
                                 # if len(ranks_dire) != 0 and len(ranks_radiant) != 0:
@@ -329,7 +330,7 @@ def live_matches():
                                     result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                 driver.quit()
                                 # protracker
-                                if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != []:
+                                if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != [] and matchups['radiant_pos1'] not in bad_heroes and matchups['dire_pos1'] not in bad_heroes:
                                     radiant_pos1_vs_team = 0
                                     dire_pos1_vs_team = 0
                                     radiant_pos1_vs_cores = 0
