@@ -277,11 +277,11 @@ def live_matches():
                                     alert.accept()
                                 except:
                                     driver.refresh()
+                                    time.sleep(10)
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
                                     select.select_by_index(9)
-                                    time.sleep(10)
                                     aler_window = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable(
                                             (By.XPATH, "//*[contains(text(), 'content_copy')]")))
