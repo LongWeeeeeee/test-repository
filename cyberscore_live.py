@@ -89,28 +89,28 @@ def live_matches():
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
-                        # ranks
-                        dltv = requests.get('https://dltv.org/matches').text
-                        soup = BeautifulSoup(dltv, 'lxml')
-                        dltv = soup.find_all('div', class_='live__matches-item')
-                        for match_dltv in dltv:
-                            id = match_dltv.get('data-series-id')
-                            map = requests.get(f'https://dltv.org/matches/{id}').text
-                            map_soup = BeautifulSoup(map, 'lxml')
-                            teams = map_soup.find_all('div', class_='lineups__team')
-                            for team in teams:
-                                name_and_rank = team.find('span', class_='lineups__team-title__name')
-                                name = name_and_rank.contents[1].text
-                                if name == radiant_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
-                                elif name == dire_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
+                        # # ranks
+                        # dltv = requests.get('https://dltv.org/matches').text
+                        # soup = BeautifulSoup(dltv, 'lxml')
+                        # dltv = soup.find_all('div', class_='live__matches-item')
+                        # for match_dltv in dltv:
+                        #     id = match_dltv.get('data-series-id')
+                        #     map = requests.get(f'https://dltv.org/matches/{id}').text
+                        #     map_soup = BeautifulSoup(map, 'lxml')
+                        #     teams = map_soup.find_all('div', class_='lineups__team')
+                        #     for team in teams:
+                        #         name_and_rank = team.find('span', class_='lineups__team-title__name')
+                        #         name = name_and_rank.contents[1].text
+                        #         if name == radiant_team_name:
+                        #             ranks = team.find_all('div', class_='rank')
+                        #             players = team.find_all('div', class_='player__name-name')
+                        #             for q in range(len(players)):
+                        #                 ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
+                        #         elif name == dire_team_name:
+                        #             ranks = team.find_all('div', class_='rank')
+                        #             players = team.find_all('div', class_='player__name-name')
+                        #             for q in range(len(players)):
+                        #                 ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
                             # могу парсить ранг глобальный
                         radiant_pick = json_map['picks_team_radiant']
                         dire_pick = json_map['picks_team_dire']
@@ -410,7 +410,8 @@ def live_matches():
                                 print(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
-                                        1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] >= 50:
+                                        1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] >= 50 \
+                                            and result_dict['pos1_vs_team'] >= 0 and result_dict['pos1_vs_cores'] >= 0:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
@@ -434,7 +435,8 @@ def live_matches():
 
                                     if result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                         1] < 50 and \
-                                            result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] <= 50:
+                                            result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] <= 50 \
+                                            and result_dict['pos1_vs_team'] <= 0 and result_dict['pos1_vs_cores'] <= 0:
                                         send_message('ТУРНИК ТИР ' + str(
                                             match['tournament'][
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
