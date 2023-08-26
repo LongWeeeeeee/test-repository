@@ -21,7 +21,7 @@ from bs4 import BeautifulSoup
 import json
 import threading
 # bad_heroes = {'Monkey King':114, "Nature's Prophet":53, 'Lina':25, 'Bristleback':99, 'Necrophos':36, 'Gyrocopter':72, 'Lycan':77, 'Templar Assasin':46, 'Riki':32, 'Meepo':82, }
-good_heroes = {'Phantom Assasin', 'Faceless Void', 'Slark', 'Sven', 'Terrorblade', 'Naga Siren', 'Morphling', 'Bloodseeker', 'Drow Ranger', 'Troll Warlord', 'Ursa', 'Phantom Lancer', 'Wraith King', 'Spectre', 'Juggernaut', 'Luna', 'Anti-Mage', 'Muerta', 'Chaos Knight', 'Medusa', 'Lifestealer'}
+good_heroes = {'Phantom Assassin', 'Faceless Void', 'Slark', 'Sven', 'Terrorblade', 'Naga Siren', 'Morphling', 'Bloodseeker', 'Drow Ranger', 'Troll Warlord', 'Ursa', 'Phantom Lancer', 'Wraith King', 'Spectre', 'Juggernaut', 'Luna', 'Anti-Mage', 'Muerta', 'Chaos Knight', 'Medusa', 'Lifestealer'}
 # Флаг состояния выполнения функции
 is_running = False
 
@@ -61,8 +61,8 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name'] and 'IESF' not in match['tournament']['name']:
+            # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
                 map_id = match['id']
                 # exe_path = os.path.dirname(sys.executable)
                 #
