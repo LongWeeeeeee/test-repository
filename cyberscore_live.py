@@ -20,7 +20,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import threading
-bad_heroes = {'Monkey King':114, "Nature's Prophet":53, 'Lina':25, 'Bristleback':99, 'Necrophos':36}
+# bad_heroes = {'Monkey King':114, "Nature's Prophet":53, 'Lina':25, 'Bristleback':99, 'Necrophos':36, 'Gyrocopter':72, 'Lycan':77, 'Templar Assasin':46, 'Riki':32, 'Meepo':82, }
+good_heroes = {'Phantom Assasin', 'Faceless Void', 'Slark', 'Sven', 'Terrorblade', 'Naga Siren', 'Morphling', 'Bloodseeker', 'Drow Ranger', 'Troll Warlord', 'Ursa', 'Phantom Lancer', 'Wraith King', 'Spectre', 'Juggernaut', 'Luna', 'Anti-Mage', 'Muerta', 'Chaos Knight', 'Medusa', 'Lifestealer'}
 # Флаг состояния выполнения функции
 is_running = False
 
@@ -60,6 +61,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
+            # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
             if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3}:
                 map_id = match['id']
                 # exe_path = os.path.dirname(sys.executable)
@@ -260,16 +262,14 @@ def live_matches():
                                 url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 # send_message(url_dotafix)
                                 driver.get(url_dotafix)
-                                time.sleep(10)
                                 try:
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
                                     select.select_by_index(9)
-                                    driver.refresh()
                                     time.sleep(10)
                                     aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                        (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        (By.XPATH, '//mat-icon[text()="content_copy"]')))
                                     # time.sleep(5)
                                     aler_window.click()
                                     alert = Alert(driver)
@@ -277,60 +277,55 @@ def live_matches():
                                     alert.accept()
                                 except:
                                     driver.refresh()
-                                    time.sleep(10)
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
                                     select.select_by_index(9)
-                                    aler_window = WebDriverWait(driver, 30).until(
-                                        EC.element_to_be_clickable(
-                                            (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                    time.sleep(10)
+                                    aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                        (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                    # time.sleep(5)
                                     aler_window.click()
                                     alert = Alert(driver)
                                     alert_text = alert.text
                                     alert.accept()
                                 datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
                                 if datan[1] == datan[2] and datan[2] == datan[3]:
-                                    driver.get(url_dotafix)
-                                    time.sleep(10)
                                     try:
-                                        element = WebDriverWait(driver, 40).until(
+                                        driver.refresh()
+                                        element = WebDriverWait(driver, 30).until(
                                             EC.element_to_be_clickable((By.ID, 'rankData')))
                                         select = Select(element)
                                         select.select_by_index(9)
-                                        time.sleep(5)
-                                        aler_window = WebDriverWait(driver, 40).until(EC.element_to_be_clickable(
-                                            (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        time.sleep(10)
+                                        aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                            (By.XPATH, '//mat-icon[text()="content_copy"]')))
                                         # time.sleep(5)
                                         aler_window.click()
                                         alert = Alert(driver)
                                         alert_text = alert.text
                                         alert.accept()
                                     except:
-                                        driver.refresh()
-                                        element = WebDriverWait(driver, 40).until(
+                                        element = WebDriverWait(driver, 30).until(
                                             EC.element_to_be_clickable((By.ID, 'rankData')))
                                         select = Select(element)
                                         select.select_by_index(9)
                                         time.sleep(10)
-                                        aler_window = WebDriverWait(driver, 40).until(
-                                            EC.element_to_be_clickable(
-                                                (By.XPATH, "//*[contains(text(), 'content_copy')]")))
+                                        aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                            (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                        # time.sleep(5)
                                         aler_window.click()
                                         alert = Alert(driver)
                                         alert_text = alert.text
                                         alert.accept()
                                     datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
-                                if len(datan) != 3:
-                                    print(url_dotafix)
-                                else:
-                                    datan = [float(datan_element) for datan_element in datan]
-                                    # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
-                                    #         datan[1] >= 54 or datan[0] <= 46):
-                                    result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                datan = [float(datan_element) for datan_element in datan]
+                                # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                #         datan[1] >= 54 or datan[0] <= 46):
+                                result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                 driver.quit()
                                 # protracker
-                                if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != [] and matchups['radiant_pos1'] not in bad_heroes and matchups['dire_pos1'] not in bad_heroes:
+                                if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != [] and matchups['radiant_pos1'] in good_heroes and matchups['dire_pos1'] in good_heroes:
                                     radiant_pos1_vs_team = 0
                                     dire_pos1_vs_team = 0
                                     radiant_pos1_vs_cores = 0
@@ -403,11 +398,11 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
-                                print('ТУРНИК ТИР ' + str(match['tournament'][
+                                send_message('ТУРНИК ТИР ' + str(match['tournament'][
                                         'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                     best_of) + '\n' + 'Текущий счет: ' + str(
                                     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                print(result_dict)
+                                send_message(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                         1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] >= 50 \
