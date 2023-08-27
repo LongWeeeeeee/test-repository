@@ -411,7 +411,7 @@ def live_matches():
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                        analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         send_message('Пик лучше у ' + radiant_team_name)
                                     if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
                                         if result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
@@ -424,7 +424,7 @@ def live_matches():
                                                     'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                                 best_of) + '\n' + 'Текущий счет: ' + str(
                                                 score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                            analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                            # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                             send_message('Победитель: ' + radiant_team_name)
 
                                     if result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
@@ -435,7 +435,7 @@ def live_matches():
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                        analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         send_message('Пик лучше у ' + dire_team_name)
                                     if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
                                         if result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
@@ -448,7 +448,7 @@ def live_matches():
                                                     'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                                 best_of) + '\n' + 'Текущий счет: ' + str(
                                                 score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                            analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                            # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                             send_message('Победитель: ' + dire_team_name)
         print('сплю')
         time.sleep(60)
@@ -531,16 +531,16 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
         send_message(result_dict)
         send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
 
-# live_matches()
-@bot.message_handler(commands=['button'])
-def button_message(message):
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Анализировать текущие матчи")
-    markup.add(item1)
-
-
-@bot.message_handler(content_types='text')
-def message_reply(message):
-    if message.text == "Анализировать текущие матчи":
-        live_matches()
-bot.infinity_polling(none_stop=True, timeout=123)
+live_matches()
+# @bot.message_handler(commands=['button'])
+# def button_message(message):
+#     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+#     item1 = types.KeyboardButton("Анализировать текущие матчи")
+#     markup.add(item1)
+#
+#
+# @bot.message_handler(content_types='text')
+# def message_reply(message):
+#     if message.text == "Анализировать текущие матчи":
+#         live_matches()
+# bot.infinity_polling(none_stop=True, timeout=123)
