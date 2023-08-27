@@ -543,4 +543,4 @@ live_matches()
 # def message_reply(message):
 #     if message.text == "Анализировать текущие матчи":
 #         live_matches()
-# bot.infinity_polling()
+bot.infinity_polling(none_stop=True, timeout=123)
