@@ -531,7 +531,7 @@ def analyze_results(result_dict, dire_team_name, radiant_team_name):
         send_message(result_dict)
         send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
 
-live_matches()
+# live_matches()
 @bot.message_handler(commands=['button'])
 def button_message(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
