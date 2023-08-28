@@ -61,7 +61,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name'] and 'IESF' not in match['tournament']['name']:
+            if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
             # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4}:
                 map_id = match['id']
                 # exe_path = os.path.dirname(sys.executable)
@@ -290,39 +290,41 @@ def live_matches():
                                     alert_text = alert.text
                                     alert.accept()
                                 datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
-                                if datan[1] == datan[2] and datan[2] == datan[3]:
-                                    try:
-                                        driver.refresh()
-                                        element = WebDriverWait(driver, 30).until(
-                                            EC.element_to_be_clickable((By.ID, 'rankData')))
-                                        select = Select(element)
-                                        select.select_by_index(9)
-                                        time.sleep(10)
-                                        aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                            (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                        # time.sleep(5)
-                                        aler_window.click()
-                                        alert = Alert(driver)
-                                        alert_text = alert.text
-                                        alert.accept()
-                                    except:
-                                        element = WebDriverWait(driver, 30).until(
-                                            EC.element_to_be_clickable((By.ID, 'rankData')))
-                                        select = Select(element)
-                                        select.select_by_index(9)
-                                        time.sleep(10)
-                                        aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                            (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                        # time.sleep(5)
-                                        aler_window.click()
-                                        alert = Alert(driver)
-                                        alert_text = alert.text
-                                        alert.accept()
-                                    datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
-                                datan = [float(datan_element) for datan_element in datan]
-                                # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
-                                #         datan[1] >= 54 or datan[0] <= 46):
-                                result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                if len(datan) == 3:
+                                    if datan[0] == datan[1] and datan[1] == datan[2]:
+                                        try:
+                                            driver.refresh()
+                                            element = WebDriverWait(driver, 30).until(
+                                                EC.element_to_be_clickable((By.ID, 'rankData')))
+                                            select = Select(element)
+                                            select.select_by_index(9)
+                                            time.sleep(10)
+                                            aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                                (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                            # time.sleep(5)
+                                            aler_window.click()
+                                            alert = Alert(driver)
+                                            alert_text = alert.text
+                                            alert.accept()
+                                        except:
+                                            element = WebDriverWait(driver, 30).until(
+                                                EC.element_to_be_clickable((By.ID, 'rankData')))
+                                            select = Select(element)
+                                            select.select_by_index(9)
+                                            time.sleep(10)
+                                            aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                                (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                            # time.sleep(5)
+                                            aler_window.click()
+                                            alert = Alert(driver)
+                                            alert_text = alert.text
+                                            alert.accept()
+                                        datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                    else:
+                                        datan = [float(datan_element) for datan_element in datan]
+                                        # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                        #         datan[1] >= 54 or datan[0] <= 46):
+                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                 driver.quit()
                                 # protracker
                                 if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != [] and matchups['radiant_pos1'] in good_heroes and matchups['dire_pos1'] in good_heroes:
@@ -398,10 +400,6 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
-                                # send_message('ТУРНИК ТИР ' + str(match['tournament'][
-                                #         'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                #     best_of) + '\n' + 'Текущий счет: ' + str(
-                                #     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                 # send_message(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
@@ -452,11 +450,19 @@ def live_matches():
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 send_message('Победитель: ' + dire_team_name)
                                     else:
-                                        send_message('Ставка неудачная')
-                                        send_message(result_dict)
+                                        print('ТУРНИК ТИР ' + str(match['tournament'][
+                                                                             'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                            best_of) + '\n' + 'Текущий счет: ' + str(
+                                            score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                        print('Ставка неудачная')
+                                        print(result_dict)
                                 else:
-                                    send_message('Ставка неудачная')
-                                    send_message(result_dict)
+                                    print('ТУРНИК ТИР ' + str(match['tournament'][
+                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                    best_of) + '\n' + 'Текущий счет: ' + str(
+                                    score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                    print('Ставка неудачная')
+                                    print(result_dict)
         print('сплю')
         time.sleep(60)
     is_running = False
