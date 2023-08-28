@@ -262,7 +262,7 @@ def live_matches():
                                 url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 # send_message(url_dotafix)
                                 driver.get(url_dotafix)
-                                try:
+                                def dotafix():
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
@@ -275,52 +275,41 @@ def live_matches():
                                     alert = Alert(driver)
                                     alert_text = alert.text
                                     alert.accept()
+                                    return(alert_text)
+                                try:
+                                    alert_text = dotafix()
                                 except:
                                     driver.refresh()
-                                    element = WebDriverWait(driver, 30).until(
-                                        EC.element_to_be_clickable((By.ID, 'rankData')))
-                                    select = Select(element)
-                                    select.select_by_index(9)
-                                    time.sleep(10)
-                                    aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                        (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                    # time.sleep(5)
-                                    aler_window.click()
-                                    alert = Alert(driver)
-                                    alert_text = alert.text
-                                    alert.accept()
+                                    time.sleep(5)
+                                    alert_text = dotafix()
                                 datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
                                 if len(datan) == 3:
                                     if datan[0] == datan[1] and datan[1] == datan[2]:
                                         try:
-                                            driver.refresh()
-                                            element = WebDriverWait(driver, 30).until(
-                                                EC.element_to_be_clickable((By.ID, 'rankData')))
-                                            select = Select(element)
-                                            select.select_by_index(9)
-                                            time.sleep(10)
-                                            aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                                (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                            # time.sleep(5)
-                                            aler_window.click()
-                                            alert = Alert(driver)
-                                            alert_text = alert.text
-                                            alert.accept()
+                                            alert_text = dotafix()
                                         except:
-                                            element = WebDriverWait(driver, 30).until(
-                                                EC.element_to_be_clickable((By.ID, 'rankData')))
-                                            select = Select(element)
-                                            select.select_by_index(9)
-                                            time.sleep(10)
-                                            aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
-                                                (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                            # time.sleep(5)
-                                            aler_window.click()
-                                            alert = Alert(driver)
-                                            alert_text = alert.text
-                                            alert.accept()
-                                        datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                            driver.refresh()
+                                            time.sleep(5)
+                                            alert_text = dotafix()
                                     else:
+                                        datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                        datan = [float(datan_element) for datan_element in datan]
+                                        # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                        #         datan[1] >= 54 or datan[0] <= 46):
+                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                else:
+                                    try:
+                                        alert_text = dotafix()
+                                        datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                        datan = [float(datan_element) for datan_element in datan]
+                                        # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
+                                        #         datan[1] >= 54 or datan[0] <= 46):
+                                        result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
+                                    except:
+                                        driver.refresh()
+                                        time.sleep(5)
+                                        alert_text = dotafix()
+                                        datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
                                         datan = [float(datan_element) for datan_element in datan]
                                         # if (datan[0] >= 54 or datan[0] <= 46) and (datan[1] >= 54 or datan[1] <= 46) and (
                                         #         datan[1] >= 54 or datan[0] <= 46):
