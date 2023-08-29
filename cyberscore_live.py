@@ -431,9 +431,8 @@ def live_matches():
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         for key in final_time:
                                             if key <=60:
-                                                if final_time[key] >= 2:
-                                                    send_message('На ' + str(key) + ' минуте ' + 'команда ' + radiant_team_name + ' сильнее на ' + str(
-                                                        int(final_time[key])) + '%')
+                                                if final_time[key] <= 0:
+                                                    send_message('На ' + str(key) + ' моно ставить ' + str(int(final_time[key])*-1) + '%')
                                         if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
                                             for values in ranks_dire.values():
                                                 dire_values += int(values)
@@ -469,10 +468,8 @@ def live_matches():
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         for key in final_time:
                                             if key <=60:
-                                                if final_time[key] <= -2:
-                                                    send_message('На ' + str(
-                                                        key) + ' минуте ' + 'команда ' + dire_team_name + ' сильнее на ' + str(
-                                                        int(final_time[key])*-1) + '%')
+                                                if final_time[key] >= 0:
+                                                    send_message('На ' + str(key) + ' минуте можно ставить ' + str(int(final_time[key])*-1) + '%')
                                         if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
                                             for values in ranks_dire.values():
                                                 dire_values += int(values)
