@@ -291,6 +291,7 @@ def live_matches():
                                 url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                 # send_message(url_dotafix)
                                 driver.get(url_dotafix)
+                                import time
                                 def dotafix():
                                     element = WebDriverWait(driver, 30).until(
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
