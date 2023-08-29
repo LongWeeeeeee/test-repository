@@ -434,10 +434,6 @@ def live_matches():
                                                 if final_time[key] >= 2:
                                                     send_message('На ' + str(key) + ' минуте ' + 'команда ' + radiant_team_name + ' сильнее на ' + str(
                                                         int(final_time[key])) + '%')
-                                                elif final_time[key] <= -2:
-                                                    send_message('На ' + str(
-                                                        key) + ' минуте ' + 'команда ' + dire_team_name + ' сильнее на ' + str(
-                                                        int(final_time[key])*-1) + '%')
                                         if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
                                             for values in ranks_dire.values():
                                                 dire_values += int(values)
@@ -473,10 +469,7 @@ def live_matches():
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         for key in final_time:
                                             if key <=60:
-                                                if final_time[key] >= 2:
-                                                    send_message('На ' + str(key) + ' минуте ' + 'команда ' + radiant_team_name + ' сильнее на ' + str(
-                                                        int(final_time[key])) + '%')
-                                                elif final_time[key] <= -2:
+                                                if final_time[key] <= -2:
                                                     send_message('На ' + str(
                                                         key) + ' минуте ' + 'команда ' + dire_team_name + ' сильнее на ' + str(
                                                         int(final_time[key])*-1) + '%')
@@ -523,93 +516,4 @@ def live_matches():
         time.sleep(60)
     is_running = False
     print("Работа завершена")
-
-
-def analyze_results(result_dict, dire_team_name, radiant_team_name):
-    g = 0
-    p = 0
-    t = 0
-    c = 0
-    pt = 0
-    pt2 = 0
-    pt3 = 0
-    counter = 0
-    flag = True
-    wins_looses = {"w_g": 0, "l_g": 0, "w_p": 0, "l_p": 0, "w_t": 0, "l_t": 0, "w_pt": 0, "l_pt": 0, "w_pt2": 0,
-                   "l_pt2": 0, "w_pt3": 0, "l_pt3": 0}
-    counter = 0
-    # exe_path = os.path.dirname(sys.executable)
-    #
-    # # Объединяем путь к исполняемому файлу с относительным путем к файлу
-    # file_path = os.path.join(exe_path, 'protrackers.json')
-    #
-    # with open(file_path, 'r') as f:
-    with open('protrackers.json', 'r') as f:
-        json_file = json.load(f)  # 912
-        while flag:
-            counter += 1
-            print(counter)
-            for match in json_file[1]:
-                if match["winner"] == 'radiant':
-                    if result_dict['dotafix.github'] != [] and match['dotafix.github'] != []:
-                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
-                                match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
-                                and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
-                                match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
-                                and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
-                                match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
-                            wins_looses['w_g'] += 1
-                    if result_dict['protracker_pos1'] != []:
-                        if float(match['protracker_pos1']) >= result_dict['protracker_pos1'] - pt and float(
-                                match['protracker_pos1']) <= result_dict['protracker_pos1'] + pt:
-                            wins_looses['w_pt'] += 1
-                elif match['winner'] == 'dire':
-                    if result_dict['dotafix.github'] != [] and match['dotafix.github'] != []:
-                        if match["dotafix.github"][0] >= result_dict['dotafix.github'][0] - g and \
-                                match["dotafix.github"][0] <= result_dict['dotafix.github'][0] + g \
-                                and match["dotafix.github"][1] >= result_dict['dotafix.github'][1] - g and \
-                                match["dotafix.github"][1] <= result_dict['dotafix.github'][1] + g \
-                                and match["dotafix.github"][2] >= result_dict['dotafix.github'][2] - g and \
-                                match["dotafix.github"][2] <= result_dict['dotafix.github'][2] + g:
-                            wins_looses['l_g'] += 1
-                    if result_dict['protracker_pos1'] != []:
-                        if float(match['protracker_pos1']) >= result_dict['protracker_pos1'] - pt and float(
-                                match['protracker_pos1']) <= result_dict['protracker_pos1'] + pt:
-                            wins_looses['l_pt'] += 1
-            flag = False
-            if (wins_looses['l_g'] + wins_looses['w_g'] < 20) and result_dict["dotafix.github"] != []:
-                g += 1
-                flag = True
-            if (wins_looses['l_pt'] + wins_looses['w_pt'] < 14) and result_dict["protracker_pos1"] != []:
-                pt += 0.1
-                flag = True
-            if flag:
-                for key in wins_looses:
-                    wins_looses[key] = 0
-        global_perc = []
-        if result_dict["dotafix.github"] != []:
-            github_percents = (wins_looses['w_g'] * 100 / (wins_looses['w_g'] + wins_looses['l_g']))
-            global_perc.append(github_percents)
-            print('Github WR: ' + str(github_percents) + '%' + '\n' + str(wins_looses['w_g'] + wins_looses['l_g']))
-        if result_dict["protracker_pos1"] != []:
-            dota2protracker1_percents = (wins_looses['w_pt'] * 100 / (wins_looses['w_pt'] + wins_looses['l_pt']))
-            global_perc.append(dota2protracker1_percents)
-            print('Protracker_pos1: ' + str(dota2protracker1_percents) + '%' + '\n' + str(
-                wins_looses['w_pt'] + wins_looses['l_pt']))
-        total = sum(global_perc) // len(global_perc)
-        send_message(result_dict)
-        send_message('Общий шанс на победу ' + radiant_team_name + ' ' + str(total) + '%')
-
 live_matches()
-# @bot.message_handler(commands=['button'])
-# def button_message(message):
-#     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-#     item1 = types.KeyboardButton("Анализировать текущие матчи")
-#     markup.add(item1)
-#
-#
-# @bot.message_handler(content_types='text')
-# def message_reply(message):
-#     if message.text == "Анализировать текущие матчи":
-#         live_matches()
-# bot.infinity_polling(none_stop=True, timeout=123)
