@@ -230,14 +230,12 @@ def live_matches():
                                             pass
                                     dire_hero_names.append(dire_hero['hero']['label'])
                                     dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                if matchups['radiant_pos1'] == []:
-                                    for hero in radiant_hero_names:
-                                        if hero in good_heroes:
-                                            matchups['radiant_pos1'] = hero
-                                if matchups['dire_pos1'] == []:
-                                    for hero in dire_hero_names:
-                                        if hero in good_heroes:
-                                            matchups['dire_pos1'] = hero
+                                for hero in radiant_hero_names:
+                                    if hero in good_heroes:
+                                        matchups['radiant_pos1'] = hero
+                                for hero in dire_hero_names:
+                                    if hero in good_heroes:
+                                        matchups['dire_pos1'] = hero
                                 radiant_values = 0
                                 dire_values = 0
                                 if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
@@ -416,11 +414,6 @@ def live_matches():
                                                     result_dict["dotafix.github"][2] > 54 \
                                                     and result_dict['protracker_pos1'] > 53 and result_dict[
                                                 'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
-                                                send_message('ТУРНИК ТИР ' + str(
-                                                    match['tournament'][
-                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                    best_of) + '\n' + 'Текущий счет: ' + str(
-                                                    score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 send_message('Победитель: ' + radiant_team_name)
                                     elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
@@ -440,11 +433,6 @@ def live_matches():
                                                     result_dict["dotafix.github"][2] < 46 \
                                                     and result_dict['protracker_pos1'] < 47 and result_dict[
                                                 'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
-                                                send_message('ТУРНИК ТИР ' + str(
-                                                    match['tournament'][
-                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                    best_of) + '\n' + 'Текущий счет: ' + str(
-                                                    score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 send_message('Победитель: ' + dire_team_name)
                                     else:
