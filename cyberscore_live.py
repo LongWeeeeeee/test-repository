@@ -6,6 +6,7 @@
 # ранги неправильно работают
 import sys, os
 from telebot import types
+import time
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
 import re
@@ -14,7 +15,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
-import time
 import telebot
 import requests
 from bs4 import BeautifulSoup
@@ -57,6 +57,7 @@ def live_matches():
     # Ваш код выполнения функции
     print("Функция выполняется...")
     while True:
+        import time
         url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
         response = requests.get(url).text
         json_data = json.loads(response)
@@ -236,21 +237,42 @@ def live_matches():
                                 for hero in dire_hero_names:
                                     if hero in good_heroes:
                                         matchups['dire_pos1'] = hero
+                                        # duration
+                                        game_time_radiant, game_time_dire = {}, {}
+                                        for hero_id in radiant_hero_ids:
+                                            radiant_duration = requests.get(
+                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                            radiant_duration_json = json.loads(radiant_duration)
+                                            for moment in radiant_duration_json:
+                                                if int(moment['duration_bin'] / 60) not in game_time_radiant:
+                                                    game_time_radiant[int(moment['duration_bin'] / 60)] = [
+                                                        moment['wins'] / moment['games_played'] * 100]
+                                                else:
+                                                    game_time_radiant[int(moment['duration_bin'] / 60)].append(
+                                                        moment['wins'] / moment['games_played'] * 100)
+                                        for time in game_time_radiant:
+                                            game_time_radiant[time] = sum(game_time_radiant[time]) / 5
+                                        for hero_id in dire_hero_ids:
+                                            dire_duration = requests.get(
+                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                            dire_duration_json = json.loads(dire_duration)
+                                            for moment in dire_duration_json:
+                                                if int(moment['duration_bin'] / 60) not in game_time_dire:
+                                                    game_time_dire[int(moment['duration_bin'] / 60)] = [
+                                                        moment['wins'] / moment['games_played'] * 100]
+                                                else:
+                                                    game_time_dire[int(moment['duration_bin'] / 60)].append(
+                                                        moment['wins'] / moment['games_played'] * 100)
+                                        for time in game_time_dire:
+                                            game_time_dire[time] = sum(game_time_dire[time]) / 5
+                                        final_time = {}
+                                        for key in game_time_radiant:
+                                            if key in game_time_dire:
+                                                final_time[key] = game_time_radiant[key] - game_time_dire[key]
+                                        final_time = dict(sorted(final_time.items()))
+
                                 radiant_values = 0
                                 dire_values = 0
-                                if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
-                                    for values in ranks_dire.values():
-                                        dire_values += int(values)
-                                    for values in ranks_radiant.values():
-                                        radiant_values += int(values)
-
-                                    diff = radiant_values - dire_values
-                                    if diff > 0:
-                                        send_message(dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                            radiant_values - dire_values))
-                                    elif diff < 0:
-                                        send_message(radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                            radiant_values - dire_values))
                                 title = json_map['title']
                                 radiant_team_name = \
                                     json_map['team_radiant']['name']
@@ -274,6 +296,7 @@ def live_matches():
                                         EC.element_to_be_clickable((By.ID, 'rankData')))
                                     select = Select(element)
                                     select.select_by_index(9)
+                                    import time
                                     time.sleep(10)
                                     aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
                                         (By.XPATH, '//mat-icon[text()="content_copy"]')))
@@ -406,6 +429,29 @@ def live_matches():
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        for key in final_time:
+                                            if key <=60:
+                                                if final_time[key] >= 2:
+                                                    send_message('На ' + str(key) + ' минуте ' + 'команда ' + radiant_team_name + ' сильнее на ' + str(
+                                                        int(final_time[key])) + '%')
+                                                elif final_time[key] <= -2:
+                                                    send_message('На ' + str(
+                                                        key) + ' минуте ' + 'команда ' + dire_team_name + ' сильнее на ' + str(
+                                                        int(final_time[key])*-1) + '%')
+                                        if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
+                                            for values in ranks_dire.values():
+                                                dire_values += int(values)
+                                            for values in ranks_radiant.values():
+                                                radiant_values += int(values)
+
+                                            diff = radiant_values - dire_values
+                                            if diff > 0:
+                                                send_message(
+                                                    dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
+                                            elif diff < 0:
+                                                send_message(
+                                                    radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                                        diff * -1))
                                         send_message(result_dict)
                                         send_message('Пик лучше у ' + radiant_team_name)
                                         if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
@@ -425,6 +471,29 @@ def live_matches():
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                        for key in final_time:
+                                            if key <=60:
+                                                if final_time[key] >= 2:
+                                                    send_message('На ' + str(key) + ' минуте ' + 'команда ' + radiant_team_name + ' сильнее на ' + str(
+                                                        int(final_time[key])) + '%')
+                                                elif final_time[key] <= -2:
+                                                    send_message('На ' + str(
+                                                        key) + ' минуте ' + 'команда ' + dire_team_name + ' сильнее на ' + str(
+                                                        int(final_time[key])*-1) + '%')
+                                        if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
+                                            for values in ranks_dire.values():
+                                                dire_values += int(values)
+                                            for values in ranks_radiant.values():
+                                                radiant_values += int(values)
+
+                                            diff = radiant_values - dire_values
+                                            if diff > 0:
+                                                send_message(
+                                                    dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
+                                            elif diff < 0:
+                                                send_message(
+                                                    radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                                        diff * -1))
                                         send_message(result_dict)
                                         send_message('Пик лучше у ' + dire_team_name)
                                         if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
@@ -450,6 +519,7 @@ def live_matches():
                                     print('Ставка неудачная')
                                     print(result_dict)
         print('сплю')
+        import time
         time.sleep(60)
     is_running = False
     print("Работа завершена")
