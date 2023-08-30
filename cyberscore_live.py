@@ -92,28 +92,28 @@ def live_matches():
                         radiant_team_name = match['team_radiant']['name']
                         dire_team_name = match['team_dire']['name']
                         dire_hero_names, dire_hero_ids, radiant_hero_names, radiant_hero_ids, dire_team_rangs, radiant_team_rangs = [], [], [], [], [], []
-                        # ranks
-                        dltv = requests.get('https://dltv.org/matches').text
-                        soup = BeautifulSoup(dltv, 'lxml')
-                        dltv = soup.find_all('div', class_='live__matches-item')
-                        for match_dltv in dltv:
-                            id = match_dltv.get('data-series-id')
-                            map = requests.get(f'https://dltv.org/matches/{id}').text
-                            map_soup = BeautifulSoup(map, 'lxml')
-                            teams = map_soup.find_all('div', class_='lineups__team')
-                            for team in teams:
-                                name_and_rank = team.find('span', class_='lineups__team-title__name')
-                                name = name_and_rank.contents[1].text
-                                if name == radiant_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
-                                elif name == dire_team_name:
-                                    ranks = team.find_all('div', class_='rank')
-                                    players = team.find_all('div', class_='player__name-name')
-                                    for q in range(len(players)):
-                                        ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
+                        # # ranks
+                        # dltv = requests.get('https://dltv.org/matches').text
+                        # soup = BeautifulSoup(dltv, 'lxml')
+                        # dltv = soup.find_all('div', class_='live__matches-item')
+                        # for match_dltv in dltv:
+                        #     id = match_dltv.get('data-series-id')
+                        #     map = requests.get(f'https://dltv.org/matches/{id}').text
+                        #     map_soup = BeautifulSoup(map, 'lxml')
+                        #     teams = map_soup.find_all('div', class_='lineups__team')
+                        #     for team in teams:
+                        #         name_and_rank = team.find('span', class_='lineups__team-title__name')
+                        #         name = name_and_rank.contents[1].text
+                        #         if name == radiant_team_name:
+                        #             ranks = team.find_all('div', class_='rank')
+                        #             players = team.find_all('div', class_='player__name-name')
+                        #             for q in range(len(players)):
+                        #                 ranks_radiant[players[q].text.strip().lower()] = ranks[q].text.strip()
+                        #         elif name == dire_team_name:
+                        #             ranks = team.find_all('div', class_='rank')
+                        #             players = team.find_all('div', class_='player__name-name')
+                        #             for q in range(len(players)):
+                        #                 ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
 
                             # могу парсить ранг глобальный
                         radiant_pick = json_map['picks_team_radiant']
@@ -237,40 +237,6 @@ def live_matches():
                                 for hero in dire_hero_names:
                                     if hero in good_heroes:
                                         matchups['dire_pos1'] = hero
-                                # duration
-                                game_time_radiant, game_time_dire = {}, {}
-                                for hero_id in radiant_hero_ids:
-                                    radiant_duration = requests.get(
-                                        f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                    radiant_duration_json = json.loads(radiant_duration)
-                                    for moment in radiant_duration_json:
-                                        if int(moment['duration_bin'] / 60) not in game_time_radiant:
-                                            game_time_radiant[int(moment['duration_bin'] / 60)] = [
-                                                moment['wins'] / moment['games_played'] * 100]
-                                        else:
-                                            game_time_radiant[int(moment['duration_bin'] / 60)].append(
-                                                moment['wins'] / moment['games_played'] * 100)
-                                for time in game_time_radiant:
-                                    game_time_radiant[time] = sum(game_time_radiant[time]) / 5
-                                for hero_id in dire_hero_ids:
-                                    dire_duration = requests.get(
-                                        f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                    dire_duration_json = json.loads(dire_duration)
-                                    for moment in dire_duration_json:
-                                        if int(moment['duration_bin'] / 60) not in game_time_dire:
-                                            game_time_dire[int(moment['duration_bin'] / 60)] = [
-                                                moment['wins'] / moment['games_played'] * 100]
-                                        else:
-                                            game_time_dire[int(moment['duration_bin'] / 60)].append(
-                                                moment['wins'] / moment['games_played'] * 100)
-                                for time in game_time_dire:
-                                    game_time_dire[time] = sum(game_time_dire[time]) / 5
-                                final_time = {}
-                                for key in game_time_radiant:
-                                    if key in game_time_dire:
-                                        final_time[key] = game_time_radiant[key] - game_time_dire[key]
-                                final_time = dict(sorted(final_time.items()))
-
                                 radiant_values = 0
                                 dire_values = 0
                                 title = json_map['title']
@@ -420,8 +386,47 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
+
                                 # send_message(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
+                                    if (result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                        1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
+                                        'protracker_pos1'] > 50) or (result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
+                                        1] < 50 and \
+                                            result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50):
+                                        # duration
+                                        game_time_radiant, game_time_dire = {}, {}
+                                        for hero_id in radiant_hero_ids:
+                                            radiant_duration = requests.get(
+                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                            radiant_duration_json = json.loads(radiant_duration)
+                                            for moment in radiant_duration_json:
+                                                if int(moment['duration_bin'] / 60) not in game_time_radiant:
+                                                    game_time_radiant[int(moment['duration_bin'] / 60)] = [
+                                                        moment['wins'] / moment['games_played'] * 100]
+                                                else:
+                                                    game_time_radiant[int(moment['duration_bin'] / 60)].append(
+                                                        moment['wins'] / moment['games_played'] * 100)
+                                        for time in game_time_radiant:
+                                            game_time_radiant[time] = sum(game_time_radiant[time]) / 5
+                                        for hero_id in dire_hero_ids:
+                                            dire_duration = requests.get(
+                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                            dire_duration_json = json.loads(dire_duration)
+                                            for moment in dire_duration_json:
+                                                if int(moment['duration_bin'] / 60) not in game_time_dire:
+                                                    game_time_dire[int(moment['duration_bin'] / 60)] = [
+                                                        moment['wins'] / moment['games_played'] * 100]
+                                                else:
+                                                    game_time_dire[int(moment['duration_bin'] / 60)].append(
+                                                        moment['wins'] / moment['games_played'] * 100)
+                                        for time in game_time_dire:
+                                            game_time_dire[time] = sum(game_time_dire[time]) / 5
+                                        final_time = {}
+                                        for key in game_time_radiant:
+                                            if key in game_time_dire:
+                                                final_time[key] = game_time_radiant[key] - game_time_dire[key]
+                                        final_time = dict(sorted(final_time.items()))
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                         1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] > 50:
                                         send_message('ТУРНИК ТИР ' + str(
