@@ -501,19 +501,19 @@ def live_matches():
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 send_message('Победитель: ' + dire_team_name)
                                     else:
-                                        print('ТУРНИК ТИР ' + str(match['tournament'][
+                                        send_message('ТУРНИК ТИР ' + str(match['tournament'][
                                                                              'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                        print('Ставка неудачная')
-                                        print(result_dict)
+                                        send_message(result_dict)
+                                        send_message('Ставка неудачная')
                                 else:
-                                    print('ТУРНИК ТИР ' + str(match['tournament'][
+                                    send_message('ТУРНИК ТИР ' + str(match['tournament'][
                                         'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                     best_of) + '\n' + 'Текущий счет: ' + str(
                                     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                    print('Ставка неудачная')
-                                    print(result_dict)
+                                    send_message(result_dict)
+                                    send_message('Ставка неудачная')
         print('сплю')
         import time
         time.sleep(60)
