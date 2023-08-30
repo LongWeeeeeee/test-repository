@@ -237,39 +237,39 @@ def live_matches():
                                 for hero in dire_hero_names:
                                     if hero in good_heroes:
                                         matchups['dire_pos1'] = hero
-                                        # duration
-                                        game_time_radiant, game_time_dire = {}, {}
-                                        for hero_id in radiant_hero_ids:
-                                            radiant_duration = requests.get(
-                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                            radiant_duration_json = json.loads(radiant_duration)
-                                            for moment in radiant_duration_json:
-                                                if int(moment['duration_bin'] / 60) not in game_time_radiant:
-                                                    game_time_radiant[int(moment['duration_bin'] / 60)] = [
-                                                        moment['wins'] / moment['games_played'] * 100]
-                                                else:
-                                                    game_time_radiant[int(moment['duration_bin'] / 60)].append(
-                                                        moment['wins'] / moment['games_played'] * 100)
-                                        for time in game_time_radiant:
-                                            game_time_radiant[time] = sum(game_time_radiant[time]) / 5
-                                        for hero_id in dire_hero_ids:
-                                            dire_duration = requests.get(
-                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                            dire_duration_json = json.loads(dire_duration)
-                                            for moment in dire_duration_json:
-                                                if int(moment['duration_bin'] / 60) not in game_time_dire:
-                                                    game_time_dire[int(moment['duration_bin'] / 60)] = [
-                                                        moment['wins'] / moment['games_played'] * 100]
-                                                else:
-                                                    game_time_dire[int(moment['duration_bin'] / 60)].append(
-                                                        moment['wins'] / moment['games_played'] * 100)
-                                        for time in game_time_dire:
-                                            game_time_dire[time] = sum(game_time_dire[time]) / 5
-                                        final_time = {}
-                                        for key in game_time_radiant:
-                                            if key in game_time_dire:
-                                                final_time[key] = game_time_radiant[key] - game_time_dire[key]
-                                        final_time = dict(sorted(final_time.items()))
+                                # duration
+                                game_time_radiant, game_time_dire = {}, {}
+                                for hero_id in radiant_hero_ids:
+                                    radiant_duration = requests.get(
+                                        f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                    radiant_duration_json = json.loads(radiant_duration)
+                                    for moment in radiant_duration_json:
+                                        if int(moment['duration_bin'] / 60) not in game_time_radiant:
+                                            game_time_radiant[int(moment['duration_bin'] / 60)] = [
+                                                moment['wins'] / moment['games_played'] * 100]
+                                        else:
+                                            game_time_radiant[int(moment['duration_bin'] / 60)].append(
+                                                moment['wins'] / moment['games_played'] * 100)
+                                for time in game_time_radiant:
+                                    game_time_radiant[time] = sum(game_time_radiant[time]) / 5
+                                for hero_id in dire_hero_ids:
+                                    dire_duration = requests.get(
+                                        f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                    dire_duration_json = json.loads(dire_duration)
+                                    for moment in dire_duration_json:
+                                        if int(moment['duration_bin'] / 60) not in game_time_dire:
+                                            game_time_dire[int(moment['duration_bin'] / 60)] = [
+                                                moment['wins'] / moment['games_played'] * 100]
+                                        else:
+                                            game_time_dire[int(moment['duration_bin'] / 60)].append(
+                                                moment['wins'] / moment['games_played'] * 100)
+                                for time in game_time_dire:
+                                    game_time_dire[time] = sum(game_time_dire[time]) / 5
+                                final_time = {}
+                                for key in game_time_radiant:
+                                    if key in game_time_dire:
+                                        final_time[key] = game_time_radiant[key] - game_time_dire[key]
+                                final_time = dict(sorted(final_time.items()))
 
                                 radiant_values = 0
                                 dire_values = 0
