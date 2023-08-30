@@ -127,6 +127,12 @@ def live_matches():
                         # пики
                         if dire_pick != None:
                             if len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
+                                for hero in radiant_hero_names:
+                                    if hero in good_heroes:
+                                        matchups['radiant_pos1'] = hero
+                                for hero in dire_hero_names:
+                                    if hero in good_heroes:
+                                        matchups['dire_pos1'] = hero
                                 for radiant_hero in radiant_pick:
                                     for q in range(5):
                                         try:
@@ -231,12 +237,7 @@ def live_matches():
                                             pass
                                     dire_hero_names.append(dire_hero['hero']['label'])
                                     dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                for hero in radiant_hero_names:
-                                    if hero in good_heroes:
-                                        matchups['radiant_pos1'] = hero
-                                for hero in dire_hero_names:
-                                    if hero in good_heroes:
-                                        matchups['dire_pos1'] = hero
+
                                 radiant_values = 0
                                 dire_values = 0
                                 title = json_map['title']
@@ -394,6 +395,8 @@ def live_matches():
                                         'protracker_pos1'] > 50) or (result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                         1] < 50 and \
                                             result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50):
+
+
                                         # duration
                                         game_time_radiant, game_time_dire = {}, {}
                                         for hero_id in radiant_hero_ids:
@@ -427,6 +430,9 @@ def live_matches():
                                             if key in game_time_dire:
                                                 final_time[key] = game_time_radiant[key] - game_time_dire[key]
                                         final_time = dict(sorted(final_time.items()))
+
+
+
                                     if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                         1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict['protracker_pos1'] > 50:
                                         send_message('ТУРНИК ТИР ' + str(
@@ -436,23 +442,22 @@ def live_matches():
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         for key in final_time:
-                                            if key <=60:
-                                                if final_time[key] <= -1:
-                                                    send_message('На ' + str(key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(int(final_time[key])*-1) + '%')
-                                        if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
-                                            for values in ranks_dire.values():
-                                                dire_values += int(values)
-                                            for values in ranks_radiant.values():
-                                                radiant_values += int(values)
-
-                                            diff = radiant_values - dire_values
-                                            if diff > 0:
-                                                send_message(
-                                                    dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
-                                            elif diff < 0:
-                                                send_message(
-                                                    radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                                        diff * -1))
+                                            if final_time[key] <= -1:
+                                                send_message('На ' + str(key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(int(final_time[key])*-1) + '%')
+                                        # if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
+                                        #     for values in ranks_dire.values():
+                                        #         dire_values += int(values)
+                                        #     for values in ranks_radiant.values():
+                                        #         radiant_values += int(values)
+                                        #
+                                        #     diff = radiant_values - dire_values
+                                        #     if diff > 0:
+                                        #         send_message(
+                                        #             dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
+                                        #     elif diff < 0:
+                                        #         send_message(
+                                        #             radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                        #                 diff * -1))
                                         send_message(result_dict)
                                         send_message('Пик лучше у ' + radiant_team_name)
                                         if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
@@ -473,23 +478,22 @@ def live_matches():
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                         for key in final_time:
-                                            if key <=60:
-                                                if final_time[key] >= 1:
-                                                    send_message('На ' + str(key) + ' минуте можно ставить ' + str(int(final_time[key])*-1) + '%')
-                                        if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
-                                            for values in ranks_dire.values():
-                                                dire_values += int(values)
-                                            for values in ranks_radiant.values():
-                                                radiant_values += int(values)
-
-                                            diff = radiant_values - dire_values
-                                            if diff > 0:
-                                                send_message(
-                                                    dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
-                                            elif diff < 0:
-                                                send_message(
-                                                    radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
-                                                        diff * -1))
+                                            if final_time[key] >= 1:#сильнее radiant
+                                                send_message('На ' + str(key) + ' минуте ' + dire_team_name + ' слабее на ' + str(int(final_time[key])) + '%')
+                                        # if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
+                                        #     for values in ranks_dire.values():
+                                        #         dire_values += int(values)
+                                        #     for values in ranks_radiant.values():
+                                        #         radiant_values += int(values)
+                                        #
+                                        #     diff = radiant_values - dire_values
+                                        #     if diff > 0:
+                                        #         send_message(
+                                        #             dire_team_name + ' Ранги лучше. Разнциа составляет: ' + str(diff))
+                                        #     elif diff < 0:
+                                        #         send_message(
+                                        #             radiant_team_name + ' Ранги лучше. Разнциа составляет: ' + str(
+                                        #                 diff * -1))
                                         send_message(result_dict)
                                         send_message('Пик лучше у ' + dire_team_name)
                                         if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
