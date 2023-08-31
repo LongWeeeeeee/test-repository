@@ -251,6 +251,7 @@ def live_matches():
                                 options.add_argument("--start-maximized")
                                 options.add_argument("--no-sandbox")
                                 driver = webdriver.Chrome(options=options)
+                                print('dotafix')
                                 ####dotafix.github
                                 radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
                                 dire = ''.join(['&e=' + element for element in dire_hero_ids])
@@ -313,6 +314,7 @@ def live_matches():
                                         #         datan[1] >= 54 or datan[0] <= 46):
                                         result_dict['dotafix.github'] = [datan[0]] + [datan[1]] + [datan[2]]
                                 driver.quit()
+                                print('protracker')
                                 # protracker
                                 if matchups['radiant_pos1'] != [] and matchups['dire_pos1'] != []:
                                     radiant_pos1_vs_team = 0
@@ -387,7 +389,7 @@ def live_matches():
                                 ids.append(map_id)
                                 f.seek(0)
                                 json.dump(ids, f)
-
+                                print('results analyze')
                                 # send_message(result_dict)
                                 if result_dict["dotafix.github"] != [] and result_dict['protracker_pos1'] != []:
                                     if matchups['radiant_pos1'] in good_heroes and matchups['dire_pos1'] in good_heroes:
