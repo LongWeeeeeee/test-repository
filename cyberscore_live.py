@@ -527,6 +527,7 @@ def live_matches():
                                     best_of) + '\n' + 'Текущий счет: ' + str(
                                     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                     send_message(result_dict)
+                                    send_message(url_dotafix)
                                     send_message('Ставка неудачная')
         print('сплю')
         import time
