@@ -267,7 +267,7 @@ def live_matches():
                                     select.select_by_index(9)
                                     import time
                                     time.sleep(10)
-                                    aler_window = WebDriverWait(driver, 30).until(EC.element_to_be_clickable(
+                                    aler_window = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
                                         (By.XPATH, '//mat-icon[text()="content_copy"]')))
                                     # time.sleep(5)
                                     aler_window.click()
