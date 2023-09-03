@@ -261,20 +261,23 @@ def live_matches():
                                 driver.get(url_dotafix)
                                 import time
                                 def dotafix():
-                                    element = WebDriverWait(driver, 30).until(
-                                        EC.element_to_be_clickable((By.ID, 'rankData')))
-                                    select = Select(element)
-                                    select.select_by_index(9)
-                                    import time
-                                    time.sleep(10)
-                                    aler_window = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
-                                        (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                    # time.sleep(5)
-                                    aler_window.click()
-                                    alert = Alert(driver)
-                                    alert_text = alert.text
-                                    alert.accept()
-                                    return(alert_text)
+                                    try:
+                                        element = WebDriverWait(driver, 30).until(
+                                            EC.element_to_be_clickable((By.ID, 'rankData')))
+                                        select = Select(element)
+                                        select.select_by_index(9)
+                                        import time
+                                        time.sleep(10)
+                                        aler_window = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
+                                            (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                        # time.sleep(5)
+                                        aler_window.click()
+                                        alert = Alert(driver)
+                                        alert_text = alert.text
+                                        alert.accept()
+                                        return(alert_text)
+                                    except:
+                                        send_message('Ошибка dotafix')
                                 try:
                                     alert_text = dotafix()
                                 except:
