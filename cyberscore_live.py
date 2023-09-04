@@ -4,6 +4,7 @@
 # Отладка винрейта на старых матчах
 # Проверка того что все правильно работает
 # ранги неправильно работают
+#egb live matches
 import sys, os
 from telebot import types
 import time
@@ -82,6 +83,7 @@ def live_matches():
                         ranks_radiant = {}
                         ranks_dire = {}
                         pos_rank = {}
+                        c = 0
                         result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [],
                                        "pos1_vs_team": [],
                                        "pos1_vs_cores": []}
@@ -127,12 +129,6 @@ def live_matches():
                         # пики
                         if dire_pick != None:
                             if len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
-                                for hero in radiant_hero_names:
-                                    if hero in good_heroes:
-                                        matchups['radiant_pos1'] = hero
-                                for hero in dire_hero_names:
-                                    if hero in good_heroes:
-                                        matchups['dire_pos1'] = hero
                                 for radiant_hero in radiant_pick:
                                     for q in range(5):
                                         try:
@@ -237,7 +233,17 @@ def live_matches():
                                             pass
                                     dire_hero_names.append(dire_hero['hero']['label'])
                                     dire_hero_ids.append(dire_hero['hero']['id_steam'])
-
+                                for hero in radiant_hero_names:
+                                    if hero in good_heroes:
+                                        c+=1
+                                        matchups['radiant_pos1'] = hero
+                                if c >= 2: send_message('Bad heroes')
+                                c = 0
+                                for hero in dire_hero_names:
+                                    if hero in good_heroes:
+                                        c+=1
+                                        matchups['dire_pos1'] = hero
+                                if c >= 2: send_message('Bad heroes')
                                 radiant_values = 0
                                 dire_values = 0
                                 title = json_map['title']
@@ -523,7 +529,8 @@ def live_matches():
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         send_message(result_dict)
-                                        send_message('Ставка неудачная')
+                                        send_message(matchups)
+                                        send_message('Bad heroes')
                                 else:
                                     send_message('ТУРНИК ТИР ' + str(match['tournament'][
                                         'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
@@ -531,6 +538,7 @@ def live_matches():
                                     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                     send_message(result_dict)
                                     send_message('Ставка неудачная')
+
         print('сплю')
         import time
         time.sleep(60)
