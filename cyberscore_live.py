@@ -66,6 +66,7 @@ def live_matches():
         json_data = json.loads(response)
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+            # if match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
                 if match['status'] in {'online', 'draft'}:
                 # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4}:
                     map_id = match['id']
@@ -546,7 +547,7 @@ def live_matches():
                                         send_message(result_dict)
                                         send_message('Ставка неудачная')
                 elif match['status'] == 'pause':
-                    print('sleep')
+                    print('pause sleep')
                     time.sleep(60)
                 elif match['status'] == 'waiting':
                     time_str = match['date_start']
@@ -555,12 +556,12 @@ def live_matches():
                     time_difference = datetime_obj - current_date
                     seconds = time_difference.total_seconds()
                     if seconds > 0:
-                        print('sleep')
+                        print('waiting sleep')
                         time.sleep(seconds)
                     else:
-                        print('sleep')
+                        print('waiting sleep')
                         time.sleep(120)
-        print('sleep')
+        print('draft sleep')
         time.sleep(30)
 
 
