@@ -546,6 +546,12 @@ def live_matches():
                                         score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         send_message(result_dict)
                                         send_message('Ставка неудачная')
+                                else:
+                                    print('draft sleep')
+                                    time.sleep(30)
+                            else:
+                                print('draft sleep')
+                                time.sleep(30)
                 elif match['status'] == 'pause':
                     print('pause sleep')
                     time.sleep(60)
@@ -561,8 +567,7 @@ def live_matches():
                     else:
                         print('waiting sleep')
                         time.sleep(120)
-        print('draft sleep')
-        time.sleep(30)
+
 
 
     is_running = False
