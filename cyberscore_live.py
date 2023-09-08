@@ -461,7 +461,7 @@ def live_matches():
                                                     send_message('Ограничение по ставке 5000р')
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 for key in final_time:
-                                                    if final_time[key] <= -1:
+                                                    if final_time[key] < 0:
                                                         send_message('На ' + str(key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(int(final_time[key])*-1) + '%')
                                                 # if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
                                                 #     for values in ranks_dire.values():
@@ -499,7 +499,7 @@ def live_matches():
                                                     send_message('Ограничение по ставке 5000р')
                                                 # analyze_results(result_dict, dire_team_name, radiant_team_name)
                                                 for key in final_time:
-                                                    if final_time[key] >= 1:#сильнее radiant
+                                                    if final_time[key] > 0:#сильнее radiant
                                                         send_message('На ' + str(key) + ' минуте ' + dire_team_name + ' слабее на ' + str(int(final_time[key])) + '%')
                                                 # if '-' not in ranks_dire.values() and '-' not in ranks_radiant.values():
                                                 #     for values in ranks_dire.values():
