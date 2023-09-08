@@ -551,10 +551,12 @@ def live_matches():
                                         send_message(result_dict)
                                         send_message('Ставка неудачная')
                                 else:
+                                    import time
                                     flag_sleep = True
                                     print('draft sleep')
                                     time.sleep(30)
                             else:
+                                import time
                                 flag_sleep = True
                                 print('draft sleep')
                                 time.sleep(30)
