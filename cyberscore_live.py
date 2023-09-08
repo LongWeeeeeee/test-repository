@@ -66,12 +66,15 @@ def live_matches():
         json_data = json.loads(response)
         flag = False
         flag_pause = False
+        sleep_done = False
+        #матч идет
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
             # if match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
                 if match['status'] in {'online', 'draft'}:
                     flag = True
                     flag_sleep = False
+                    sleep_done = False
                 # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4}:
                     map_id = match['id']
                     # exe_path = os.path.dirname(sys.executable)
@@ -572,7 +575,7 @@ def live_matches():
                         print('pause sleep')
                         time.sleep(120)
                         flag_pause = True
-        if not flag and not flag_pause:
+        if not flag and not flag_pause and not sleep_done:
             for match in json_data['rows']:
                 if match['status'] == 'waiting' and not flag:
                     time_str = match['date_start']
@@ -585,6 +588,7 @@ def live_matches():
 
                         print('waiting sleep for ' + str(seconds/60))
                         time.sleep(seconds)
+                        sleep_done = True
                     else:
                         print('waiting sleep')
                         time.sleep(60)
