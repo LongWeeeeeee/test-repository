@@ -559,12 +559,14 @@ def live_matches():
                                 print('draft sleep')
                                 time.sleep(30)
         if not flag_pause:
+            import time
             print('sleep 90s')
             time.sleep(90)
         if not flag:
             for match in json_data['rows']:
                 if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
                     if match['status'] == 'pause':
+                        import time
                         print('pause sleep')
                         time.sleep(120)
                         flag_pause = True
