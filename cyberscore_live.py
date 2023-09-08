@@ -64,10 +64,13 @@ def live_matches():
         url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
         response = requests.get(url).text
         json_data = json.loads(response)
+        flag = False
+        flag_pause = False
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
             # if match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
                 if match['status'] in {'online', 'draft'}:
+                    flag = True
                 # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4}:
                     map_id = match['id']
                     # exe_path = os.path.dirname(sys.executable)
@@ -552,10 +555,18 @@ def live_matches():
                             else:
                                 print('draft sleep')
                                 time.sleep(30)
-                elif match['status'] == 'pause':
-                    print('pause sleep')
-                    time.sleep(60)
-                elif match['status'] == 'waiting':
+        print('sleep 60s')
+        time.sleep(60)
+        if not flag:
+            for match in json_data['rows']:
+                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+                    if match['status'] == 'pause':
+                        print('pause sleep')
+                        time.sleep(120)
+                        flag_pause = True
+        if not flag and not flag_pause:
+            for match in json_data['rows']:
+                if match['status'] == 'waiting' and not flag:
                     time_str = match['date_start']
                     datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
                     current_date = datetime.datetime.now()
@@ -564,11 +575,11 @@ def live_matches():
                     import time
                     if seconds > 0:
 
-                        print('waiting sleep')
+                        print('waiting sleep for ' + str(seconds/60))
                         time.sleep(seconds)
                     else:
                         print('waiting sleep')
-                        time.sleep(120)
+                        time.sleep(60)
 
 
 
