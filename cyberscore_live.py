@@ -561,7 +561,9 @@ def live_matches():
                     current_date = datetime.datetime.now()
                     time_difference = datetime_obj - current_date
                     seconds = time_difference.total_seconds()
+                    import time
                     if seconds > 0:
+
                         print('waiting sleep')
                         time.sleep(seconds)
                     else:
