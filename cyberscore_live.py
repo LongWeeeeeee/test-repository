@@ -64,18 +64,12 @@ def live_matches():
         url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
         response = requests.get(url).text
         json_data = json.loads(response)
-        flag = False
-        flag_pause = False
-        sleep_done = False
-        #матч идет
+        live_matches_flag = False
+        #live matches
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
-            # if match['tournament']['tier'] in {1, 2, 3, 4} and 'ESportsBattle' not in match['tournament']['name']:
                 if match['status'] in {'online', 'draft'}:
-                    flag = True
-                    flag_sleep = False
-                    sleep_done = False
-                # if match['status'] in {'online', 'draft'} and match['tournament']['tier'] in {1, 2, 3, 4}:
+                    live_matches_flag = True
                     map_id = match['id']
                     # exe_path = os.path.dirname(sys.executable)
                     #
@@ -563,21 +557,22 @@ def live_matches():
                                 flag_sleep = True
                                 print('draft sleep')
                                 time.sleep(30)
-        if not flag_pause:
+        if live_matches_flag:
             import time
-            print('sleep 90s')
-            time.sleep(90)
-        if not flag:
+            print('идет матч, сплю 2 минуты')
+            time.sleep(120)
+        #pause
+        for match in json_data['rows']:
+            if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+                if match['status'] == 'pause':
+                    live_matches_flag = True
+                    import time
+                    print('pause sleep')
+                    time.sleep(120)
+        #waiting matches
+        if not live_matches_flag:
             for match in json_data['rows']:
-                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
-                    if match['status'] == 'pause':
-                        import time
-                        print('pause sleep')
-                        time.sleep(120)
-                        flag_pause = True
-        if not flag and not flag_pause and not sleep_done:
-            for match in json_data['rows']:
-                if match['status'] == 'waiting' and not flag:
+                if match['status'] == 'waiting':
                     time_str = match['date_start']
                     datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
                     current_date = datetime.datetime.now()
@@ -585,13 +580,13 @@ def live_matches():
                     seconds = time_difference.total_seconds()
                     import time
                     if seconds > 0:
-
                         print('waiting sleep for ' + str(seconds/60))
                         time.sleep(seconds)
-                        sleep_done = True
+                        break
                     else:
                         print('waiting sleep')
                         time.sleep(60)
+                        break
 
 
 
