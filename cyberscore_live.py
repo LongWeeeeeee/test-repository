@@ -574,10 +574,17 @@ def live_matches():
             for match in json_data['rows']:
                 if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
                     if match['status'] == 'waiting':
-                        time_str = match['date_start']
-                        datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
+                        map_id = match['id']
+                        match_url = f'https://cyberscore.live/en/matches/{map_id}/'
+                        data = requests.get(match_url).text
+                        soup = BeautifulSoup(data, 'lxml')
+                        json_data = soup.find('script', type='application/ld+json').text
+                        json_data = json.loads(json_data)
+                        time_str = json_data['endDate']
+                        datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z')
+                        datetime_obj_utc = datetime_obj.replace(tzinfo=None)
                         current_date = datetime.datetime.now()
-                        time_difference = datetime_obj - current_date
+                        time_difference = datetime_obj_utc - current_date
                         seconds = time_difference.total_seconds()
                         import time
                         if seconds > 0:
