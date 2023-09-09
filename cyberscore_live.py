@@ -514,7 +514,7 @@ def live_matches():
             time.sleep(120)
         #pause
         for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2, 3}:
+            if match['tournament']['tier'] in {1, 2}:
                 if match['status'] == 'pause':
                     live_matches_flag = True
                     import time
@@ -523,7 +523,7 @@ def live_matches():
         #waiting matches
         if not live_matches_flag:
             for match in json_data['rows']:
-                if match['tournament']['tier'] in {1, 2, 3}:
+                if match['tournament']['tier'] in {1, 2}:
                     if match['status'] == 'waiting' and 'ESportsBattle' not in match['tournament']['name']:
                         map_id = match['id']
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
