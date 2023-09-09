@@ -504,6 +504,9 @@ def live_matches():
                                                             and result_dict['protracker_pos1'] < 40 and result_dict[
                                                         'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
                                                         send_message('Победитель ' + dire_team_name)
+                                        else:
+                                            print(result_dict)
+                                            print('Ставка неудачная')
                                 else:
                                     flag_sleep = True
                             else:
