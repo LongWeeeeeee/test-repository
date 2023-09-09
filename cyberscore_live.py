@@ -593,7 +593,7 @@ def live_matches():
                             break
                         else:
                             print('waiting for match sleep')
-                            time.sleep(400)
+                            time.sleep(60)
                             break
 
 
