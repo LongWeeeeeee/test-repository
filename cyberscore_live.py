@@ -57,6 +57,7 @@ def live_matches():
             print("Функция уже выполняется")
             return
     is_running = True
+    first_time = True
     # Ваш код выполнения функции
     print("Функция выполняется...")
     while True:
@@ -68,7 +69,7 @@ def live_matches():
         #live matches
         for match in json_data['rows']:
             flag_sleep = False
-            if match['tournament']['tier'] in {1, 2} and 'ESportsBattle' not in match['tournament']['name']:
+            if match['tournament']['tier'] in {1, 2}:
                 if match['status'] in {'online', 'draft'}:
                     live_matches_flag = True
                     map_id = match['id']
@@ -506,11 +507,15 @@ def live_matches():
                             else:
                                 flag_sleep = True
         if flag_sleep:
-            print('draft sleep')
-            time.sleep(30)
+            if first_time:
+                time.sleep(120)
+            else:
+                print('draft sleep')
+                time.sleep(15)
         if live_matches_flag and not flag_sleep:
             import time
             print('идет матч, сплю 2 минуты')
+            first_time = False
             time.sleep(120)
         #pause
         for match in json_data['rows']:
