@@ -69,7 +69,7 @@ def live_matches():
         #live matches
         for match in json_data['rows']:
             flag_sleep = False
-            if match['tournament']['tier'] in {1, 2}:
+            if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] in {'online', 'draft'}:
                     live_matches_flag = True
                     map_id = match['id']
@@ -460,15 +460,17 @@ def live_matches():
                                             # duration()
 
                                             if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                                radiant_results()
-                                                send_message(result_dict)
-                                                send_message('Пик лучше у ' + radiant_team_name)
-
-                                            else:
-                                                if result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                                if match['tournament']['tier'] != 3:
                                                     radiant_results()
                                                     send_message(result_dict)
                                                     send_message('Пик лучше у ' + radiant_team_name)
+
+                                            else:
+                                                if result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                                    if match['tournament']['tier'] != 3:
+                                                        radiant_results()
+                                                        send_message(result_dict)
+                                                        send_message('Пик лучше у ' + radiant_team_name)
                                                     if result_dict["dotafix.github"][0] > 60 and \
                                                             result_dict["dotafix.github"][
                                                                 1] > 54 and \
@@ -482,19 +484,19 @@ def live_matches():
                                                 result_dict["dotafix.github"][2] < 50 and result_dict[
                                             'protracker_pos1'] < 50:
                                             # duration()
-                                            if matchups['radiant_pos1'] not in good_heroes and matchups[
-                                                'dire_pos1'] not in good_heroes:
-                                                send_message('BAD HEROES')
-                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                                radiant_results()
-                                                send_message(result_dict)
-                                                send_message('Пик лучше у ' + dire_team_name)
 
-                                            else:
-                                                if result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
+                                                if match['tournament']['tier'] != 3:
                                                     radiant_results()
                                                     send_message(result_dict)
                                                     send_message('Пик лучше у ' + dire_team_name)
+
+                                            else:
+                                                if result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                                    if match['tournament']['tier'] != 3:
+                                                        radiant_results()
+                                                        send_message(result_dict)
+                                                        send_message('Пик лучше у ' + dire_team_name)
                                                     if result_dict["dotafix.github"][0] < 40 and \
                                                             result_dict["dotafix.github"][
                                                                 1] < 46 and \
