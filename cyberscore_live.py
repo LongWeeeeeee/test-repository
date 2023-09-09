@@ -453,10 +453,10 @@ def live_matches():
                                     print('result analyze')
                                     #вывод результатов
                                     if result_dict['dotafix.github'] != [] and result_dict['protracker_pos1'] != []:
-                                        if (result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
-                                            1] > 54 and result_dict["dotafix.github"][2] > 54 and result_dict[
-                                            'protracker_pos1'] > 53):
-                                            duration()
+                                        if (result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                            1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
+                                            'protracker_pos1'] > 50):
+                                            # duration()
 
                                             if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
                                                 radiant_results()
@@ -476,10 +476,10 @@ def live_matches():
                                                         'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
                                                         send_message('Победитель ' + radiant_team_name)
 
-                                        elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
-                                            1] < 46 and \
-                                                result_dict["dotafix.github"][2] < 46 and result_dict[
-                                            'protracker_pos1'] < 47:
+                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
+                                            1] < 50 and \
+                                                result_dict["dotafix.github"][2] < 50 and result_dict[
+                                            'protracker_pos1'] < 50:
                                             # duration()
                                             if matchups['radiant_pos1'] not in good_heroes and matchups[
                                                 'dire_pos1'] not in good_heroes:
