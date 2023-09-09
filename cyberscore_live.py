@@ -572,21 +572,22 @@ def live_matches():
         #waiting matches
         if not live_matches_flag:
             for match in json_data['rows']:
-                if match['status'] == 'waiting':
-                    time_str = match['date_start']
-                    datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
-                    current_date = datetime.datetime.now()
-                    time_difference = datetime_obj - current_date
-                    seconds = time_difference.total_seconds()
-                    import time
-                    if seconds > 0:
-                        print('waiting sleep for ' + str(seconds/60))
-                        time.sleep(seconds)
-                        break
-                    else:
-                        print('waiting sleep')
-                        time.sleep(60)
-                        break
+                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+                    if match['status'] == 'waiting':
+                        time_str = match['date_start']
+                        datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ')
+                        current_date = datetime.datetime.now()
+                        time_difference = datetime_obj - current_date
+                        seconds = time_difference.total_seconds()
+                        import time
+                        if seconds > 0:
+                            print('waiting sleep for ' + str(seconds/60))
+                            time.sleep(seconds)
+                            break
+                        else:
+                            print('waiting sleep')
+                            time.sleep(400)
+                            break
 
 
 
