@@ -68,7 +68,7 @@ def live_matches():
         #live matches
         for match in json_data['rows']:
             flag_sleep = False
-            if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+            if match['tournament']['tier'] in {1, 2} and 'ESportsBattle' not in match['tournament']['name']:
                 if match['status'] in {'online', 'draft'}:
                     live_matches_flag = True
                     map_id = match['id']
@@ -450,7 +450,6 @@ def live_matches():
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                    send_message(result_dict)
                                     print('result analyze')
                                     #вывод результатов
                                     if result_dict['dotafix.github'] != [] and result_dict['protracker_pos1'] != []:
@@ -502,13 +501,6 @@ def live_matches():
                                                             and result_dict['protracker_pos1'] < 40 and result_dict[
                                                         'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
                                                         send_message('Победитель ' + dire_team_name)
-                                        else:
-                                            radiant_results()
-                                            send_message(result_dict)
-                                            send_message('Ставка неудачная')
-                                        if matchups['radiant_pos1'] not in good_heroes or matchups[
-                                                'dire_pos1'] not in good_heroes:
-                                                send_message('BAD HEROES')
                                 else:
                                     flag_sleep = True
                             else:
