@@ -582,7 +582,7 @@ def live_matches():
         if flag_sleep:
             print('draft sleep')
             time.sleep(30)
-        if live_matches_flag:
+        if live_matches_flag and not flag_sleep:
             import time
             print('идет матч, сплю 2 минуты')
             time.sleep(120)
