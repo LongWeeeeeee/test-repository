@@ -67,7 +67,8 @@ def live_matches():
         live_matches_flag = False
         #live matches
         for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+            flag_sleep = False
+            if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] in {'online', 'draft'}:
                     live_matches_flag = True
                     map_id = match['id']
@@ -481,84 +482,113 @@ def live_matches():
                                             send_message('Ставка неудачная')
                                     #результ дикт полный
                                     else:
-
                                         #radiant
                                         if (result_dict["dotafix.github"][0] > 50 and
                                             result_dict["dotafix.github"][
                                                 1] > 50 and result_dict["dotafix.github"][2] > 50 and
                                             result_dict[
                                                 'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0):
-                                            for key in final_time:
-                                                if final_time[key] < 0:
-                                                    send_message('На ' + str(key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(int(final_time[key])*-1) + '%')
-                                            send_message(result_dict)
-                                            send_message('ТУРНИК ТИР ' + str(
-                                                match['tournament'][
-                                                    'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                best_of) + '\n' + 'Текущий счет: ' + str(
-                                                score) + '\n' + 'Пик лучше у ' + radiant_team_name)
-                                            if matchups['radiant_pos1'] not in good_heroes and matchups[
-                                                'dire_pos1'] not in good_heroes:
-                                                send_message('BAD HEROES')
-                                            if result_dict["dotafix.github"][0] > 54 and \
-                                                    result_dict["dotafix.github"][
-                                                        1] > 54 and \
-                                                    result_dict["dotafix.github"][2] > 54 \
-                                                    and result_dict['protracker_pos1'] > 53 and result_dict[
-                                                'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
-                                                # analyze_results(result_dict, dire_team_name, radiant_team_name)
-                                                send_message('Победитель: ' + radiant_team_name)
+                                            if 'ESportsBattle' not in match['tournament']['name']:
+                                                for key in final_time:
+                                                    if final_time[key] < 0:
+                                                        send_message('На ' + str(key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(int(final_time[key])*-1) + '%')
+                                                send_message(result_dict)
+                                                send_message('ТУРНИК ТИР ' + str(
+                                                    match['tournament'][
+                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                    best_of) + '\n' + 'Текущий счет: ' + str(
+                                                    score) + '\n' + 'Пик лучше у ' + radiant_team_name)
+                                                if matchups['radiant_pos1'] not in good_heroes and matchups[
+                                                    'dire_pos1'] not in good_heroes:
+                                                    send_message('BAD HEROES')
+                                                if result_dict["dotafix.github"][0] > 54 and \
+                                                        result_dict["dotafix.github"][
+                                                            1] > 54 and \
+                                                        result_dict["dotafix.github"][2] > 54 \
+                                                        and result_dict['protracker_pos1'] > 53 and result_dict[
+                                                    'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                                    # analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                                    send_message('Победитель: ' + radiant_team_name)
+                                            else:
+                                                if result_dict["dotafix.github"][0] > 60 and \
+                                                        result_dict["dotafix.github"][
+                                                            1] > 60 and \
+                                                        result_dict["dotafix.github"][2] > 60 \
+                                                        and result_dict['protracker_pos1'] > 53 and result_dict[
+                                                    'pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                                    if matchups['radiant_pos1'] not in good_heroes and matchups[
+                                                        'dire_pos1'] not in good_heroes:
+                                                        send_message('BAD HEROES')
+                                                    # analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                                    send_message(result_dict)
+                                                    send_message('ТУРНИК ТИР ' + str(
+                                                        match['tournament'][
+                                                            'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                        best_of) + '\n' + 'Текущий счет: ' + str(
+                                                        score) + '\n' + 'Пик лучше у ' + radiant_team_name)
 
 
                                         #dire
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and \
                                             result_dict["dotafix.github"][2] < 50 and result_dict[
                                                 'protracker_pos1'] < 50 and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
-                                            for key in final_time:
-                                                if final_time[key] > 0:#сильнее radiant
-                                                    send_message('На ' + str(key) + ' минуте ' + dire_team_name + ' слабее на ' + str(int(final_time[key])) + '%')
-                                            send_message(result_dict)
-                                            send_message('ТУРНИК ТИР ' + str(
-                                                match['tournament'][
-                                                    'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                best_of) + '\n' + 'Текущий счет: ' + str(
-                                                score) + '\n' + 'Пик лучше у ' + dire_team_name)
-                                            if matchups['radiant_pos1'] not in good_heroes and matchups[
-                                                'dire_pos1'] not in good_heroes:
-                                                send_message('BAD HEROES')
-                                            if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
-                                                if result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
-                                                    1] < 46 and \
-                                                        result_dict["dotafix.github"][2] < 46 \
-                                                        and result_dict['protracker_pos1'] < 47 and result_dict[
-                                                    'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
-                                                    # analyze_results(result_dict, dire_team_name, radiant_team_name)
-                                                    send_message('Победитель: ' + dire_team_name)
+                                            if 'ESportsBattle' not in match['tournament']['name']:
+                                                for key in final_time:
+                                                    if final_time[key] > 0:#сильнее radiant
+                                                        send_message('На ' + str(key) + ' минуте ' + dire_team_name + ' слабее на ' + str(int(final_time[key])) + '%')
+                                                send_message(result_dict)
+                                                send_message('ТУРНИК ТИР ' + str(
+                                                    match['tournament'][
+                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                    best_of) + '\n' + 'Текущий счет: ' + str(
+                                                    score) + '\n' + 'Пик лучше у ' + dire_team_name)
+                                                if matchups['radiant_pos1'] not in good_heroes and matchups[
+                                                    'dire_pos1'] not in good_heroes:
+                                                    send_message('BAD HEROES')
+                                                if result_dict["pos1_vs_cores"] != [] and result_dict['pos1_vs_team'] != []:
+                                                    if result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
+                                                        1] < 46 and \
+                                                            result_dict["dotafix.github"][2] < 46 \
+                                                            and result_dict['protracker_pos1'] < 47 and result_dict[
+                                                        'pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                                        # analyze_results(result_dict, dire_team_name, radiant_team_name)
+                                                        send_message('Победитель: ' + dire_team_name)
+                                            else:
+                                                if result_dict["dotafix.github"][0] < 40 and result_dict["dotafix.github"][1] < 40 and \
+                                            result_dict["dotafix.github"][2] < 40 and result_dict[
+                                                'protracker_pos1'] < 47 and result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                                    send_message(result_dict)
+                                                    send_message('ТУРНИК ТИР ' + str(
+                                                        match['tournament'][
+                                                            'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                        best_of) + '\n' + 'Текущий счет: ' + str(
+                                                        score) + '\n' + 'Пик лучше у ' + dire_team_name)
+                                                    if matchups['radiant_pos1'] not in good_heroes and matchups[
+                                                        'dire_pos1'] not in good_heroes:
+                                                        send_message('BAD HEROES')
                                         else:
-                                            send_message('ТУРНИК ТИР ' + str(
-                                                match['tournament'][
-                                                    'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                best_of) + '\n' + 'Текущий счет: ' + str(
-                                                score))
-                                            send_message(result_dict)
-                                            send_message('Ставка неудачная')
+                                            if 'ESportsBattle' not in match['tournament']['name']:
+                                                send_message('ТУРНИК ТИР ' + str(
+                                                    match['tournament'][
+                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                    best_of) + '\n' + 'Текущий счет: ' + str(
+                                                    score))
+                                                send_message(result_dict)
+                                                send_message('Ставка неудачная')
                                 else:
-                                    import time
                                     flag_sleep = True
-                                    print('draft sleep')
-                                    time.sleep(30)
                             else:
-                                import time
                                 flag_sleep = True
-                                print('draft sleep')
-                                time.sleep(30)
+        if flag_sleep:
+            print('draft sleep')
+            time.sleep(30)
         if live_matches_flag:
             import time
             print('идет матч, сплю 2 минуты')
             time.sleep(120)
         #pause
         for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+            if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] == 'pause':
                     live_matches_flag = True
                     import time
@@ -567,7 +597,7 @@ def live_matches():
         #waiting matches
         if not live_matches_flag:
             for match in json_data['rows']:
-                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+                if match['tournament']['tier'] in {1, 2, 3}:
                     if match['status'] == 'waiting':
                         map_id = match['id']
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
