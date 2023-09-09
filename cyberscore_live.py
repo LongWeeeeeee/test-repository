@@ -464,7 +464,7 @@ def live_matches():
                                                 send_message('Пик лучше у ' + radiant_team_name)
 
                                             else:
-                                                if result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                                if result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
                                                     radiant_results()
                                                     send_message(result_dict)
                                                     send_message('Пик лучше у ' + radiant_team_name)
@@ -490,7 +490,7 @@ def live_matches():
                                                 send_message('Пик лучше у ' + dire_team_name)
 
                                             else:
-                                                if result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                                if result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
                                                     radiant_results()
                                                     send_message(result_dict)
                                                     send_message('Пик лучше у ' + dire_team_name)
