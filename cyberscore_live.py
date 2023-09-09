@@ -453,65 +453,62 @@ def live_matches():
                                     send_message(result_dict)
                                     print('result analyze')
                                     #вывод результатов
-                                    if (result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
-                                        1] > 54 and result_dict["dotafix.github"][2] > 54 and result_dict[
-                                        'protracker_pos1'] > 53):
-                                        duration()
-                                        if matchups['radiant_pos1'] not in good_heroes and matchups[
-                                            'dire_pos1'] not in good_heroes:
-                                            send_message('BAD HEROES')
-                                        if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                            radiant_results()
-                                            send_message(result_dict)
-                                            send_message('Пик лучше у ' + radiant_team_name)
+                                    if result_dict['dotafix.github'] != [] and result_dict['protracker_pos1'] != []:
+                                        if (result_dict["dotafix.github"][0] > 54 and result_dict["dotafix.github"][
+                                            1] > 54 and result_dict["dotafix.github"][2] > 54 and result_dict[
+                                            'protracker_pos1'] > 53):
+                                            duration()
 
-                                        else:
-                                            if result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
                                                 radiant_results()
                                                 send_message(result_dict)
                                                 send_message('Пик лучше у ' + radiant_team_name)
-                                                if result_dict["dotafix.github"][0] > 60 and \
-                                                        result_dict["dotafix.github"][
-                                                            1] > 54 and \
-                                                        result_dict["dotafix.github"][2] > 60 \
-                                                        and result_dict['protracker_pos1'] > 53 and result_dict[
-                                                    'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
-                                                    send_message('Победитель ' + radiant_team_name)
 
+                                            else:
+                                                if result_dict['pos1_vs_team'] > 3 and result_dict['pos1_vs_cores'] > 1:
+                                                    radiant_results()
+                                                    send_message(result_dict)
+                                                    send_message('Пик лучше у ' + radiant_team_name)
+                                                    if result_dict["dotafix.github"][0] > 60 and \
+                                                            result_dict["dotafix.github"][
+                                                                1] > 54 and \
+                                                            result_dict["dotafix.github"][2] > 60 \
+                                                            and result_dict['protracker_pos1'] > 53 and result_dict[
+                                                        'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
+                                                        send_message('Победитель ' + radiant_team_name)
 
-                                    elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
-                                        1] < 46 and \
-                                            result_dict["dotafix.github"][2] < 46 and result_dict[
-                                        'protracker_pos1'] < 47:
-                                        # duration()
-                                        if matchups['radiant_pos1'] not in good_heroes and matchups[
-                                            'dire_pos1'] not in good_heroes:
-                                            send_message('BAD HEROES')
-                                        if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                            radiant_results()
-                                            send_message(result_dict)
-                                            send_message('Пик лучше у ' + dire_team_name)
-
-                                        else:
-                                            if result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                        elif result_dict["dotafix.github"][0] < 46 and result_dict["dotafix.github"][
+                                            1] < 46 and \
+                                                result_dict["dotafix.github"][2] < 46 and result_dict[
+                                            'protracker_pos1'] < 47:
+                                            # duration()
+                                            if matchups['radiant_pos1'] not in good_heroes and matchups[
+                                                'dire_pos1'] not in good_heroes:
+                                                send_message('BAD HEROES')
+                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
                                                 radiant_results()
                                                 send_message(result_dict)
                                                 send_message('Пик лучше у ' + dire_team_name)
-                                                if result_dict["dotafix.github"][0] < 40 and \
-                                                        result_dict["dotafix.github"][
-                                                            1] < 46 and \
-                                                        result_dict["dotafix.github"][2] < 40 \
-                                                        and result_dict['protracker_pos1'] < 40 and result_dict[
-                                                    'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
-                                                    send_message('Победитель ' + dire_team_name)
-                                    else:
-                                        send_message('ТУРНИК ТИР ' + str(
-                                            match['tournament'][
-                                                'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                            best_of) + '\n' + 'Текущий счет: ' + str(
-                                            score))
-                                        send_message(result_dict)
-                                        send_message('Ставка неудачная')
+
+                                            else:
+                                                if result_dict['pos1_vs_team'] < -3 and result_dict['pos1_vs_cores'] < -1:
+                                                    radiant_results()
+                                                    send_message(result_dict)
+                                                    send_message('Пик лучше у ' + dire_team_name)
+                                                    if result_dict["dotafix.github"][0] < 40 and \
+                                                            result_dict["dotafix.github"][
+                                                                1] < 46 and \
+                                                            result_dict["dotafix.github"][2] < 40 \
+                                                            and result_dict['protracker_pos1'] < 40 and result_dict[
+                                                        'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
+                                                        send_message('Победитель ' + dire_team_name)
+                                        else:
+                                            radiant_results()
+                                            send_message(result_dict)
+                                            send_message('Ставка неудачная')
+                                        if matchups['radiant_pos1'] not in good_heroes or matchups[
+                                                'dire_pos1'] not in good_heroes:
+                                                send_message('BAD HEROES')
                                 else:
                                     flag_sleep = True
                             else:
