@@ -519,9 +519,9 @@ def live_matches():
                 time.sleep(15)
         if live_matches_flag and not flag_sleep:
             import time
-            print('идет матч, сплю 2 минуты')
+            print('идет матч, сплю 4 минуты')
             first_time = False
-            time.sleep(120)
+            time.sleep(240)
         #pause
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2}:
