@@ -505,6 +505,11 @@ def live_matches():
                                                         'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
                                                         send_message('Победитель ' + dire_team_name)
                                         else:
+                                            print('ТУРНИК ТИР ' + str(
+                                                match['tournament'][
+                                                    'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                                best_of) + '\n' + 'Текущий счет: ' + str(
+                                                score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                             print(result_dict)
                                             print('Ставка неудачная')
                                 else:
