@@ -524,7 +524,7 @@ def live_matches():
             time.sleep(240)
         #pause
         for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2}:
+            if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] == 'pause':
                     live_matches_flag = True
                     import time
