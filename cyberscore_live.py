@@ -534,7 +534,7 @@ def live_matches():
         if not live_matches_flag:
             for match in json_data['rows']:
                 if match['tournament']['tier'] in {1, 2}:
-                    if match['status'] == 'waiting' and 'ESportsBattle' not in match['tournament']['name']:
+                    if match['status'] == 'waiting':
                         map_id = match['id']
                         match_url = f'https://cyberscore.live/en/matches/{map_id}/'
                         data = requests.get(match_url).text
