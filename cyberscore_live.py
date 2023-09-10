@@ -70,7 +70,6 @@ def live_matches():
         draft_flag = False
         #live matches
         for match in json_data['rows']:
-            draft_flag = False
             if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] in {'online'}:
                     live_matches_flag = True
