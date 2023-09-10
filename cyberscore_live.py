@@ -66,11 +66,13 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         live_matches_flag = False
+        pause_flag = False
+        draft_flag = False
         #live matches
         for match in json_data['rows']:
-            flag_sleep = False
+            draft_flag = False
             if match['tournament']['tier'] in {1, 2, 3}:
-                if match['status'] in {'online', 'draft'}:
+                if match['status'] in {'online'}:
                     live_matches_flag = True
                     map_id = match['id']
                     # exe_path = os.path.dirname(sys.executable)
@@ -515,54 +517,57 @@ def live_matches():
                                             print(result_dict)
                                             print('Ставка неудачная')
                                 else:
-                                    flag_sleep = True
+                                    draft_flag = True
                             else:
-                                flag_sleep = True
-        if flag_sleep:
+                                draft_flag = True
+                elif match['status'] == 'pause':
+                    pause_flag = True
+                elif match['status'] == 'draft':
+                    draft_flag = True
+        if draft_flag:
             if first_time:
+                print('first time draft, sleep 2m')
                 time.sleep(120)
             else:
                 print('draft sleep')
                 time.sleep(15)
-        if live_matches_flag and not flag_sleep:
+        elif live_matches_flag and not draft_flag:
             import time
             print('идет матч, сплю 4 минуты')
             first_time = False
             time.sleep(240)
         #pause
-        for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2, 3}:
-                if match['status'] == 'pause':
-                    live_matches_flag = True
-                    import time
-                    print('pause sleep')
-                    time.sleep(120)
+        elif pause_flag:
+            import time
+            print('pause sleep')
+            time.sleep(120)
+        else:
         #waiting matches
-        if not live_matches_flag:
-            for match in json_data['rows']:
-                if match['tournament']['tier'] in {1, 2}:
-                    if match['status'] == 'waiting':
-                        map_id = match['id']
-                        match_url = f'https://cyberscore.live/en/matches/{map_id}/'
-                        data = requests.get(match_url).text
-                        soup = BeautifulSoup(data, 'lxml')
-                        json_data = soup.find('script', type='application/ld+json').text
-                        json_data = json.loads(json_data)
-                        time_str = json_data['endDate']
-                        datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z')
-                        datetime_obj_utc = datetime_obj.replace(tzinfo=None)
-                        current_date = datetime.datetime.now()
-                        time_difference = datetime_obj_utc - current_date
-                        seconds = time_difference.total_seconds()
-                        import time
-                        if seconds > 0:
-                            print('waiting sleep for ' + str(seconds/60))
-                            time.sleep(seconds + 60)
-                            break
-                        else:
-                            print('waiting for match sleep')
-                            time.sleep(60)
-                            break
+            if not live_matches_flag:
+                for match in json_data['rows']:
+                    if match['tournament']['tier'] in {1, 2}:
+                        if match['status'] == 'waiting':
+                            map_id = match['id']
+                            match_url = f'https://cyberscore.live/en/matches/{map_id}/'
+                            data = requests.get(match_url).text
+                            soup = BeautifulSoup(data, 'lxml')
+                            json_data = soup.find('script', type='application/ld+json').text
+                            json_data = json.loads(json_data)
+                            time_str = json_data['endDate']
+                            datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z')
+                            datetime_obj_utc = datetime_obj.replace(tzinfo=None)
+                            current_date = datetime.datetime.now()
+                            time_difference = datetime_obj_utc - current_date
+                            seconds = time_difference.total_seconds()
+                            import time
+                            if seconds > 0:
+                                print('waiting sleep for ' + str(seconds/60))
+                                time.sleep(seconds + 60)
+                                break
+                            else:
+                                print('waiting for match sleep')
+                                time.sleep(60)
+                                break
 
 
 
