@@ -459,7 +459,7 @@ def live_matches():
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
                                             'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
                                             # duration()
-                                            if match['tournament']['tier'] != 3:
+                                            if match['tournament']['tier'] not in {3, 2}:
                                                 radiant_results()
                                                 send_message(result_dict)
                                                 send_message('Пик лучше у ' + radiant_team_name)
@@ -468,20 +468,20 @@ def live_matches():
                                             else:
                                                 if result_dict["dotafix.github"][0] > 60 and \
                                                         result_dict["dotafix.github"][
-                                                            1] > 54 and \
+                                                            1] > 60 and \
                                                         result_dict["dotafix.github"][2] > 60 \
-                                                        and result_dict['protracker_pos1'] > 53 and result_dict[
-                                                    'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
-                                                    if match['tournament']['tier'] != 3:
+                                                        and result_dict['protracker_pos1'] > 55 and result_dict[
+                                                    'pos1_vs_team'] > 5 and result_dict['pos1_vs_cores'] > 3:
+                                                    if match['tournament']['tier'] in {3, 2}:
                                                         radiant_results()
                                                         send_message(result_dict)
-                                                        send_message('Пик лучше у ' + radiant_team_name)
+                                                        send_message('Победитель ' + radiant_team_name)
                                                     send_message('Победитель ' + radiant_team_name)
 
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50 \
                                                 and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
                                             # duration()
-                                            if match['tournament']['tier'] != 3:
+                                            if match['tournament']['tier'] not in {3, 2}:
                                                 radiant_results()
                                                 send_message(result_dict)
                                                 send_message('Пик лучше у ' + dire_team_name)
@@ -490,14 +490,14 @@ def live_matches():
                                             else:
                                                 if result_dict["dotafix.github"][0] < 40 and \
                                                         result_dict["dotafix.github"][
-                                                            1] < 46 and \
+                                                            1] < 40 and \
                                                         result_dict["dotafix.github"][2] < 40 \
-                                                        and result_dict['protracker_pos1'] < 40 and result_dict[
-                                                    'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
-                                                    if match['tournament']['tier'] == 3:
+                                                        and result_dict['protracker_pos1'] < 45 and result_dict[
+                                                    'pos1_vs_team'] < -5 and result_dict['pos1_vs_cores'] < -3:
+                                                    if match['tournament']['tier'] in {3, 2}:
                                                         radiant_results()
                                                         send_message(result_dict)
-                                                        send_message('Пик лучше у ' + dire_team_name)
+                                                        send_message('Победитель ' + dire_team_name)
                                                     send_message('Победитель ' + dire_team_name)
                                         else:
                                             print('ТУРНИК ТИР ' + str(
@@ -532,7 +532,7 @@ def live_matches():
         #waiting matches
             if not live_matches_flag:
                 for match in json_data['rows']:
-                    if match['tournament']['tier'] in {1, 2}:
+                    if match['tournament']['tier'] in {1, 2, 3}:
                         if match['status'] == 'waiting':
                             map_id = match['id']
                             match_url = f'https://cyberscore.live/en/matches/{map_id}/'
