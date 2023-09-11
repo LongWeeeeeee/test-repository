@@ -405,41 +405,39 @@ def live_matches():
                                     ids.append(map_id)
                                     f.seek(0)
                                     json.dump(ids, f)
-                                    # duration
-                                    def duration():
-                                        game_time_radiant, game_time_dire = {}, {}
-                                        for hero_id in radiant_hero_ids:
-                                            radiant_duration = requests.get(
-                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                            radiant_duration_json = json.loads(radiant_duration)
-                                            for moment in radiant_duration_json:
-                                                if int(moment['duration_bin'] / 60) not in game_time_radiant:
-                                                    game_time_radiant[int(moment['duration_bin'] / 60)] = [
-                                                        moment['wins'] / moment['games_played'] * 100]
-                                                else:
-                                                    game_time_radiant[int(moment['duration_bin'] / 60)].append(
-                                                        moment['wins'] / moment['games_played'] * 100)
-                                        for time in game_time_radiant:
-                                            game_time_radiant[time] = sum(game_time_radiant[time]) / 5
-                                        for hero_id in dire_hero_ids:
-                                            dire_duration = requests.get(
-                                                f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
-                                            dire_duration_json = json.loads(dire_duration)
-                                            for moment in dire_duration_json:
-                                                if int(moment['duration_bin'] / 60) not in game_time_dire:
-                                                    game_time_dire[int(moment['duration_bin'] / 60)] = [
-                                                        moment['wins'] / moment['games_played'] * 100]
-                                                else:
-                                                    game_time_dire[int(moment['duration_bin'] / 60)].append(
-                                                        moment['wins'] / moment['games_played'] * 100)
-                                        for time in game_time_dire:
-                                            game_time_dire[time] = sum(game_time_dire[time]) / 5
-                                        final_time = {}
-                                        for key in game_time_radiant:
-                                            if key in game_time_dire:
-                                                final_time[key] = game_time_radiant[key] - game_time_dire[key]
-                                        final_time = dict(sorted(final_time.items()))
-                                        return(final_time)
+                                    # # duration
+                                    # game_time_radiant, game_time_dire = {}, {}
+                                    # for hero_id in radiant_hero_ids:
+                                    #     radiant_duration = requests.get(
+                                    #         f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                    #     radiant_duration_json = json.loads(radiant_duration)
+                                    #     for moment in radiant_duration_json:
+                                    #         if int(moment['duration_bin'] / 60) not in game_time_radiant:
+                                    #             game_time_radiant[int(moment['duration_bin'] / 60)] = [
+                                    #                 moment['wins'] / moment['games_played'] * 100]
+                                    #         else:
+                                    #             game_time_radiant[int(moment['duration_bin'] / 60)].append(
+                                    #                 moment['wins'] / moment['games_played'] * 100)
+                                    # for time in game_time_radiant:
+                                    #     game_time_radiant[time] = sum(game_time_radiant[time]) / 5
+                                    # for hero_id in dire_hero_ids:
+                                    #     dire_duration = requests.get(
+                                    #         f'https://api.opendota.com/api/heroes/{hero_id}/durations').text
+                                    #     dire_duration_json = json.loads(dire_duration)
+                                    #     for moment in dire_duration_json:
+                                    #         if int(moment['duration_bin'] / 60) not in game_time_dire:
+                                    #             game_time_dire[int(moment['duration_bin'] / 60)] = [
+                                    #                 moment['wins'] / moment['games_played'] * 100]
+                                    #         else:
+                                    #             game_time_dire[int(moment['duration_bin'] / 60)].append(
+                                    #                 moment['wins'] / moment['games_played'] * 100)
+                                    # for time in game_time_dire:
+                                    #     game_time_dire[time] = sum(game_time_dire[time]) / 5
+                                    # final_time = {}
+                                    # for key in game_time_radiant:
+                                    #     if key in game_time_dire:
+                                    #         final_time[key] = game_time_radiant[key] - game_time_dire[key]
+                                    # final_time = dict(sorted(final_time.items()))
 
                                     # for key in final_time:
                                     #     if final_time[key] < 0:
@@ -452,53 +450,36 @@ def live_matches():
                                                 'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                        send_message(result_dict)
+                                        send_message('Обязательно СВЕРЬ КОМАНДЫ')
                                     print('result analyze')
                                     #вывод результатов
                                     if [] not in result_dict.values():
-                                        if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                        if result_dict["dotafix.github"][0] > 60 and \
+                                                result_dict["dotafix.github"][
+                                                    1] > 60 and \
+                                                result_dict["dotafix.github"][2] > 60 \
+                                                and result_dict['protracker_pos1'] > 55 and result_dict[
+                                            'pos1_vs_team'] > 5 and result_dict['pos1_vs_cores'] > 3:
+                                            radiant_results()
+                                            send_message('Победитель ' + radiant_team_name)
+                                        elif result_dict["dotafix.github"][0] < 40 and \
+                                                result_dict["dotafix.github"][
+                                                    1] < 40 and \
+                                                result_dict["dotafix.github"][2] < 40 \
+                                                and result_dict['protracker_pos1'] < 45 and result_dict[
+                                            'pos1_vs_team'] < -5 and result_dict['pos1_vs_cores'] < -3:
+                                            radiant_results()
+                                            send_message('Победитель ' + dire_team_name)
+                                        elif result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
-                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
-                                            # duration()
-                                            if match['tournament']['tier'] not in {3, 2}:
-                                                radiant_results()
-                                                send_message(result_dict)
-                                                send_message('Пик лучше у ' + radiant_team_name)
-                                                send_message('Обязательно СВЕРЬ КОМАНДЫ')
-
-                                            else:
-                                                if result_dict["dotafix.github"][0] > 60 and \
-                                                        result_dict["dotafix.github"][
-                                                            1] > 60 and \
-                                                        result_dict["dotafix.github"][2] > 60 \
-                                                        and result_dict['protracker_pos1'] > 55 and result_dict[
-                                                    'pos1_vs_team'] > 5 and result_dict['pos1_vs_cores'] > 3:
-                                                    if match['tournament']['tier'] in {3, 2}:
-                                                        radiant_results()
-                                                        send_message(result_dict)
-                                                        send_message('Победитель ' + radiant_team_name)
-                                                    send_message('Победитель ' + radiant_team_name)
-
+                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0 and 'ESportsBattle' not in match['tournament']['name']:
+                                            radiant_results()
+                                            send_message('Пик лучше у ' + radiant_team_name)
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50 \
-                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
-                                            # duration()
-                                            if match['tournament']['tier'] not in {3, 2}:
-                                                radiant_results()
-                                                send_message(result_dict)
-                                                send_message('Пик лучше у ' + dire_team_name)
-                                                send_message('Обязательно СВЕРЬ КОМАНДЫ')
-
-                                            else:
-                                                if result_dict["dotafix.github"][0] < 40 and \
-                                                        result_dict["dotafix.github"][
-                                                            1] < 40 and \
-                                                        result_dict["dotafix.github"][2] < 40 \
-                                                        and result_dict['protracker_pos1'] < 45 and result_dict[
-                                                    'pos1_vs_team'] < -5 and result_dict['pos1_vs_cores'] < -3:
-                                                    if match['tournament']['tier'] in {3, 2}:
-                                                        radiant_results()
-                                                        send_message(result_dict)
-                                                        send_message('Победитель ' + dire_team_name)
-                                                    send_message('Победитель ' + dire_team_name)
+                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0 and 'ESportsBattle' not in match['tournament']['name']:
+                                            radiant_results()
+                                            send_message('Пик лучше у ' + dire_team_name)
                                         else:
                                             print('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
