@@ -524,13 +524,9 @@ def live_matches():
                 elif match['status'] == 'draft':
                     draft_flag = True
         if draft_flag:
-            if first_time:
-                print('first time draft, sleep 2m')
-                time.sleep(120)
-            else:
-                print('draft sleep')
-                time.sleep(15)
-        elif live_matches_flag and not draft_flag:
+            print('draft sleep')
+            time.sleep(30)
+        elif live_matches_flag:
             import time
             print('идет матч, сплю 4 минуты')
             first_time = False
