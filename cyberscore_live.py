@@ -92,7 +92,7 @@ def live_matches():
                             ranks_dire = {}
                             pos_rank = {}
                             c = 0
-                            result_dict = {"winner": [], "dotafix.github": [], "protracker_pos1": [],
+                            result_dict = {"dotafix.github": [], "protracker_pos1": [],
                                            "pos1_vs_team": [],
                                            "pos1_vs_cores": []}
                             best_of = match['best_of']
@@ -454,59 +454,51 @@ def live_matches():
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                     print('result analyze')
                                     #вывод результатов
-                                    if result_dict['dotafix.github'] != [] and result_dict['protracker_pos1'] != []:
-                                        if (result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+                                    if [] not in result_dict.values():
+                                        if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
-                                            'protracker_pos1'] > 50):
+                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
                                             # duration()
-
-                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                                if match['tournament']['tier'] != 3:
-                                                    radiant_results()
-                                                    send_message(result_dict)
-                                                    send_message('Пик лучше у ' + radiant_team_name)
-                                                    send_message('Обязательно СВЕРЬ КОМАНДЫ')
+                                            if match['tournament']['tier'] != 3:
+                                                radiant_results()
+                                                send_message(result_dict)
+                                                send_message('Пик лучше у ' + radiant_team_name)
+                                                send_message('Обязательно СВЕРЬ КОМАНДЫ')
 
                                             else:
-                                                if result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                                if result_dict["dotafix.github"][0] > 60 and \
+                                                        result_dict["dotafix.github"][
+                                                            1] > 54 and \
+                                                        result_dict["dotafix.github"][2] > 60 \
+                                                        and result_dict['protracker_pos1'] > 53 and result_dict[
+                                                    'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
                                                     if match['tournament']['tier'] != 3:
                                                         radiant_results()
                                                         send_message(result_dict)
                                                         send_message('Пик лучше у ' + radiant_team_name)
-                                                    if result_dict["dotafix.github"][0] > 60 and \
-                                                            result_dict["dotafix.github"][
-                                                                1] > 54 and \
-                                                            result_dict["dotafix.github"][2] > 60 \
-                                                            and result_dict['protracker_pos1'] > 53 and result_dict[
-                                                        'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 3:
-                                                        send_message('Победитель ' + radiant_team_name)
+                                                    send_message('Победитель ' + radiant_team_name)
 
-                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
-                                            1] < 50 and \
-                                                result_dict["dotafix.github"][2] < 50 and result_dict[
-                                            'protracker_pos1'] < 50:
+                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50 \
+                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
                                             # duration()
-
-                                            if result_dict['pos1_vs_team'] == [] and result_dict['pos1_vs_cores'] == []:
-                                                if match['tournament']['tier'] != 3:
-                                                    radiant_results()
-                                                    send_message(result_dict)
-                                                    send_message('Пик лучше у ' + dire_team_name)
-                                                    send_message('Обязательно СВЕРЬ КОМАНДЫ')
+                                            if match['tournament']['tier'] != 3:
+                                                radiant_results()
+                                                send_message(result_dict)
+                                                send_message('Пик лучше у ' + dire_team_name)
+                                                send_message('Обязательно СВЕРЬ КОМАНДЫ')
 
                                             else:
-                                                if result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
-                                                    if match['tournament']['tier'] != 3:
+                                                if result_dict["dotafix.github"][0] < 40 and \
+                                                        result_dict["dotafix.github"][
+                                                            1] < 46 and \
+                                                        result_dict["dotafix.github"][2] < 40 \
+                                                        and result_dict['protracker_pos1'] < 40 and result_dict[
+                                                    'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
+                                                    if match['tournament']['tier'] == 3:
                                                         radiant_results()
                                                         send_message(result_dict)
                                                         send_message('Пик лучше у ' + dire_team_name)
-                                                    if result_dict["dotafix.github"][0] < 40 and \
-                                                            result_dict["dotafix.github"][
-                                                                1] < 46 and \
-                                                            result_dict["dotafix.github"][2] < 40 \
-                                                            and result_dict['protracker_pos1'] < 40 and result_dict[
-                                                        'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -3:
-                                                        send_message('Победитель ' + dire_team_name)
+                                                    send_message('Победитель ' + dire_team_name)
                                         else:
                                             print('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
