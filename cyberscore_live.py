@@ -457,31 +457,40 @@ def live_matches():
                                     print('result analyze')
                                     #вывод результатов
                                     if [] not in result_dict.values():
-                                        if result_dict["dotafix.github"][0] > 60 and \
-                                                result_dict["dotafix.github"][
-                                                    1] > 60 and \
-                                                result_dict["dotafix.github"][2] > 60 \
-                                                and result_dict['protracker_pos1'] > 55 and result_dict[
-                                            'pos1_vs_team'] > 5 and result_dict['pos1_vs_cores'] > 3:
-                                            radiant_results()
-                                            send_message('Победитель ' + radiant_team_name)
-                                        elif result_dict["dotafix.github"][0] < 40 and \
-                                                result_dict["dotafix.github"][
-                                                    1] < 40 and \
-                                                result_dict["dotafix.github"][2] < 40 \
-                                                and result_dict['protracker_pos1'] < 45 and result_dict[
-                                            'pos1_vs_team'] < -5 and result_dict['pos1_vs_cores'] < -3:
-                                            radiant_results()
-                                            send_message('Победитель ' + dire_team_name)
-                                        elif result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
+
+                                        if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
-                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0 and 'ESportsBattle' not in match['tournament']['name']:
-                                            radiant_results()
-                                            send_message('Пик лучше у ' + radiant_team_name)
+                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                            if 'ESportsBattle' not in match['tournament']['name']:
+                                                radiant_results()
+                                                send_message('Пик лучше у ' + radiant_team_name)
+                                            if (result_dict["dotafix.github"][0] > 60 and \
+                                                    result_dict["dotafix.github"][
+                                                        1] > 60 and \
+                                                    result_dict["dotafix.github"][2] > 60) or \
+                                                    (result_dict['protracker_pos1'] > 56 and result_dict[
+                                                'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 6):
+                                                if 'ESportsBattle' in match['tournament']['name']:
+                                                    radiant_results()
+                                                    send_message('Победитель ' + radiant_team_name)
+                                                else:
+                                                    send_message('Победитель ' + radiant_team_name)
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50 \
-                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0 and 'ESportsBattle' not in match['tournament']['name']:
-                                            radiant_results()
-                                            send_message('Пик лучше у ' + dire_team_name)
+                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                            if 'ESportsBattle' not in match['tournament']['name']:
+                                                radiant_results()
+                                                send_message('Пик лучше у ' + dire_team_name)
+                                            if (result_dict["dotafix.github"][0] < 40 and \
+                                                 result_dict["dotafix.github"][
+                                                     1] < 40 and \
+                                                 result_dict["dotafix.github"][2] < 40) \
+                                                 or (result_dict['protracker_pos1'] < 44 and result_dict[
+                                                     'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -6):
+                                                if 'ESportsBattle' in match['tournament']['name']:
+                                                    radiant_results()
+                                                    send_message('Победитель ' + dire_team_name)
+                                                else:
+                                                    send_message('Победитель ' + dire_team_name)
                                         else:
                                             print('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
