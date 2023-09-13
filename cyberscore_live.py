@@ -451,6 +451,8 @@ def live_matches():
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         send_message(result_dict)
+                                        if matchups['radiant_pos1'] not in good_heroes or matchups['dire_pos1'] not in good_heroes:
+                                            send_message('BAD HEROES')
                                         send_message('Обязательно СВЕРЬ КОМАНДЫ')
                                     print('result analyze')
                                     #вывод результатов
@@ -511,8 +513,7 @@ def live_matches():
             time.sleep(120)
         else:
         #waiting matches
-            if not live_matches_flag:
-                for match in json_data['rows']:
+            for match in json_data['rows']:
                     if match['tournament']['tier'] in {1, 2, 3}:
                         if match['status'] == 'waiting':
                             map_id = match['id']
