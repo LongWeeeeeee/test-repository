@@ -261,8 +261,6 @@ def live_matches():
                                         json_map['team_radiant']['name']
                                     dire_team_name = json_map['team_dire'][
                                         'name']
-                                    map_winner = json_map['winner']
-                                    result_dict['winner'] = map_winner
                                     options = Options()
                                     options.add_argument("--start-maximized")
                                     options.add_argument("--no-sandbox")
@@ -494,7 +492,7 @@ def live_matches():
                                                 else:
                                                     send_message('Победитель ' + dire_team_name)
                                             else:
-                                                send_message('Ставка рисковая, максимум 10к')
+                                                send_message('Ставка рисковая, максимум 5к')
                                         else:
                                             print('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
