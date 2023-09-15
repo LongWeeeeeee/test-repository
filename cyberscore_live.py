@@ -450,7 +450,7 @@ def live_matches():
                                         send_message(result_dict)
                                         if matchups['radiant_pos1'] not in good_heroes or matchups['dire_pos1'] not in good_heroes:
                                             send_message('BAD HEROES')
-                                        send_message('Обязательно СВЕРЬ КОМАНДЫ')
+                                        send_message('Обязательно СВЕРЬ КОМАНДЫ' + '\n' + 'Максимальная ставка 5000 если команды равны +-')
                                     print('result analyze')
                                     #вывод результатов
                                     if [] not in result_dict.values():
