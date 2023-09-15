@@ -241,18 +241,19 @@ def live_matches():
                                                 pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                    for hero in radiant_hero_names:
-                                        if hero in good_heroes:
-                                            c+=1
-                                            matchups['radiant_pos1'] = hero
-                                    if c >= 2: send_message('Bad heroes')
-                                    c = 0
-                                    for hero in dire_hero_names:
-                                        if hero in good_heroes:
-                                            c+=1
-                                            matchups['dire_pos1'] = hero
-                                    if c >= 2: send_message('Bad heroes')
-                                    # if matchups['dire_pos1'] != [] and matchups['radiant_pos1'] != [] and [] in matchups:
+                                    if not matchups['radiant_pos1'] in good_heroes and not matchups['dire_pos1'] in good_heroes:
+                                        for hero in radiant_hero_names:
+                                            if hero in good_heroes:
+                                                c+=1
+                                                matchups['radiant_pos1'] = hero
+                                        if c >= 2: send_message('Bad heroes')
+                                        c = 0
+                                        for hero in dire_hero_names:
+                                            if hero in good_heroes:
+                                                c+=1
+                                                matchups['dire_pos1'] = hero
+                                        if c >= 2: send_message('Bad heroes')
+                                        # if matchups['dire_pos1'] != [] and matchups['radiant_pos1'] != [] and [] in matchups:
 
                                     radiant_values = 0
                                     dire_values = 0
@@ -400,9 +401,7 @@ def live_matches():
                                         # if diff > 1 or diff < -1
                                         result_dict['pos1_vs_cores'] = diff
                                         #
-                                    ids.append(map_id)
-                                    f.seek(0)
-                                    json.dump(ids, f)
+
                                     # # duration
                                     # game_time_radiant, game_time_dire = {}, {}
                                     # for hero_id in radiant_hero_ids:
@@ -502,6 +501,9 @@ def live_matches():
                                                 score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                             print(result_dict)
                                             print('Ставка неудачная')
+                                        ids.append(map_id)
+                                        f.seek(0)
+                                        json.dump(ids, f)
                                 else:
                                     draft_flag = True
                             else:
