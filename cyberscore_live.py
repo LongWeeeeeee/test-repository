@@ -468,6 +468,7 @@ def live_matches():
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
                                                 else:
+                                                    radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
                                             else:
                                                 if 'ESportsBattle' not in match['tournament']['name']:
