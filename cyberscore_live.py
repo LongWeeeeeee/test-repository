@@ -178,6 +178,7 @@ def live_matches():
                                                         radiant_hero['player'][
                                                             "game_name"].lower() and radiant_player['player'][
                                                     'role'] == 4:
+                                                    matchups['radiant_pos4'] = radiant_hero['hero']['label']
                                                     for guy in ranks_radiant:
                                                         if guy == radiant_player['player']["game_name"].lower():
                                                             if ranks_radiant[guy] != '-':
@@ -187,6 +188,7 @@ def live_matches():
                                                         radiant_hero['player'][
                                                             "game_name"].lower() and radiant_player['player'][
                                                     'role'] == 5:
+                                                    matchups['radiant_pos5'] = radiant_hero['hero']['label']
                                                     for guy in ranks_radiant:
                                                         if guy == radiant_player['player']["game_name"].lower():
                                                             if ranks_radiant[guy] != '-':
@@ -229,6 +231,7 @@ def live_matches():
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 4:
+                                                    matchups['dire_pos4'] = dire_hero['hero']['label']
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
                                                             if 4 in pos_rank and ranks_radiant[guy] != '-':
@@ -236,6 +239,7 @@ def live_matches():
                                                 elif dire_player['player']["game_name"].lower() == dire_hero['player'][
                                                     "game_name"].lower() and \
                                                         dire_player['player']['role'] == 5:
+                                                    matchups['dire_pos5'] = dire_hero['hero']['label']
                                                     for guy in ranks_dire:
                                                         if guy == dire_player['player']["game_name"].lower():
                                                             if 5 in pos_rank and ranks_radiant[guy] != '-':
@@ -406,9 +410,78 @@ def live_matches():
                                         diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
                                         # if diff > 1 or diff < -1
                                         result_dict['pos1_vs_cores'] = diff
-                                        #
+
 
                                     ####
+                                    lines = {}
+                                    tracker_matchups = {}
+                                    if [] not in matchups.values():
+                                        for name in matchups:
+                                            tracker_matchups[name] = matchups[name].replace(' ', '%20')
+                                        safe_line, off_line, mid = 0, 0, 0
+                                        #mid
+                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{tracker_matchups["radiant_pos2"]}'
+                                        response = requests.get(url_dota2_protracker)
+                                        soup = BeautifulSoup(response.text, "lxml")
+                                        hero_names = soup.find_all('td', class_='td-hero-pic')
+                                        wr_percentage = soup.find_all('div', class_='perc-wr')
+                                        hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                      dota2protracker_hero_name
+                                                      in hero_names]
+                                        percent_iter = iter(wr_percentage)
+                                        for dota2protracker_hero_name in hero_names:
+                                            try:
+                                                with_wr = next(percent_iter).text.strip()
+                                                against_wr = next(percent_iter).text.strip()
+                                                against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                if dota2protracker_hero_name == matchups['dire_pos2']:
+                                                    # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                    mid += float(against_wr)
+                                            except:
+                                                pass
+                                        #safe_line
+                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{tracker_matchups["radiant_pos1"]}'
+                                        response = requests.get(url_dota2_protracker)
+                                        soup = BeautifulSoup(response.text, "lxml")
+                                        hero_names = soup.find_all('td', class_='td-hero-pic')
+                                        wr_percentage = soup.find_all('div', class_='perc-wr')
+                                        hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                      dota2protracker_hero_name
+                                                      in hero_names]
+                                        percent_iter = iter(wr_percentage)
+                                        for dota2protracker_hero_name in hero_names:
+                                            try:
+                                                with_wr = next(percent_iter).text.strip()
+                                                against_wr = next(percent_iter).text.strip()
+                                                against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
+                                                if dota2protracker_hero_name == matchups['dire_pos3'] or dota2protracker_hero_name == matchups['dire_pos4']:
+                                                    # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                    safe_line += float(against_wr)/2
+
+                                            except:
+                                                pass
+                                        #off_line
+                                        url_dota2_protracker = f'https://www.dota2protracker.com/hero/{tracker_matchups["radiant_pos3"]}'
+                                        response = requests.get(url_dota2_protracker)
+                                        soup = BeautifulSoup(response.text, "lxml")
+                                        hero_names = soup.find_all('td', class_='td-hero-pic')
+                                        wr_percentage = soup.find_all('div', class_='perc-wr')
+                                        hero_names = [dota2protracker_hero_name.get('data-order') for
+                                                      dota2protracker_hero_name
+                                                      in hero_names]
+                                        percent_iter = iter(wr_percentage)
+                                        for dota2protracker_hero_name in hero_names:
+                                            try:
+                                                with_wr = next(percent_iter).text.strip()
+                                                against_wr = next(percent_iter).text.strip()
+                                                against_wr = re.match('[0-9]{1,}\.[0-9]{1,}',
+                                                                      against_wr).group()
+                                                if dota2protracker_hero_name == matchups['dire_pos1'] or \
+                                                        dota2protracker_hero_name == matchups['dire_pos5']:
+                                                    # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                    off_line += float(against_wr) / 2
+                                            except:
+                                                pass
 
                                     # # duration
                                     # game_time_radiant, game_time_dire = {}, {}
@@ -470,20 +543,21 @@ def live_matches():
                                             if (result_dict["dotafix.github"][0] > 60 and \
                                                 result_dict["dotafix.github"][
                                                     1] > 60 and \
-                                                result_dict["dotafix.github"][2] > 60) or \
+                                                result_dict["dotafix.github"][2] > 60 and mid > 50 and off_line > 50 and safe_line > 50) or \
                                                     (result_dict['protracker_pos1'] > 56 and result_dict[
-                                                        'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 6):
+                                                        'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 6 and mid > 50 and off_line > 50 and safe_line > 50):
                                                 if 'ESportsBattle' in match['tournament']['name']:
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
                                                 else:
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
-                                            else:
-                                                if 'ESportsBattle' not in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Пик лучше у ' + radiant_team_name)
-                                                    send_message('Ставка рисковая, максимум 5к')
+                                            # else:
+                                            #     if 'ESportsBattle' not in match['tournament']['name']:
+                                            #         radiant_results()
+                                            #         send_message('Пик лучше у ' + radiant_team_name)
+                                            #         send_message('Ставка рисковая, максимум 5к')
+
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                             1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict[
                                             'protracker_pos1'] < 50 \
@@ -492,20 +566,20 @@ def live_matches():
                                             if (result_dict["dotafix.github"][0] < 40 and \
                                                 result_dict["dotafix.github"][
                                                     1] < 40 and \
-                                                result_dict["dotafix.github"][2] < 40) \
+                                                result_dict["dotafix.github"][2] < 40 and mid < 50 and off_line < 50 and safe_line < 50) \
                                                     or (result_dict['protracker_pos1'] < 44 and result_dict[
-                                                'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -6):
+                                                'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -6 and mid < 50 and off_line < 50 and safe_line < 50):
                                                 if 'ESportsBattle' in match['tournament']['name']:
                                                     radiant_results()
                                                     send_message('Победитель ' + dire_team_name)
                                                 else:
                                                     radiant_results()
                                                     send_message('Победитель ' + dire_team_name)
-                                            else:
-                                                if 'ESportsBattle' not in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Пик лучше у ' + dire_team_name)
-                                                    send_message('Ставка рисковая, максимум 5к')
+                                            # else:
+                                            #     if 'ESportsBattle' not in match['tournament']['name']:
+                                            #         radiant_results()
+                                            #         send_message('Пик лучше у ' + dire_team_name)
+                                            #         send_message('Ставка рисковая, максимум 5к')
                                         # else:
                                         #     print('ТУРНИК ТИР ' + str(
                                         #         match['tournament'][
