@@ -539,7 +539,7 @@ def live_matches():
                                         if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
                                             'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict[
-                                            'pos1_vs_cores'] > 0 and matchups['radiant_pos1'] in good_heroes:
+                                            'pos1_vs_cores'] > 0 and mid > 50 and off_line > 50 and safe_line > 50 and matchups['radiant_pos1'] in good_heroes:
                                             if (result_dict["dotafix.github"][0] > 60 and \
                                                 result_dict["dotafix.github"][
                                                     1] > 60 and \
@@ -552,17 +552,17 @@ def live_matches():
                                                 else:
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
-                                            # else:
-                                            #     if 'ESportsBattle' not in match['tournament']['name']:
-                                            #         radiant_results()
-                                            #         send_message('Пик лучше у ' + radiant_team_name)
-                                            #         send_message('Ставка рисковая, максимум 5к')
+                                            else:
+                                                if 'ESportsBattle' not in match['tournament']['name']:
+                                                    radiant_results()
+                                                    send_message('Пик лучше у ' + radiant_team_name)
+                                                    send_message('Ставка рисковая, максимум 5к')
 
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                             1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict[
                                             'protracker_pos1'] < 50 \
                                                 and result_dict['pos1_vs_team'] < 0 and result_dict[
-                                            'pos1_vs_cores'] < 0 and matchups['dire_pos1'] in good_heroes:
+                                            'pos1_vs_cores'] < 0 and mid < 50 and off_line < 50 and safe_line < 50 and matchups['dire_pos1'] in good_heroes:
                                             if (result_dict["dotafix.github"][0] < 40 and \
                                                 result_dict["dotafix.github"][
                                                     1] < 40 and \
@@ -575,11 +575,11 @@ def live_matches():
                                                 else:
                                                     radiant_results()
                                                     send_message('Победитель ' + dire_team_name)
-                                            # else:
-                                            #     if 'ESportsBattle' not in match['tournament']['name']:
-                                            #         radiant_results()
-                                            #         send_message('Пик лучше у ' + dire_team_name)
-                                            #         send_message('Ставка рисковая, максимум 5к')
+                                            else:
+                                                if 'ESportsBattle' not in match['tournament']['name']:
+                                                    radiant_results()
+                                                    send_message('Пик лучше у ' + dire_team_name)
+                                                    send_message('Ставка рисковая, максимум 5к')
                                         # else:
                                         #     print('ТУРНИК ТИР ' + str(
                                         #         match['tournament'][
