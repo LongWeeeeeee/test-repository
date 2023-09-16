@@ -578,13 +578,13 @@ def live_matches():
                                                     send_message('Пик лучше у ' + dire_team_name)
                                                     send_message('Ставка рисковая, максимум 5к')
                                         else:
-                                            print('ТУРНИК ТИР ' + str(
+                                            send_message('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
                                                     'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
                                                 best_of) + '\n' + 'Текущий счет: ' + str(
                                                 score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                            print(result_dict)
-                                            print('Ставка неудачная')
+                                            send_message(result_dict)
+                                            send_message('Ставка неудачная')
                                         ids.append(map_id)
                                         f.seek(0)
                                         json.dump(ids, f)
