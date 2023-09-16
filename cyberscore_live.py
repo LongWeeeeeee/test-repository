@@ -4,7 +4,7 @@
 # Отладка винрейта на старых матчах
 # Проверка того что все правильно работает
 # ранги неправильно работают
-#egb live matches
+# egb live matches
 import sys, os
 from telebot import types
 import time
@@ -23,8 +23,11 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import threading
+
 # bad_heroes = {'Monkey King':114, "Nature's Prophet":53, 'Lina':25, 'Bristleback':99, 'Necrophos':36, 'Gyrocopter':72, 'Lycan':77, 'Templar Assasin':46, 'Riki':32, 'Meepo':82, }
-good_heroes = {'Phantom Assassin', 'Faceless Void', 'Slark', 'Sven', 'Terrorblade', 'Naga Siren', 'Morphling', 'Bloodseeker', 'Drow Ranger', 'Troll Warlord', 'Ursa', 'Phantom Lancer', 'Wraith King', 'Spectre', 'Juggernaut', 'Luna', 'Anti-Mage', 'Muerta', 'Chaos Knight', 'Medusa', 'Lifestealer', 'Gyrocopter'}
+good_heroes = {'Phantom Assassin', 'Faceless Void', 'Slark', 'Sven', 'Terrorblade', 'Naga Siren', 'Morphling',
+               'Bloodseeker', 'Drow Ranger', 'Troll Warlord', 'Ursa', 'Phantom Lancer', 'Wraith King', 'Spectre',
+               'Juggernaut', 'Luna', 'Anti-Mage', 'Muerta', 'Chaos Knight', 'Medusa', 'Lifestealer', 'Gyrocopter'}
 # Флаг состояния выполнения функции
 is_running = False
 
@@ -68,7 +71,7 @@ def live_matches():
         live_matches_flag = False
         pause_flag = False
         draft_flag = False
-        #live matches
+        # live matches
         for match in json_data['rows']:
             if match['tournament']['tier'] in {1, 2, 3}:
                 if match['status'] in {'online'}:
@@ -125,7 +128,7 @@ def live_matches():
                             #             for q in range(len(players)):
                             #                 ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
 
-                                # могу парсить ранг глобальный
+                            # могу парсить ранг глобальный
                             radiant_pick = json_map['picks_team_radiant']
                             dire_pick = json_map['picks_team_dire']
                             # map_winner = json_map['winner']
@@ -241,16 +244,17 @@ def live_matches():
                                                 pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                    if (not (matchups['radiant_pos1'] in good_heroes)) and (not (matchups['dire_pos1'] in good_heroes)):
+                                    if (not (matchups['radiant_pos1'] in good_heroes)) and (
+                                    not (matchups['dire_pos1'] in good_heroes)):
                                         for hero in radiant_hero_names:
                                             if hero in good_heroes:
-                                                c+=1
+                                                c += 1
                                                 matchups['radiant_pos1'] = hero
                                         if c >= 2: send_message('Bad heroes')
                                         c = 0
                                         for hero in dire_hero_names:
                                             if hero in good_heroes:
-                                                c+=1
+                                                c += 1
                                                 matchups['dire_pos1'] = hero
                                         if c >= 2: send_message('Bad heroes')
                                         # if matchups['dire_pos1'] != [] and matchups['radiant_pos1'] != [] and [] in matchups:
@@ -283,16 +287,18 @@ def live_matches():
                                             select.select_by_index(9)
                                             import time
                                             time.sleep(10)
-                                            aler_window = WebDriverWait(driver, 30).until(EC.visibility_of_element_located(
-                                                (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                            aler_window = WebDriverWait(driver, 30).until(
+                                                EC.visibility_of_element_located(
+                                                    (By.XPATH, '//mat-icon[text()="content_copy"]')))
                                             # time.sleep(5)
                                             aler_window.click()
                                             alert = Alert(driver)
                                             alert_text = alert.text
                                             alert.accept()
-                                            return(alert_text)
+                                            return (alert_text)
                                         except:
                                             send_message('Ошибка dotafix')
+
                                     try:
                                         alert_text = dotafix()
                                     except:
@@ -402,6 +408,8 @@ def live_matches():
                                         result_dict['pos1_vs_cores'] = diff
                                         #
 
+                                    ####
+
                                     # # duration
                                     # game_time_radiant, game_time_dire = {}, {}
                                     # for hero_id in radiant_hero_ids:
@@ -448,22 +456,23 @@ def live_matches():
                                             best_of) + '\n' + 'Текущий счет: ' + str(
                                             score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                         send_message(result_dict)
-                                        if matchups['radiant_pos1'] not in good_heroes or matchups['dire_pos1'] not in good_heroes:
-                                            send_message('BAD HEROES')
-                                        send_message('Обязательно СВЕРЬ КОМАНДЫ' + '\n' + 'Максимальная ставка 5000 если команды равны +-')
+                                        send_message(
+                                            'Обязательно СВЕРЬ КОМАНДЫ' + '\n' + 'Максимальная ставка 5000 если команды равны +-')
+
                                     print('result analyze')
-                                    #вывод результатов
+                                    # вывод результатов
                                     if [] not in result_dict.values():
 
                                         if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                             1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
-                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict['pos1_vs_cores'] > 0:
+                                            'protracker_pos1'] > 50 and result_dict['pos1_vs_team'] > 0 and result_dict[
+                                            'pos1_vs_cores'] > 0 and matchups['radiant_pos1'] in good_heroes:
                                             if (result_dict["dotafix.github"][0] > 60 and \
-                                                    result_dict["dotafix.github"][
-                                                        1] > 60 and \
-                                                    result_dict["dotafix.github"][2] > 60) or \
+                                                result_dict["dotafix.github"][
+                                                    1] > 60 and \
+                                                result_dict["dotafix.github"][2] > 60) or \
                                                     (result_dict['protracker_pos1'] > 56 and result_dict[
-                                                'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 6):
+                                                        'pos1_vs_team'] > 6 and result_dict['pos1_vs_cores'] > 6):
                                                 if 'ESportsBattle' in match['tournament']['name']:
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
@@ -475,14 +484,17 @@ def live_matches():
                                                     radiant_results()
                                                     send_message('Пик лучше у ' + radiant_team_name)
                                                     send_message('Ставка рисковая, максимум 5к')
-                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict['protracker_pos1'] < 50 \
-                                                and result_dict['pos1_vs_team'] < 0 and result_dict['pos1_vs_cores'] < 0:
+                                        elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
+                                            1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict[
+                                            'protracker_pos1'] < 50 \
+                                                and result_dict['pos1_vs_team'] < 0 and result_dict[
+                                            'pos1_vs_cores'] < 0 and matchups['dire_pos1'] in good_heroes:
                                             if (result_dict["dotafix.github"][0] < 40 and \
-                                                 result_dict["dotafix.github"][
-                                                     1] < 40 and \
-                                                 result_dict["dotafix.github"][2] < 40) \
-                                                 or (result_dict['protracker_pos1'] < 44 and result_dict[
-                                                     'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -6):
+                                                result_dict["dotafix.github"][
+                                                    1] < 40 and \
+                                                result_dict["dotafix.github"][2] < 40) \
+                                                    or (result_dict['protracker_pos1'] < 44 and result_dict[
+                                                'pos1_vs_team'] < -6 and result_dict['pos1_vs_cores'] < -6):
                                                 if 'ESportsBattle' in match['tournament']['name']:
                                                     radiant_results()
                                                     send_message('Победитель ' + dire_team_name)
@@ -521,40 +533,40 @@ def live_matches():
             print('идет матч, сплю 4 минуты')
             first_time = False
             time.sleep(240)
-        #pause
+        # pause
         elif pause_flag:
             import time
             print('pause sleep')
             time.sleep(120)
         else:
-        #waiting matches
+            # waiting matches
             for match in json_data['rows']:
-                    if match['tournament']['tier'] in {1, 2, 3}:
-                        if match['status'] == 'waiting':
-                            map_id = match['id']
-                            match_url = f'https://cyberscore.live/en/matches/{map_id}/'
-                            data = requests.get(match_url).text
-                            soup = BeautifulSoup(data, 'lxml')
-                            json_data = soup.find('script', type='application/ld+json').text
-                            json_data = json.loads(json_data)
-                            time_str = json_data['endDate']
-                            datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z')
-                            datetime_obj_utc = datetime_obj.replace(tzinfo=None)
-                            current_date = datetime.datetime.now()
-                            time_difference = datetime_obj_utc - current_date
-                            seconds = time_difference.total_seconds()
-                            import time
-                            if seconds > 0:
-                                print('waiting sleep for ' + str(seconds/60))
-                                time.sleep(seconds + 60)
-                                break
-                            else:
-                                print('waiting for match sleep')
-                                time.sleep(60)
-                                break
-
-
+                if match['tournament']['tier'] in {1, 2, 3}:
+                    if match['status'] == 'waiting':
+                        map_id = match['id']
+                        match_url = f'https://cyberscore.live/en/matches/{map_id}/'
+                        data = requests.get(match_url).text
+                        soup = BeautifulSoup(data, 'lxml')
+                        json_data = soup.find('script', type='application/ld+json').text
+                        json_data = json.loads(json_data)
+                        time_str = json_data['endDate']
+                        datetime_obj = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S%z')
+                        datetime_obj_utc = datetime_obj.replace(tzinfo=None)
+                        current_date = datetime.datetime.now()
+                        time_difference = datetime_obj_utc - current_date
+                        seconds = time_difference.total_seconds()
+                        import time
+                        if seconds > 0:
+                            print('waiting sleep for ' + str(seconds / 60))
+                            time.sleep(seconds + 60)
+                            break
+                        else:
+                            print('waiting for match sleep')
+                            time.sleep(60)
+                            break
 
     is_running = False
     print("Работа завершена")
+
+
 live_matches()
