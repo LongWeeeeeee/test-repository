@@ -241,7 +241,7 @@ def live_matches():
                                                 pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                    if not matchups['radiant_pos1'] in good_heroes and not matchups['dire_pos1'] in good_heroes:
+                                    if (not (matchups['radiant_pos1'] in good_heroes)) and (not (matchups['dire_pos1'] in good_heroes)):
                                         for hero in radiant_hero_names:
                                             if hero in good_heroes:
                                                 c+=1
