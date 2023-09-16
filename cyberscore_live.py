@@ -482,6 +482,7 @@ def live_matches():
                                                     off_line += float(against_wr) / 2
                                             except:
                                                 pass
+                                    result_dict['mid'], result_dict['off_line'], result_dict['safe_line'] = mid, off_line, safe_line
 
                                     # # duration
                                     # game_time_radiant, game_time_dire = {}, {}
