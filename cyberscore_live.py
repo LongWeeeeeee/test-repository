@@ -531,17 +531,12 @@ def live_matches():
                                                     1] > 60 and \
                                                 result_dict["dotafix.github"][2] > 60 and mid > 50 and off_line > 50 and safe_line > 50) or \
                                                     (result_dict['protracker_pos1'] > 56 and mid > 50 and off_line > 50 and safe_line > 50):
-                                                if 'ESportsBattle' in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Победитель ' + radiant_team_name)
-                                                else:
-                                                    radiant_results()
-                                                    send_message('Победитель ' + radiant_team_name)
+                                                radiant_results()
+                                                send_message('Победитель ' + radiant_team_name)
                                             else:
-                                                if 'ESportsBattle' not in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Пик лучше у ' + radiant_team_name)
-                                                    send_message('Ставка рисковая, максимум 5к')
+                                                radiant_results()
+                                                send_message('Пик лучше у ' + radiant_team_name)
+                                                send_message('Ставка рисковая, максимум 5к')
 
                                         elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                             1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict[
@@ -551,17 +546,12 @@ def live_matches():
                                                     1] < 40 and \
                                                 result_dict["dotafix.github"][2] < 40 and mid < 50 and off_line < 50 and safe_line < 50) \
                                                     or (result_dict['protracker_pos1'] < 44 and mid < 50 and off_line < 50 and safe_line < 50):
-                                                if 'ESportsBattle' in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Победитель ' + dire_team_name)
-                                                else:
-                                                    radiant_results()
-                                                    send_message('Победитель ' + dire_team_name)
+                                                radiant_results()
+                                                send_message('Победитель ' + dire_team_name)
                                             else:
-                                                if 'ESportsBattle' not in match['tournament']['name']:
-                                                    radiant_results()
-                                                    send_message('Пик лучше у ' + dire_team_name)
-                                                    send_message('Ставка рисковая, максимум 5к')
+                                                radiant_results()
+                                                send_message('Пик лучше у ' + dire_team_name)
+                                                send_message('Ставка рисковая, максимум 5к')
                                         else:
                                             if 'ESportsBattle' not in match['tournament']['name']:
                                                 send_message('ТУРНИК ТИР ' + str(
@@ -571,6 +561,8 @@ def live_matches():
                                                     score) + '\n' + 'Вероятность победы ' + radiant_team_name)
                                                 send_message(result_dict)
                                                 send_message('Ставка неудачная')
+                                            else:
+                                                print('еспорт сосать')
                                         ids.append(map_id)
                                         f.seek(0)
                                         json.dump(ids, f)
