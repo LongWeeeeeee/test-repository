@@ -248,21 +248,6 @@ def live_matches():
                                                 pass
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                    if (not (matchups['radiant_pos1'] in good_heroes)) and (
-                                    not (matchups['dire_pos1'] in good_heroes)):
-                                        for hero in radiant_hero_names:
-                                            if hero in good_heroes:
-                                                c += 1
-                                                matchups['radiant_pos1'] = hero
-                                        if c >= 2: send_message('Bad heroes')
-                                        c = 0
-                                        for hero in dire_hero_names:
-                                            if hero in good_heroes:
-                                                c += 1
-                                                matchups['dire_pos1'] = hero
-                                        if c >= 2: send_message('Bad heroes')
-                                        # if matchups['dire_pos1'] != [] and matchups['radiant_pos1'] != [] and [] in matchups:
-
                                     radiant_values = 0
                                     dire_values = 0
                                     title = json_map['title']
