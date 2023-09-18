@@ -564,16 +564,17 @@ def live_matches():
                                                 send_message('Пик лучше у ' + dire_team_name)
                                                 send_message('Ставка рисковая, максимум 5к')
                                         else:
-                                            if 'ESportsBattle' not in match['tournament']['name']:
-                                                send_message('ТУРНИК ТИР ' + str(
-                                                    match['tournament'][
-                                                        'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
-                                                    best_of) + '\n' + 'Текущий счет: ' + str(
-                                                    score) + '\n' + 'Вероятность победы ' + radiant_team_name)
-                                                send_message(result_dict)
-                                                send_message('Ставка неудачная')
-                                            else:
-                                                print('еспорт сосать')
+                                            # if 'ESportsBattle' not in match['tournament']['name']:
+                                            #     send_message('ТУРНИК ТИР ' + str(
+                                            #         match['tournament'][
+                                            #             'tier']) + '\n' + title + '\n' + 'Играется бест оф: ' + str(
+                                            #         best_of) + '\n' + 'Текущий счет: ' + str(
+                                            #         score) + '\n' + 'Вероятность победы ' + radiant_team_name)
+                                            #     send_message(result_dict)
+                                            #     send_message('Ставка неудачная')
+                                            # else:
+                                            #     print('еспорт сосать')
+                                            pass
                                         ids.append(map_id)
                                         f.seek(0)
                                         json.dump(ids, f)
