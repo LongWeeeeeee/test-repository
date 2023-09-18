@@ -8,6 +8,7 @@
 import sys, os
 from telebot import types
 import time
+import subprocess
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
 import re
@@ -623,7 +624,7 @@ def live_matches():
                             print('waiting for match sleep')
                             time.sleep(60)
                             break
-
+    subprocess.Popen(["python3", cyberscore_live.py])
     is_running = False
     print("Работа завершена")
 
