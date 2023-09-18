@@ -624,6 +624,7 @@ def live_matches():
                             print('waiting for match sleep')
                             time.sleep(60)
                             break
+    time.sleep(30)
     subprocess.Popen(["python3", cyberscore_live.py])
     is_running = False
     print("Работа завершена")
