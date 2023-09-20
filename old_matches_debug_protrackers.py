@@ -35,7 +35,7 @@ def live_matches():
         response = requests.get(url).text
         json_data = json.loads(response)
         for match in json_data['rows']:
-            if match['tournament']['tier'] in {1, 2,}:
+            if match['tournament']['tier'] in {1, 2}:
                 for map in match['related_matches']:
                     map_id = map['id']
                     with open('protrackers_copy.json', 'r+') as f:
