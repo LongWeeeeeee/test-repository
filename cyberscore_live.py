@@ -108,7 +108,6 @@ def live_matches():
                                                 players = team.find_all('div', class_='player__name-name')
                                                 for q in range(len(players)):
                                                     ranks_dire[players[q].text.strip().lower()] = ranks[q].text.strip()
-
                                 # могу парсить ранг глобальный
                                 radiant_pick = json_map['picks_team_radiant']
                                 dire_pick = json_map['picks_team_dire']
@@ -163,8 +162,6 @@ def live_matches():
                                         for dire_hero in dire_hero_names:
                                             if dire_hero in good_heroes:
                                                 matchups['dire_pos1'] = dire_hero
-                                    radiant_values = 0
-                                    dire_values = 0
                                     title = json_map['title']
                                     radiant_team_name = \
                                         json_map['team_radiant']['name']
@@ -394,7 +391,6 @@ def live_matches():
                                     ids.append(map_id)
                                     f.seek(0)
                                     json.dump(ids, f)
-
                                 else:
                                     draft_flag = True
                     elif match['status'] == 'pause':
