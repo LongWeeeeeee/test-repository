@@ -7,6 +7,7 @@
 # egb live matches
 import sys, os
 from telebot import types
+from queue import Queue
 import time
 from threading import Thread
 import subprocess
@@ -268,7 +269,7 @@ def live_matches():
                                             json_map['team_radiant']['name']
                                         dire_team_name = json_map['team_dire'][
                                             'name']
-                                        def dotafix():
+                                        def dotafix(queue):
                                             options = Options()
                                             options.add_argument("--start-maximized")
                                             options.add_argument("--no-sandbox")
@@ -281,27 +282,29 @@ def live_matches():
                                             url_dotafix = "https://dotafix.github.io/" + dire + radiant
                                             # send_message(url_dotafix)
                                             driver.get(url_dotafix)
+                                            element = WebDriverWait(driver, 30).until(
+                                                EC.element_to_be_clickable((By.ID, 'rankData')))
+                                            select = Select(element)
+                                            select.select_by_index(9)
                                             import time
-                                            def get_element():
-                                                element = WebDriverWait(driver, 30).until(
-                                                    EC.element_to_be_clickable((By.ID, 'rankData')))
-                                                select = Select(element)
-                                                select.select_by_index(9)
-                                                import time
-                                                time.sleep(10)
-                                                aler_window = WebDriverWait(driver, 30).until(
-                                                    EC.visibility_of_element_located(
-                                                        (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                                # time.sleep(5)
-                                                aler_window.click()
-                                                alert = Alert(driver)
-                                                alert_text = alert.text
-                                                alert.accept()
-                                                datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
-                                                datan = [float(datan_element) for datan_element in datan]
+                                            time.sleep(10)
+                                            aler_window = WebDriverWait(driver, 30).until(
+                                                EC.visibility_of_element_located(
+                                                    (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                            # time.sleep(5)
+                                            aler_window.click()
+                                            alert = Alert(driver)
+                                            alert_text = alert.text
+                                            alert.accept()
+                                            datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                            datan = [float(datan_element) for datan_element in datan]
+                                            if len(datan) == 3 and datan[0] != datan[1] and datan[1] != datan[2]:
                                                 driver.quit()
-                                                return([datan[0]] + [datan[1]] + [datan[2]])
-                                        def protracker():
+                                                queue.put([datan[0]] + [datan[1]] + [datan[2]])
+
+
+
+                                        def protracker(queue):
                                             print('protracker')
                                             lines = {}
                                             tracker_matchups = {}
@@ -343,7 +346,7 @@ def live_matches():
                                                                     radiant_safe_line += float(against_wr) / 2
                                                                 if dota2protracker_hero_name == matchups['dire_pos1']:
                                                                     # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
-                                                                    result_dict['protracker_pos1'] = float(against_wr)
+                                                                    pos1_vs_pos1 = float(against_wr)
                                                                 if [] not in matchups.values():
                                                                     if dota2protracker_hero_name in {matchups['dire_pos1'],
                                                                                                      matchups['dire_pos2'],
@@ -386,14 +389,12 @@ def live_matches():
                                                         except:
                                                             pass
                                                 # pos1 vs team
-                                                diff = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
+                                                pos1_vs_team = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
                                                 # if diff > 3 or diff < -3:
-                                                result_dict['pos1_vs_team'] = diff
                                                 # pos1 vs cores
-                                                diff = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
+                                                pos1_vs_cores = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
                                                 # if diff > 1 or diff < -1
-                                                result_dict['pos1_vs_cores'] = diff
-                                                result_dict['mid'], result_dict['off_line'], result_dict['safe_line'] = mid, radiant_off_line - dire_off_line, radiant_safe_line-dire_safe_line
+                                                queue.put(pos1_vs_team, pos1_vs_cores, pos1_vs_pos1, mid, radiant_off_line - dire_off_line, radiant_safe_line-dire_safe_line)
                                         def duration():
                                             # duration
                                             game_time_radiant, game_time_dire = {}, {}
@@ -434,10 +435,19 @@ def live_matches():
                                                     send_message('На ' + str(
                                                         key) + ' минуте ' + radiant_team_name + ' слабее на ' + str(
                                                         int(final_time[key]) * -1) + '%')
-                                        t1 = Thread(dotafix())
-                                        t2 = Thread(protracker())
+
+                                        result_queue_1 = Queue()
+                                        result_queue_2 = Queue()
+
+                                        t1 = Thread(dotafix(), args=(result_queue_1,))
+                                        t2 = Thread(protracker(), args=(result_queue_2,))
                                         t1.start()
                                         t2.start()
+                                        t1.join()
+                                        t2.join()
+                                        result_dict['dotafix.github'] = result_queue_1.get()
+                                        result_dict['pos1_vs_team'], result_dict['pos1_vs_cores'],  result_dict['pos1_vs_pos1'],  result_dict['mid'],  result_dict['off_line'],  result_dict['safe_line'],  = result_queue_2.get()
+                                        pass
                                         def radiant_results():
                                             send_message('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
@@ -455,14 +465,14 @@ def live_matches():
 
                                                 if result_dict["dotafix.github"][0] > 50 and result_dict["dotafix.github"][
                                                     1] > 50 and result_dict["dotafix.github"][2] > 50 and result_dict[
-                                                    'protracker_pos1'] > 50 and mid > 50 and result_dict['off_line'] > 0 and result_dict['safe_line'] > 0 and matchups['radiant_pos1'] in good_heroes:
+                                                    'protracker_pos1'] > 50 and result_dict['mid'] > 50 and result_dict['off_line'] > 0 and result_dict['safe_line'] > 0 and matchups['radiant_pos1'] in good_heroes:
 
                                                     radiant_results()
                                                     send_message('Победитель ' + radiant_team_name)
 
                                                 elif result_dict["dotafix.github"][0] < 50 and result_dict["dotafix.github"][
                                                     1] < 50 and result_dict["dotafix.github"][2] < 50 and result_dict[
-                                                    'protracker_pos1'] < 50 and mid < 50 and result_dict['off_line'] < 0 and result_dict['safe_line'] < 0 and matchups['dire_pos1'] in good_heroes:
+                                                    'protracker_pos1'] < 50 and result_dict['mid'] < 50 and result_dict['off_line'] < 0 and result_dict['safe_line'] < 0 and matchups['dire_pos1'] in good_heroes:
                                                     radiant_results()
                                                     send_message('Победитель ' + dire_team_name)
                                                 else:
@@ -537,5 +547,6 @@ def main():
         live_matches()
     except Exception as e:
         print(e)
+        time.sleep(30)
         main()
 main()
