@@ -77,7 +77,7 @@ def live_matches():
         # live matches
         for match in json_data['rows']:
             if match['tournament'] != None:
-                if match['tournament']['tier'] in {1, 2, 3}:
+                if match['tournament']['tier'] in {1, 2, 3, 4}:
                     if match['status'] in {'online'}:
                         live_matches_flag = True
                         map_id = match['id']
@@ -270,12 +270,12 @@ def live_matches():
                                         dire_team_name = json_map['team_dire'][
                                             'name']
                                         def dotafix(queue):
+
                                             options = Options()
                                             options.add_argument("--start-maximized")
                                             options.add_argument("--no-sandbox")
                                             driver = webdriver.Chrome(options=options)
                                             print('dotafix')
-                                            ####dotafix.github
                                             radiant = ''.join(['&m=' + element for element in radiant_hero_ids])
                                             dire = ''.join(['&e=' + element for element in dire_hero_ids])
                                             dire = '?' + dire[1:]
@@ -394,7 +394,8 @@ def live_matches():
                                                 # pos1 vs cores
                                                 pos1_vs_cores = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
                                                 # if diff > 1 or diff < -1
-                                                queue.put(pos1_vs_team, pos1_vs_cores, pos1_vs_pos1, mid, radiant_off_line - dire_off_line, radiant_safe_line-dire_safe_line)
+                                                answer = [pos1_vs_team, pos1_vs_cores, pos1_vs_pos1, mid, radiant_off_line - dire_off_line, radiant_safe_line-dire_safe_line]
+                                                queue.put(answer)
                                         def duration():
                                             # duration
                                             game_time_radiant, game_time_dire = {}, {}
@@ -439,15 +440,18 @@ def live_matches():
                                         result_queue_1 = Queue()
                                         result_queue_2 = Queue()
 
-                                        t1 = Thread(dotafix(), args=(result_queue_1,))
-                                        t2 = Thread(protracker(), args=(result_queue_2,))
+                                        t1 = Thread(target=dotafix, args=(result_queue_1,))
+                                        t2 = Thread(target=protracker, args=(result_queue_2,))
                                         t1.start()
                                         t2.start()
                                         t1.join()
                                         t2.join()
                                         result_dict['dotafix.github'] = result_queue_1.get()
-                                        result_dict['pos1_vs_team'], result_dict['pos1_vs_cores'],  result_dict['pos1_vs_pos1'],  result_dict['mid'],  result_dict['off_line'],  result_dict['safe_line'],  = result_queue_2.get()
-                                        pass
+                                        answer = result_queue_2.get()
+                                        result_dict['pos1_vs_team'], result_dict['pos1_vs_cores'], result_dict[
+                                            'pos1_vs_pos1'], result_dict['mid'], result_dict['off_line'], result_dict[
+                                            'safe_line'] = answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]
+                                        print(result_dict)
                                         def radiant_results():
                                             send_message('ТУРНИК ТИР ' + str(
                                                 match['tournament'][
