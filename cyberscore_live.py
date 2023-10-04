@@ -52,6 +52,7 @@ def live_matches():
     # Ваш код выполнения функции
     print("Функция выполняется...")
     while True:
+        start_time = time.time()
         url = 'https://api.cyberscore.live/api/v1/matches/?limit=20&liveOrUpcoming=1'
         response = requests.get(url).text
         json_data = json.loads(response)
@@ -194,8 +195,24 @@ def live_matches():
                                             print('dotafix time')
                                             print(end - start)
                                         else:
-                                            print('dotafix error')
-                                            print(datan)
+                                            driver.refresh()
+                                            time.sleep(5)
+                                            aler_window = WebDriverWait(driver, 30).until(
+                                                EC.visibility_of_element_located(
+                                                    (By.XPATH, '//mat-icon[text()="content_copy"]')))
+                                            aler_window.click()
+                                            alert = Alert(driver)
+                                            alert_text = alert.text
+                                            alert.accept()
+                                            datan = re.findall(r'\d+(?:\.\d+)?', alert_text)
+                                            datan = [float(datan_element) for datan_element in datan]
+                                            if len(datan) == 3 and datan[0] != datan[1] and datan[1] != datan[2]:
+                                                driver.quit()
+                                                print('dotafix end')
+                                                queue.put([datan[0]] + [datan[1]] + [datan[2]])
+
+
+
 
                                     def protracker(queue):
                                         start_p = time.time()
@@ -371,7 +388,6 @@ def live_matches():
 
                                     result_queue_1 = Queue()
                                     result_queue_2 = Queue()
-
                                     t1 = Thread(target=dotafix, args=(result_queue_1,))
                                     t2 = Thread(target=protracker, args=(result_queue_2,))
                                     t1.start()
@@ -384,9 +400,11 @@ def live_matches():
                                         'pos1_vs_pos1'], result_dict['mid'], result_dict['off_line'], result_dict[
                                         'safe_line'] = answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]
                                     result_out()
-                                    # ids.append(map_id)
-                                    # f.seek(0)
-                                    # json.dump(ids, f)
+                                    ids.append(map_id)
+                                    f.seek(0)
+                                    json.dump(ids, f)
+                                    end_time = time.time()
+                                    print(end_time-start_time)
                                 else:
                                     draft_flag = True
                     elif match['status'] == 'pause':
