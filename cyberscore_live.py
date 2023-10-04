@@ -61,7 +61,7 @@ def live_matches():
         # live matches
         for match in json_data['rows']:
             if match['tournament'] != None:
-                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
+                if match['tournament']['tier'] in {1, 2, 3, 4}:#and 'ESportsBattle' not in match['tournament']['name']
                     if match['status'] in {'online'}:
                         live_matches_flag = True
                         map_id = match['id']
@@ -161,6 +161,7 @@ def live_matches():
                                         'name']
 
                                     def dotafix(queue):
+                                        start = time.time()
                                         options = Options()
                                         options.add_argument("--start-maximized")
                                         options.add_argument("--no-sandbox")
@@ -176,7 +177,6 @@ def live_matches():
                                             EC.element_to_be_clickable((By.ID, 'rankData')))
                                         select = Select(element)
                                         select.select_by_index(9)
-                                        time.sleep(10)
                                         aler_window = WebDriverWait(driver, 30).until(
                                             EC.visibility_of_element_located(
                                                 (By.XPATH, '//mat-icon[text()="content_copy"]')))
@@ -190,11 +190,15 @@ def live_matches():
                                             driver.quit()
                                             print('dotafix end')
                                             queue.put([datan[0]] + [datan[1]] + [datan[2]])
+                                            end = time.time()
+                                            print('dotafix time')
+                                            print(end - start)
                                         else:
                                             print('dotafix error')
                                             print(datan)
 
                                     def protracker(queue):
+                                        start_p = time.time()
                                         print('protracker')
                                         lines = {}
                                         tracker_matchups = {}
@@ -278,6 +282,9 @@ def live_matches():
                                                       radiant_off_line - dire_off_line,
                                                       radiant_safe_line - dire_safe_line]
                                             queue.put(answer)
+                                            end_p = time.time()
+                                            print('protracker time')
+                                            print(end_p - start_p)
 
                                     def duration():
                                         # duration
@@ -377,9 +384,9 @@ def live_matches():
                                         'pos1_vs_pos1'], result_dict['mid'], result_dict['off_line'], result_dict[
                                         'safe_line'] = answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]
                                     result_out()
-                                    ids.append(map_id)
-                                    f.seek(0)
-                                    json.dump(ids, f)
+                                    # ids.append(map_id)
+                                    # f.seek(0)
+                                    # json.dump(ids, f)
                                 else:
                                     draft_flag = True
                     elif match['status'] == 'pause':
