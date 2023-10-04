@@ -62,7 +62,7 @@ def live_matches():
         # live matches
         for match in json_data['rows']:
             if match['tournament'] != None:
-                if match['tournament']['tier'] in {1, 2, 3, 4}:#and 'ESportsBattle' not in match['tournament']['name']
+                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
                     if match['status'] in {'online'}:
                         live_matches_flag = True
                         map_id = match['id']
