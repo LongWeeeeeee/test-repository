@@ -210,6 +210,8 @@ def live_matches():
                                                 driver.quit()
                                                 print('dotafix end')
                                                 queue.put([datan[0]] + [datan[1]] + [datan[2]])
+                                            else:
+                                                print('dotafix error')
 
 
 
