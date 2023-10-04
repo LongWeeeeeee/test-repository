@@ -60,7 +60,7 @@ def live_matches():
         # live matches
         for match in json_data['rows']:
             if match['tournament'] != None:
-                if match['tournament']['tier'] in {1, 2, 3}:
+                if match['tournament']['tier'] in {1, 2, 3} and 'ESportsBattle' not in match['tournament']['name']:
                     if match['status'] in {'online'}:
                         live_matches_flag = True
                         map_id = match['id']
@@ -121,47 +121,33 @@ def live_matches():
                                 if dire_pick != None and len(dire_pick) == 5 and len(radiant_pick) == 5 and dire_pick[4]['hero'] != '':
                                     for radiant_hero in radiant_pick:
                                         for q in range(5):
-                                            try:
-                                                radiant_player = json_map['team_radiant']['players_items'][q]
-                                                for c in range(5):
-                                                    if radiant_player['player']["game_name"].lower() == \
-                                                            radiant_hero['player'][
-                                                                "game_name"].lower() and radiant_player['player'][
-                                                        'role'] == c + 1:
-                                                        matchups[f'radiant_pos{c+1}'] = radiant_hero['hero']['label']
-                                                        for guy in ranks_radiant:
-                                                            if guy == radiant_player['player']["game_name"].lower():
-                                                                if ranks_radiant[guy] != '-':
-                                                                    pos_rank[c+1] = [ranks_radiant[guy]]
-                                            except:
-                                                pass
+                                            radiant_player = json_map['team_radiant']['players_items'][q]
+                                            for c in range(5):
+                                                if radiant_player['player']["game_name"].lower() == \
+                                                        radiant_hero['player'][
+                                                            "game_name"].lower() and radiant_player['player'][
+                                                    'role'] == c + 1:
+                                                    matchups[f'radiant_pos{c+1}'] = radiant_hero['hero']['label']
+                                                    for guy in ranks_radiant:
+                                                        if guy == radiant_player['player']["game_name"].lower():
+                                                            if ranks_radiant[guy] != '-':
+                                                                pos_rank[c+1] = [ranks_radiant[guy]]
                                         radiant_hero_names.append(radiant_hero['hero']['label'])
                                         radiant_hero_ids.append(radiant_hero['hero']['id_steam'])
                                     for dire_hero in dire_pick:
                                         for q in range(5):
-                                            try:
-                                                dire_player = json_map['team_dire']['players_items'][q]
-                                                for c in range(5):
-                                                    if dire_player['player']["game_name"].lower() == dire_hero['player'][
-                                                        "game_name"].lower() and \
-                                                            dire_player['player']['role'] == c+1:
-                                                        matchups[f'dire_pos{c+1}'] = dire_hero['hero']['label']
-                                                        for guy in ranks_dire:
-                                                            if guy == dire_player['player']["game_name"].lower():
-                                                                if c+1 in pos_rank and ranks_radiant[guy] != '-':
-                                                                    pos_rank[1].append(ranks_dire[guy])
-                                            except:
-                                                pass
+                                            dire_player = json_map['team_dire']['players_items'][q]
+                                            for c in range(5):
+                                                if dire_player['player']["game_name"].lower() == dire_hero['player'][
+                                                    "game_name"].lower() and \
+                                                        dire_player['player']['role'] == c+1:
+                                                    matchups[f'dire_pos{c+1}'] = dire_hero['hero']['label']
+                                                    for guy in ranks_dire:
+                                                        if guy == dire_player['player']["game_name"].lower():
+                                                            if c+1 in pos_rank and ranks_radiant[guy] != '-':
+                                                                pos_rank[1].append(ranks_dire[guy])
                                         dire_hero_names.append(dire_hero['hero']['label'])
                                         dire_hero_ids.append(dire_hero['hero']['id_steam'])
-                                    if matchups['radiant_pos1'] == []:
-                                        for radiant_hero in radiant_hero_names:
-                                            if radiant_hero in good_heroes:
-                                                matchups['radiant_pos1'] = radiant_hero
-                                    if matchups['dire_pos1'] == []:
-                                        for dire_hero in dire_hero_names:
-                                            if dire_hero in good_heroes:
-                                                matchups['dire_pos1'] = dire_hero
                                     title = json_map['title']
                                     radiant_team_name = \
                                         json_map['team_radiant']['name']
@@ -183,11 +169,10 @@ def live_matches():
                                             EC.element_to_be_clickable((By.ID, 'rankData')))
                                         select = Select(element)
                                         select.select_by_index(9)
-                                        time.sleep(10)
+                                        time.sleep(8)
                                         aler_window = WebDriverWait(driver, 30).until(
                                             EC.visibility_of_element_located(
                                                 (By.XPATH, '//mat-icon[text()="content_copy"]')))
-                                        # time.sleep(5)
                                         aler_window.click()
                                         alert = Alert(driver)
                                         alert_text = alert.text
@@ -211,7 +196,6 @@ def live_matches():
                                             radiant_pos1_vs_cores = 0
                                             dire_pos1_vs_cores = 0
                                             dire_safe_line, mid, radiant_safe_line, radiant_off_line, dire_off_line = 0, 0, 0, 0, 0
-                                            # mid
                                             for position in [tracker_matchups['radiant_pos1'], tracker_matchups['dire_pos1']  ,tracker_matchups["radiant_pos2"],
                                                              tracker_matchups["radiant_pos1"],
                                                              tracker_matchups["dire_pos1"],
@@ -231,41 +215,33 @@ def live_matches():
                                                         with_wr = next(percent_iter).text.strip()
                                                         against_wr = next(percent_iter).text.strip()
                                                         against_wr = re.match('[0-9]{1,}\.[0-9]{1,}', against_wr).group()
-                                                        with_wr = re.match('[0-9]{1,}\.[0-9]{1,}',
-                                                                              with_wr).group()
                                                         if position == tracker_matchups['radiant_pos1']:
                                                             if dota2protracker_hero_name == matchups[
                                                                 'dire_pos3'] or dota2protracker_hero_name == \
                                                                     matchups['dire_pos4']:
-                                                                # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                                                                 radiant_safe_line += float(against_wr) / 2
-                                                            if dota2protracker_hero_name == matchups['dire_pos1']:
-                                                                # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
+                                                            elif dota2protracker_hero_name == matchups['dire_pos1']:
+                                                                radiant_pos1_vs_cores += int(float(against_wr))
                                                                 pos1_vs_pos1 = float(against_wr)
-                                                            if [] not in matchups.values():
-                                                                if dota2protracker_hero_name in {matchups['dire_pos1'],
-                                                                                                 matchups['dire_pos2'],
-                                                                                                 matchups['dire_pos3']}:
-                                                                    radiant_pos1_vs_cores += int(float(against_wr))
+                                                            elif dota2protracker_hero_name in {matchups['dire_pos2'],
+                                                                                             matchups['dire_pos3']}:
+                                                                radiant_pos1_vs_cores += int(float(against_wr))
                                                             if dota2protracker_hero_name in dire_hero_names:
                                                                 radiant_pos1_vs_team += int(float(against_wr))
                                                         if position == tracker_matchups['dire_pos1']:
                                                             if dota2protracker_hero_name == matchups[
                                                                 'radiant_pos3'] or dota2protracker_hero_name == \
                                                                     matchups['radiant_pos4']:
-                                                                # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                                                                 dire_safe_line += float(against_wr) / 2
-                                                            if [] not in matchups.values():
-                                                                if dota2protracker_hero_name in {
-                                                                    matchups['radiant_pos1'],
-                                                                    matchups['radiant_pos2'],
-                                                                    matchups['radiant_pos3']}:
-                                                                    dire_pos1_vs_cores += int(float(against_wr))
+                                                            if dota2protracker_hero_name in {
+                                                                matchups['radiant_pos1'],
+                                                                matchups['radiant_pos2'],
+                                                                matchups['radiant_pos3']}:
+                                                                dire_pos1_vs_cores += int(float(against_wr))
                                                             if dota2protracker_hero_name in radiant_hero_names:
                                                                 dire_pos1_vs_team += int(float(against_wr))
                                                         if position == tracker_matchups['radiant_pos2']:
                                                             if dota2protracker_hero_name == matchups['dire_pos2']:
-                                                                # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                                                                 mid += float(against_wr)
                                                         if position == tracker_matchups['radiant_pos3']:
                                                             if dota2protracker_hero_name == matchups['dire_pos1'] or \
@@ -283,12 +259,8 @@ def live_matches():
                                                     except Exception as e:
                                                         print(e)
                                             print('protracker end')
-                                            # pos1 vs team
                                             pos1_vs_team = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
-                                            # if diff > 3 or diff < -3:
-                                            # pos1 vs cores
                                             pos1_vs_cores = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-                                            # if diff > 1 or diff < -1
                                             answer = [pos1_vs_team, pos1_vs_cores, pos1_vs_pos1, mid, radiant_off_line - dire_off_line, radiant_safe_line-dire_safe_line]
                                             queue.put(answer)
                                     def duration():
