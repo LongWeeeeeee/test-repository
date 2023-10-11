@@ -50,7 +50,7 @@ query = '''
 url = "https://api.stratz.com/graphql"
 api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiMWM5MDkyYTgtMGY0OS00OTExLTliMjQtNjM2OWZlNDQ2NzFhIiwiU3RlYW1JZCI6IjQ1MDgzMDI2MCIsIm5iZiI6MTY5NTM2NTcwOCwiZXhwIjoxNzI2OTAxNzA4LCJpYXQiOjE2OTUzNjU3MDgsImlzcyI6Imh0dHBzOi8vYXBpLnN0cmF0ei5jb20ifQ.WfU7Yd8DFBOuOg_MaoisTIhvgElC1E8qGn_OlZa7PYE"
 headers = {"Authorization": f"Bearer {api_token}"}
-map_id = 7376082994
+map_id = 7376370930
 match_query = '''
 { 
   live {
@@ -94,7 +94,12 @@ for heroes in map_json['players']:
     elif heroes['hero']['name'] == 'npc_dota_hero_zuus':
         heroes['hero']['name'] = 'npc_dota_hero_zeus'
     elif heroes['hero']['name'] == 'npc_dota_hero_treant':
-        heroes['hero']['name'] = 'npc_dota_hero_treant_protecter'
+        heroes['hero']['name'] = 'npc_dota_hero_treant_protector'
+    elif heroes['hero']['name'] == 'npc_dota_hero_necrolyte':
+        heroes['hero']['name'] = 'npc_dota_hero_necrophos'
+    elif heroes['hero']['name'] == 'npc_dota_hero_life_stealer':
+        heroes['hero']['name'] = 'npc_dota_hero_lifestealer'
+
     if heroes['isRadiant']:
         pos = heroes['position'].split('_')[1]
         hero = heroes['hero']['name'].split('npc_dota_hero_')[1].split('_')
@@ -193,6 +198,10 @@ def dotafix(queue):
 def protracker(queue):
     start_p = time.time()
     c = 0
+    a = 0
+    b = 0
+    d = 0
+    f = 0
     print('protracker')
     lines = {}
     tracker_matchups = {}
@@ -227,7 +236,7 @@ def protracker(queue):
                     if dota2protracker_hero_name == matchups[
                         'dire_pos3'] or dota2protracker_hero_name == \
                             matchups['dire_pos4']:
-                        c +=1
+                        a +=1
                         radiant_safe_line += float(against_wr) / 2
                     elif dota2protracker_hero_name == matchups['dire_pos1']:
                         radiant_pos1_vs_cores += int(float(against_wr))
@@ -241,7 +250,7 @@ def protracker(queue):
                     if dota2protracker_hero_name == matchups[
                         'radiant_pos3'] or dota2protracker_hero_name == \
                             matchups['radiant_pos4']:
-                        c +=1
+                        b +=1
                         dire_safe_line += float(against_wr) / 2
                     if dota2protracker_hero_name in {
                         matchups['radiant_pos1'],
@@ -260,20 +269,18 @@ def protracker(queue):
                         'dire_pos5']:
                         # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                         radiant_off_line += float(against_wr) / 2
-                        c+=1
+                        d+=1
                 if position == tracker_matchups['dire_pos3']:
-                    if dota2protracker_hero_name == matchups[
-                        'radiant_pos1'] or \
-                            dota2protracker_hero_name == matchups[
-                        'radiant_pos5']:
+                    if dota2protracker_hero_name == matchups['radiant_pos1'] or \
+                            dota2protracker_hero_name == matchups['radiant_pos5']:
                         # if int(float(against_wr)) > 53 or int(float(against_wr)) < 47:
                         dire_off_line += float(against_wr) / 2
-                        c+=1
+                        f+=1
             except Exception as e:
                 print(e)
     pos1_vs_team = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
     pos1_vs_cores = radiant_pos1_vs_cores / 3 - dire_pos1_vs_cores / 3
-    if mid ==0 or pos1_vs_pos1 ==0 or dire_off_line == 0 or dire_safe_line==0 or radiant_safe_line==0 or radiant_off_line==0 or c!=9:
+    if mid ==0 or pos1_vs_pos1 ==0 or dire_off_line == 0 or dire_safe_line==0 or radiant_safe_line==0 or radiant_off_line==0:
         print('protracker error')
     if mid != 0 and pos1_vs_pos1 != 0:
         mid -= 50
