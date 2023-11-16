@@ -50,7 +50,7 @@ query = '''
 url = "https://api.stratz.com/graphql"
 api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiMWM5MDkyYTgtMGY0OS00OTExLTliMjQtNjM2OWZlNDQ2NzFhIiwiU3RlYW1JZCI6IjQ1MDgzMDI2MCIsIm5iZiI6MTY5NTM2NTcwOCwiZXhwIjoxNzI2OTAxNzA4LCJpYXQiOjE2OTUzNjU3MDgsImlzcyI6Imh0dHBzOi8vYXBpLnN0cmF0ei5jb20ifQ.WfU7Yd8DFBOuOg_MaoisTIhvgElC1E8qGn_OlZa7PYE"
 headers = {"Authorization": f"Bearer {api_token}"}
-map_id = 7436541641
+map_id = 7441986333
 match_query = '''
 { 
   live {
@@ -154,13 +154,16 @@ for heroes in map_json['players']:
         dire_hero_ids.append(heroes['hero']['id'])
 
 
-matchups ={'radiant_pos3': 'Legion Commander', 'radiant_pos4': 'Muerta', 'radiant_pos1': 'Wraith King', 'radiant_pos5': 'Treant Protector', 'radiant_pos2': 'Clinkz', 'dire_pos2': 'Outworld Destroyer', 'dire_pos1': 'Troll Warlord', 'dire_pos4': "Nature's Prophet", 'dire_pos3': 'Beastmaster', 'dire_pos5': 'Shadow Shaman'}
+
+# matchups ={'radiant_pos1': 'Spectre', 'radiant_pos5': 'Pudge', 'radiant_pos4': 'Snapfire', 'radiant_pos2': 'Invoker', 'radiant_pos3': 'Viper', 'dire_pos3': 'Brewmaster', 'dire_pos2': 'Outworld Destroyer', 'dire_pos5': 'Marci', 'dire_pos4': 'Phoenix', 'dire_pos1': 'Templar Assassin'}
+
+
+
 
 print(matchups)
 
 
 def dotafix(queue):
-    start = time.time()
     options = Options()
     options.add_argument("--start-maximized")
     options.add_argument("--no-sandbox")
@@ -188,7 +191,6 @@ def dotafix(queue):
         driver.quit()
         queue.put([datan[0]] + [datan[1]] + [datan[2]])
         end = time.time()
-        print('dotafix time ' + str(end - start))
     else:
         driver.refresh()
         time.sleep(10)
@@ -210,7 +212,6 @@ def dotafix(queue):
 
 
 def protracker(queue):
-    start_p = time.time()
     off_c = 0
     safe_c = 0
 
@@ -220,48 +221,50 @@ def protracker(queue):
     if [] not in matchups.values():
         for name in matchups:
             tracker_matchups[name] = matchups[name].replace(' ', '%20')
+    radiant_pos3_vs_team, radiant_pos4_vs_team, radiant_pos5_vs_team, radiant_pos2_vs_team, dire_pos2_vs_team, dire_pos3_vs_team, dire_pos4_vs_team, dire_pos5_vs_team = 0,0,0,0,0,0,0,0
     dire_pos3_vs_pos1, dire_pos3_vs_pos5, dire_pos1_vs_pos3, dire_pos1_vs_pos4, radiant_pos3_vs_pos1, radiant_pos3_vs_pos5, radiant_pos1_vs_pos3, radiant_pos1_vs_pos4 = 0,0,0,0,0,0,0,0
     dire_safe_line, mid, radiant_safe_line, radiant_off_line, dire_off_line, radiant_pos1_vs_team, dire_pos1_vs_team, pos1_vs_pos1 = 0, 0, 0, 0, 0, 0, 0, 0
     for position in [tracker_matchups['radiant_pos1'],
                      tracker_matchups['dire_pos1'],
                      tracker_matchups["radiant_pos2"],
+                     tracker_matchups["dire_pos2"],
                      tracker_matchups["radiant_pos3"],
                      tracker_matchups["dire_pos3"]]:
         url_dota2_protracker = f'https://www.dota2protracker.com/hero/{position}/new'
         response = requests.get(url_dota2_protracker)
         soup = BeautifulSoup(response.text, "lxml")
         blocks = soup.find_all('div', class_='overflow-y-scroll tbody h-96')
+        c = 0
         if position in tracker_matchups['radiant_pos1']:
             if blocks[0] != '''<div class="overflow-y-scroll tbody h-96">
                                                                                         </div>''':
                 div_blocks = blocks[0].find_all('div', {'data-hero': True})  # керри позиция
                 for data in div_blocks:
+
                     flex = data.find_all('div', class_='flex w-1/4 items-center justify-center')
                     tracker_hero_name = flex[0]['data-sort-value']
                     wr = float(flex[1]['data-sort-value'])
                     pos = flex[3]['data-sort-value']
                     if tracker_hero_name == matchups['dire_pos1'] and pos == 'pos 1':
-                        pos1_vs_pos1 = wr
                         radiant_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
+                        c+=1
+                    elif tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
                         radiant_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
+                        c+=1
+                    elif tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
                         radiant_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
-                        radiant_safe_line += wr
-                        safe_c += 1
-                        radiant_pos1_vs_pos3 = wr
-                    if tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
-                        radiant_safe_line += wr
-                        safe_c += 1
-                        radiant_pos1_vs_pos4 = wr
-                if radiant_pos1_vs_pos4 == 0:
-                    print(position + ' pos 1' + ' VS ' + matchups['dire_pos4'] + ' pos 4 нету на protracker')
-                if pos1_vs_pos1 == 0:
-                    print(position + ' pos 1' + ' VS ' + matchups['dire_pos1'] + ' pos 1 нету на protracker')
-                if radiant_pos1_vs_pos3 == 0:
-                    print(position + ' pos 1' + ' VS ' + matchups['dire_pos3'] + ' pos 3 нету на protracker')
-        if position in tracker_matchups['dire_pos1']:
+                        c+=1
+                    elif tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
+                        radiant_pos1_vs_team += wr
+                        c+=1
+                    elif tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
+                        radiant_pos1_vs_team += wr
+                        c+=1
+                if c !=5:
+                    print(position + " error")
+                    c = 0
+                else: c = 0
+        elif position in tracker_matchups['dire_pos1']:
             if blocks[0] != '''<div class="overflow-y-scroll tbody h-96">
                                                                                         </div>''':
                 div_blocks = blocks[0].find_all('div', {'data-hero': True})  # керри позиция
@@ -272,23 +275,25 @@ def protracker(queue):
                     pos = flex[3]['data-sort-value']
                     if tracker_hero_name == matchups['radiant_pos1'] and pos == 'pos 1':
                         dire_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
+                        c += 1
+                    elif tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
                         dire_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
+                        c += 1
+                    elif tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
                         dire_pos1_vs_team += wr
-                    if tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
-                        safe_c += 1
-                        dire_safe_line += wr
-                        dire_pos1_vs_pos3 = wr
-                    if tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
-                        dire_safe_line += wr
-                        safe_c += 1
-                        dire_pos1_vs_pos4 = wr
-                if dire_pos1_vs_pos4 == 0:
-                    print(position + ' pos 1' + ' VS ' + matchups['radiant_pos4'] + ' pos 4 нету на protracker')
-                if dire_pos1_vs_pos3 == 0:
-                    print(position + ' pos 1' + ' VS ' + matchups['radiant_pos3'] + ' pos 3 нету на protracker')
-        if position == tracker_matchups['radiant_pos2']:
+                        c += 1
+                    elif tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
+                        dire_pos1_vs_team += wr
+                        c += 1
+                    elif tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
+                        dire_pos1_vs_team += wr
+                        c += 1
+                if c != 5:
+                    print(position + " error")
+                    c = 0
+                else:
+                    c = 0
+        elif position == tracker_matchups['radiant_pos2']:
             if blocks[2] != '''<div class="overflow-y-scroll tbody h-96">
                                                 </div>''':
                 if len(blocks) == 10:
@@ -298,10 +303,26 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                        if tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
-                            mid += wr
-                    if mid == 0:
-                        print(position + ' pos 2' + ' VS ' + matchups['dire_pos2'] + ' pos 2 нету на protracker')
+                        if tracker_hero_name == matchups['dire_pos1'] and pos == 'pos 1':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
 
                 else:
                     div_blocks = blocks[0].find_all('div', {'data-hero': True})
@@ -310,9 +331,85 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                    if mid == 0:
-                        print(position + ' pos 2' + ' VS ' + matchups['dire_pos2'] + ' pos 2 нету на protracker')
-        if position == tracker_matchups['radiant_pos3']:
+                        if tracker_hero_name == matchups['dire_pos1'] and pos == 'pos 1':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
+                            radiant_pos2_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
+        elif position == tracker_matchups['dire_pos2']:
+            if blocks[2] != '''<div class="overflow-y-scroll tbody h-96">
+                                                </div>''':
+                if len(blocks) == 10:
+                    div_blocks = blocks[2].find_all('div', {'data-hero': True})
+                    for data in div_blocks:
+                        flex = data.find_all('div', class_='flex w-1/4 items-center justify-center')
+                        tracker_hero_name = flex[0]['data-sort-value']
+                        wr = float(flex[1]['data-sort-value'])
+                        pos = flex[3]['data-sort-value']
+                        if tracker_hero_name == matchups['radiant_pos1'] and pos == 'pos 1':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
+
+                else:
+                    div_blocks = blocks[0].find_all('div', {'data-hero': True})
+                    for data in div_blocks:
+                        flex = data.find_all('div', class_='flex w-1/4 items-center justify-center')
+                        tracker_hero_name = flex[0]['data-sort-value']
+                        wr = float(flex[1]['data-sort-value'])
+                        pos = flex[3]['data-sort-value']
+                        if tracker_hero_name == matchups['radiant_pos1'] and pos == 'pos 1':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
+                            dire_pos2_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
+        elif position == tracker_matchups['radiant_pos3']:
             if len(blocks) == 10:
                 if blocks[4] != '''<div class="overflow-y-scroll tbody h-96">
                                                     </div>''':
@@ -322,18 +419,26 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                        if tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
-                            off_c += 1
-                            radiant_off_line += wr
-                            radiant_pos3_vs_pos5 = wr
                         if tracker_hero_name == matchups['dire_pos1'] and pos == 'pos 1':
-                            off_c += 1
-                            radiant_off_line += wr
-                            radiant_pos3_vs_pos1 = wr
-                    if radiant_pos3_vs_pos1 == 0:
-                        print(position + ' pos 3' + ' VS ' + matchups['dire_pos1'] + ' pos 1 нету на protracker')
-                    if radiant_pos3_vs_pos5 == 0:
-                        print(position + ' pos 3' + ' VS ' + matchups['dire_pos5'] + ' pos 5 нету на protracker')
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
             else:
                 if blocks[2] != '''<div class="overflow-y-scroll tbody h-96">
                                                     </div>''':
@@ -343,19 +448,27 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                        if tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
-                            off_c += 1
-                            radiant_off_line += wr
-                            radiant_pos3_vs_pos5 = wr
                         if tracker_hero_name == matchups['dire_pos1'] and pos == 'pos 1':
-                            off_c += 1
-                            radiant_off_line += wr
-                            radiant_pos3_vs_pos1 = wr
-                    if radiant_pos3_vs_pos1 == 0:
-                        print(position + ' pos 3' + ' VS ' + matchups['dire_pos1'] + ' pos 1 нету на protracker')
-                    if radiant_pos3_vs_pos5 == 0:
-                        print(position + ' pos 3' + ' VS ' + matchups['dire_pos5'] + ' pos 5 нету на protracker')
-        if position == tracker_matchups['dire_pos3']:
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos2'] and pos == 'pos 2':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos5'] and pos == 'pos 5':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos3'] and pos == 'pos 3':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['dire_pos4'] and pos == 'pos 4':
+                            radiant_pos3_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
+        elif position == tracker_matchups['dire_pos3']:
             if len(blocks) == 10:
                 if blocks[4] != '''<div class="overflow-y-scroll tbody h-96">
                                                                                             </div>''':
@@ -365,14 +478,26 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                        if tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
-                            dire_off_line += wr
-                            off_c += 1
-                            dire_pos3_vs_pos5 = wr
                         if tracker_hero_name == matchups['radiant_pos1'] and pos == 'pos 1':
-                            dire_off_line += wr
-                            off_c += 1
-                            dire_pos3_vs_pos1 = wr
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
             else:
                 if blocks[2] != '''<div class="overflow-y-scroll tbody h-96">
                                                                                             </div>''':
@@ -382,31 +507,29 @@ def protracker(queue):
                         tracker_hero_name = flex[0]['data-sort-value']
                         wr = float(flex[1]['data-sort-value'])
                         pos = flex[3]['data-sort-value']
-                        if tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
-                            dire_off_line += wr
-                            off_c += 1
-                            dire_pos3_vs_pos5 = wr
                         if tracker_hero_name == matchups['radiant_pos1'] and pos == 'pos 1':
-                            dire_off_line += wr
-                            off_c += 1
-                            dire_pos3_vs_pos1 = wr
-                    if dire_pos3_vs_pos1 == 0:
-                        print(position + ' pos 3' + ' VS '  + matchups['radiant_pos1'] + ' pos 1 нету на protracker')
-                    if dire_pos3_vs_pos5 == 0:
-                        print(position + ' pos 3' + ' VS '  + matchups['radiant_pos5'] + ' pos 5 нету на protracker')
-    pos1_vs_team = radiant_pos1_vs_team / 5 - dire_pos1_vs_team / 5
-    if mid == 0 or pos1_vs_pos1 == 0 or dire_off_line == 0 or dire_safe_line == 0 or radiant_safe_line == 0 or radiant_off_line == 0 or safe_c != 4 or off_c != 4:
-        print('protracker error')
-    if mid != 0:
-        mid = mid - 0.5
-    if pos1_vs_pos1 !=0:
-        pos1_vs_pos1 = pos1_vs_pos1 - 0.5
-    off_line = (radiant_off_line / 2) - (dire_safe_line / 2)
-    safe_line = (radiant_safe_line / 2) - (dire_off_line / 2)
-    answer = [pos1_vs_team * 100, (pos1_vs_pos1 * 100), (mid + off_line + safe_line) * 100, mid, off_line, safe_line]
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos2'] and pos == 'pos 2':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos5'] and pos == 'pos 5':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos3'] and pos == 'pos 3':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                        elif tracker_hero_name == matchups['radiant_pos4'] and pos == 'pos 4':
+                            dire_pos3_vs_team += wr
+                            c += 1
+                    if c != 5:
+                        print(position + " error")
+                        c = 0
+                    else:
+                        c = 0
+
+    answer = [(radiant_pos2_vs_team /5 + radiant_pos1_vs_team/5 + radiant_pos3_vs_team/5)-(dire_pos1_vs_team/5+dire_pos2_vs_team/5+dire_pos3_vs_team/5)]
     queue.put(answer)
-    end_p = time.time()
-    print('protracker time ' + str(end_p - start_p))
 
 
 def duration():
@@ -498,13 +621,9 @@ t2.start()
 t2.join()
 # result_dict['dotafix.github'] = result_queue_1.get()
 answer = result_queue_2.get()
-error = answer[1]
-result_dict['pos1_vs_team'], result_dict[
-    'pos1_vs_pos1'], result_dict['lanes'], result_dict['mid'], result_dict['off'], result_dict['safe'] = answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]
-send_message(result_dict)
-print(result_dict)
+answer = int(answer[0]*100)
+print('Уверенность в том что radiant победит ' + str(50 + answer) + "%")
+send_message('Уверенность в том что radiant победит ' + str(50 + answer) + "%")
 # ids.append(map_id)
 # f.seek(0)
 # json.dump(ids, f)
-end_time = time.time()
-print(end_time - start_time)
