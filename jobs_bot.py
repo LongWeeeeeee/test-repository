@@ -39,12 +39,7 @@ def add_day_to_excel(date, activities):
     # Вычисление итогового счета
     score = 0
     for activity in activities:
-        if activity == "работал":
-            score += 0.5
-        elif activity == "гулял":
-            score += 1
-        elif activity == "занимался вокалом":
-            score += 2
+        score += scores[activity]
 
     # Вставка итогового счета в таблицу
     sheet.cell(row=last_row+1, column=4).value = score
@@ -79,6 +74,7 @@ def about_day_to_excel(user_message):
 
     # Сохранение изменений в файл
     wb.save("результат.xlsx")
+    send_message('Готово! Хорошего тебе дня, пусть он будет лучше, чем вчера :)')
 
 send_message('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
 date = datetime.now()
