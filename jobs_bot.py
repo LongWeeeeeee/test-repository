@@ -6,16 +6,8 @@ import json
 from numbers_parser import Document
 bot = telebot.TeleBot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 def send_message(message):
-    BOT_TOKEN = '6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs'
-    CHAT_ID = '1091698279'
-    url = f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage'
-    payload = {
-        'chat_id': CHAT_ID,
-        'text': message
-    }
-    response = requests.post(url, json=payload)
-    result = json.loads(response.content)
-    return result
+    bot.send_message(chat_id='1091698279', text=message)
+
 
 def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps):
     # Загрузка существующего файла Excel
