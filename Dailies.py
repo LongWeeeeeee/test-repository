@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import types
 from aiogram import F
+import ast
 from aiogram.types import FSInputFile
+import json
 import os
 
 from openpyxl.workbook import Workbook
@@ -18,11 +20,11 @@ from openpyxl.workbook import Workbook
 load_dotenv()
 bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
-scores = {'встал в 6:30': 1, 'лег в 11': 1, 'умылся льдом': 1, 'контрастный душ': 1, 'сделал зарядку': 1, 'позанимался вокалом' : 1, 'сходил за водой': 1,'правильно питался': 1, 'читал книгу': 1, 'шаги': 1, 'принимал витамины': 1, 'массаж перед сном': 1}
 
 
 class ClientState(StatesGroup):
     greet = State()
+    scores = State()
     steps = State()
     total_sleep = State()
     deep_sleep = State()
@@ -59,7 +61,10 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     sheet.cell(row=last_row+1, column=1).value = yesterday.strftime("%d.%m.%Y")
 
     # Вставка дел в таблицу
-    sheet.cell(row=last_row+1, column=2).value = ", ".join(activities)
+    if type(activities) == list:
+        sheet.cell(row=last_row+1, column=2).value = ", ".join(activities)
+    else:
+        sheet.cell(row=last_row + 1, column=2).value = activities
     # Вставка шаги
     sheet.cell(row=last_row + 1, column=3).value = mysteps
     # Вставка сколько часов спал
@@ -73,16 +78,25 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
 
     # Вычисление итогового счета
     score = 0
-    for activity in activities:
-        score += scores[activity]
+    if type(activities) == list:
+        for activity in activities:
+            score += int(scores[activity])
+    else:
+        score += int(scores[activities])
 
     # Вставка итогового счета в таблицу
     sheet.cell(row=last_row+1, column=8).value = score
 
     # Сохранение изменений в файл
     wb.save(f'{user_id}_Diary.xlsx')
-    await message.answer('Готово! Вы в любой момент можете скачать файл по кнопке ниже')
+    await message.answer('Готово! Вы в любой момент можете скачать дневник по кнопке ниже')
 async def send_message(message) -> None:
+    with open('scores.txt', 'w+') as f:
+        for line in f:
+            line = json.loads(line.strip())
+            if message.from_user.id == line['id']:
+                scores = line['scores']
+
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
 
 @dp.message(F.text == 'Скачать таблицу')
@@ -92,11 +106,6 @@ async def download(message: Message) -> None:
             document=FSInputFile(f'{message.from_user.id}_Diary.xlsx'),
             disable_content_type_detection=True,
         )
-
-
-
-
-
     else:
         await message.answer('Сначала заполните данные')
 @dp.message(CommandStart())
@@ -109,16 +118,38 @@ async def greetings(message: Message, state: FSMContext) -> None:
     if not os.path.exists(f'{message.from_user.id}_Diary.xlsx'):
         await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA', reply_markup=keyboard)
         await message.answer('Привет, ' + message.from_user.full_name + '!' + '\n' + 'Добро пожаловать в ' + name + '!' + '\n' + 'Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим')
-        await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
-    scheduler = AsyncIOScheduler(timezone = "Europe/Moscow")
+        await message.answer('Для начала нужно задать список дел и их "стоимость". Например:' +  '\n' + 'встал в 6:30 : 1, лег в 11 : 1 ''' + '\n' + 'Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
+        await state.set_state(ClientState.scores)
+    else:
+        # await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
+        await state.set_state(ClientState.greet)
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(send_message, 'cron', hour=7, minute=10, args=(message,))
     scheduler.start()
-    await state.set_state(ClientState.greet)
+@dp.message(ClientState.scores)
+async def command_start(message: Message, state: FSMContext):
+    global scores
+    scores = dict()
+    user_message = message.text
+    str_data = user_message.split(', ')
+    for one in str_data:
+        one = one.split(' : ')
+        scores[one[0]] = one[1]
 
+
+    data = {'user_id' : message.from_user.id, 'scores': scores}
+    with open ('scores.txt', 'w+') as f:
+        json.dump(data, f)
+    await message.answer(
+        'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' + ', '.join(
+            scores.keys()))
+    await state.set_state(ClientState.greet)
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
-    activities = [activity for activity in message.text.split(', ') if activity in scores]
-
+    if len(scores) > 1:
+        activities = [activity for activity in message.text.split(', ') if activity in scores]
+    else:
+        activities = message.text.strip(',')
     if len(activities) >= 1:
         await state.update_data(activities = activities)
         await message.answer("Сколько сделал шагов?")
