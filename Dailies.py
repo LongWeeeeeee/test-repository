@@ -2,7 +2,6 @@ import asyncio
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -13,8 +12,10 @@ import os
 
 
 load_dotenv()
-bot = Bot(token=os.getenv('TOKEN'), parse_mode=ParseMode.HTML)
+bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
+scores = {'встал в 6:30': 1, 'лег в 11': 1, 'умылся льдом': 1, 'контрастный душ': 1, 'сделал зарядку': 1, 'дрочил': -1, 'позанимался вокалом' : 1, 'сходил за водой': 1,'правильно питался': 1, 'читал книгу': 1, 'шаги': 1, 'принимал витамины': 1, 'массаж перед сном': 1, 'сахар': -1}
+
 
 class ClientState(StatesGroup):
     greet = State()
@@ -23,7 +24,6 @@ class ClientState(StatesGroup):
     deep_sleep = State()
     about_day = State()
     personal_rate = State()
-scores = {'встал в 6:30': 1, 'лег в 11': 1, 'умылся льдом': 1, 'контрастный душ': 1, 'сделал зарядку': 1, 'дрочил': -1, 'позанимался вокалом' : 1, 'сходил за водой': 1,'правильно питался': 1, 'читал книгу': 1, 'шаги': 1, 'принимал витамины': 1, 'массаж перед сном': 1, 'сахар': -1}
 async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message):
     # Загрузка существующего файла Excel
     wb = load_workbook('MyDays.xlsx')
