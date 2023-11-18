@@ -1,15 +1,19 @@
 import asyncio
 from openpyxl import load_workbook
 from datetime import datetime, timedelta
-from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
+from dotenv import load_dotenv
+import os
 
-TOKEN = "6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs"
-bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
+
+
+load_dotenv()
+bot = Bot(token=os.getenv('TOKEN'), parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
 class ClientState(StatesGroup):
@@ -20,7 +24,6 @@ class ClientState(StatesGroup):
     about_day = State()
     personal_rate = State()
 scores = {'встал в 6:30': 1, 'лег в 11': 1, 'умылся льдом': 1, 'контрастный душ': 1, 'сделал зарядку': 1, 'дрочил': -1, 'позанимался вокалом' : 1, 'сходил за водой': 1,'правильно питался': 1, 'читал книгу': 1, 'шаги': 1, 'принимал витамины': 1, 'массаж перед сном': 1, 'сахар': -1}
-go = False
 async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message):
     # Загрузка существующего файла Excel
     wb = load_workbook('MyDays.xlsx')
@@ -62,16 +65,13 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     wb.save("MyDays.xlsx")
     await message.answer('Готово! Хорошего дня')
 async def send_message(message) -> None:
-    # Replace 'YOUR_CHAT_ID' with your actual chat ID
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
-    await asyncio.sleep(60)  # Wait for 60 seconds
-    asyncio.create_task(send_message(message))  # Run the function again in the background
+    await asyncio.sleep(60)
+    asyncio.create_task(send_message(message))
 
 @dp.message(CommandStart())
 async def greetings(message: Message, state: FSMContext) -> None:
     asyncio.create_task(send_message(message))
-    # msg = 'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys())
-    # await bot.send_message(chat_id=1091698279, text=msg)
     await state.set_state(ClientState.greet)
 
 @dp.message(ClientState.greet)
