@@ -76,56 +76,49 @@ async def greetings(message: Message, state: FSMContext) -> None:
 
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
-    global activities, go
-    go = True
-    activities = []
-    flag = False
-    user_message = message.text
-    for activy in user_message.split(', '):
-        if activy in scores:
-            flag = True
-            activities.append(activy)
-        else:
-            await message.answer('Активности ' + user_message + ' нету в списке...')
-    if flag:
+    activities = [activy if activy in scores else await message.answer('Активности ' + message.text + ' нету в списке...') for activy in message.text.split(', ')]
+    if len(activities) >= 1:
+        await state.update_data(activities = activities)
         await message.answer("Сколько сделал шагов?")
         await state.set_state(ClientState.steps)
 
 @dp.message(ClientState.steps)
 async def process_name(message: Message, state: FSMContext):
-    global mysteps
-    mysteps = message.text
+    await state.update_data(mysteps=message.text)
     await message.answer('Сколько всего спал?')
     await state.set_state(ClientState.total_sleep)
 
 
 @dp.message(ClientState.total_sleep)
 async def process_dont_like_write_bots(message: Message, state: FSMContext):
-    global total_sleep
-    total_sleep = message.text
+    await state.update_data(total_sleep=message.text)
     await message.answer('Сколько из них глубокий сон?')
     await state.set_state(ClientState.deep_sleep)
 
 
 @dp.message(ClientState.deep_sleep)
 async def process_like_write_bots(message: Message, state: FSMContext):
-    global deep_sleep
-    deep_sleep = message.text
+    await state.update_data(deep_sleep=message.text)
     await message.answer('Хочешь рассказать как прошел день? Это поможет отслеживать почему день был хороший или нет')
     await state.set_state(ClientState.about_day)
 
 @dp.message(ClientState.about_day)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
-    global user_message
-    user_message = message.text
+    await state.update_data(user_message=message.text)
     await message.answer('Насколько из 10 сам оцениваешь день?')
     await state.set_state(ClientState.personal_rate)
 
 @dp.message(ClientState.personal_rate)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
-    global rate
-    rate = message.text
+    await state.update_data(rate=message.text)
     date = datetime.now()
+    user_states_data = await state.get_data()
+    activities = user_states_data['activities']
+    user_message = user_states_data['user_message']
+    total_sleep = user_states_data['total_sleep']
+    deep_sleep = user_states_data['deep_sleep']
+    rate = user_states_data['rate']
+    mysteps = user_states_data['mysteps']
     await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message)
     await state.set_state(ClientState.greet)
 
