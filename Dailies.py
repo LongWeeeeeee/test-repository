@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from dotenv import load_dotenv
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import os
 
 
@@ -66,12 +67,13 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     await message.answer('Готово! Хорошего дня')
 async def send_message(message) -> None:
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
-    await asyncio.sleep(60)
-    asyncio.create_task(send_message(message))
+
 
 @dp.message(CommandStart())
 async def greetings(message: Message, state: FSMContext) -> None:
-    asyncio.create_task(send_message(message))
+    scheduler = AsyncIOScheduler(timezone = "Europe/Moscow")
+    scheduler.add_job(send_message, 'cron', hour=7, minute=10, args=(message,))
+    scheduler.start()
     await state.set_state(ClientState.greet)
 
 @dp.message(ClientState.greet)
