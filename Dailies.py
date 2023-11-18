@@ -62,17 +62,17 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     # Сохранение изменений в файл
     wb.save("MyDays.xlsx")
     await message.answer('Готово! Хорошего дня')
-async def send_message() -> None:
+async def send_message(message) -> None:
     # Replace 'YOUR_CHAT_ID' with your actual chat ID
-    await bot.send_message(chat_id='1091698279', text='Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
+    await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
     await asyncio.sleep(60)  # Wait for 60 seconds
-    asyncio.create_task(send_message())  # Run the function again in the background
+    asyncio.create_task(send_message(message))  # Run the function again in the background
 
 
 
 @dp.message(CommandStart())
 async def greetings(message: Message, state: FSMContext) -> None:
-    asyncio.create_task(send_message())
+    asyncio.create_task(send_message(message))
     # msg = 'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys())
     # await bot.send_message(chat_id=1091698279, text=msg)
     await state.set_state(ClientState.greet)
@@ -139,11 +139,7 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
 
 
 async def main():
-
     await dp.start_polling(bot)
-
-
-
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
