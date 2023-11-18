@@ -12,7 +12,6 @@ TOKEN = "6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs"
 bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
-
 class ClientState(StatesGroup):
     greet = State()
     steps = State()
@@ -68,8 +67,6 @@ async def send_message(message) -> None:
     await asyncio.sleep(60)  # Wait for 60 seconds
     asyncio.create_task(send_message(message))  # Run the function again in the background
 
-
-
 @dp.message(CommandStart())
 async def greetings(message: Message, state: FSMContext) -> None:
     asyncio.create_task(send_message(message))
@@ -124,7 +121,6 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     await message.answer('Насколько из 10 сам оцениваешь день?')
     await state.set_state(ClientState.personal_rate)
 
-
 @dp.message(ClientState.personal_rate)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
     global rate
@@ -132,11 +128,6 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     date = datetime.now()
     await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message)
     await state.set_state(ClientState.greet)
-
-
-
-
-
 
 async def main():
     await dp.start_polling(bot)
