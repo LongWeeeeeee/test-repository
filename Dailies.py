@@ -64,7 +64,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
 async def send_message() -> None:
     # Replace 'YOUR_CHAT_ID' with your actual chat ID
     await bot.send_message(chat_id='1091698279', text='This is a test message')
-    await asyncio.sleep(5)  # Wait for 60 seconds
+    await asyncio.sleep(60)  # Wait for 60 seconds
     await send_message()  # Loop back to send_message() to send the message again
 
 
