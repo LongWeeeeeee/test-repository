@@ -63,19 +63,21 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     await message.answer('Готово! Хорошего дня')
 async def send_message() -> None:
     # Replace 'YOUR_CHAT_ID' with your actual chat ID
-    await bot.send_message(chat_id='1091698279', text='This is a test message')
+    await bot.send_message(chat_id='1091698279', text='Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys()))
     await asyncio.sleep(60)  # Wait for 60 seconds
     await send_message()  # Loop back to send_message() to send the message again
 
 
 @dp.message(CommandStart())
 async def greetings(message: Message, state: FSMContext) -> None:
-    msg = 'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys())
-    await bot.send_message(chat_id=1091698279, text=msg)
+
+    # msg = 'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:' + '\n' + '\n' +  ', '.join(scores.keys())
+    # await bot.send_message(chat_id=1091698279, text=msg)
     await state.set_state(ClientState.greet)
 
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
+
     global activities
     activities = []
     flag = False
@@ -127,6 +129,8 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     rate = message.text
     date = datetime.now()
     await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message)
+    await state.set_state(ClientState.greet)
+
 
 
 
