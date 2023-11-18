@@ -76,7 +76,7 @@ async def greetings(message: Message, state: FSMContext) -> None:
 
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
-    activities = [activy if activy in scores else await message.answer('Активности ' + message.text + ' нету в списке...') for activy in message.text.split(', ')]
+    activities = [activy if activy in scores else await message.answer('Активности ' + activy + ' нету в списке...') for activy in message.text.split(', ')]
     if len(activities) >= 1:
         await state.update_data(activities = activities)
         await message.answer("Сколько сделал шагов?")
