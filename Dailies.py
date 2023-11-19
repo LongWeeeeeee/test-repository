@@ -90,7 +90,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     sheet.cell(row=last_row+1, column=8).value = score
 
     # Сохранение изменений в файл
-    wb.save(f'{user_id}_Diary.xlsx')
+    wb.save(f'{user_name}_Diary.xlsx')
     kb = [[types.KeyboardButton(text="Скачать таблицу"), types.KeyboardButton(text="Изменить список дел")]]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
