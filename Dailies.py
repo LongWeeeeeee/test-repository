@@ -180,12 +180,14 @@ async def command_start(message: Message, state: FSMContext):
     scores = dict()
     user_message = message.text
     str_data = user_message.split(', ')
+    flag = False
     for one in str_data:
         one = one.split(' : ')
         if len(one) == 2 and one[1].isdigit():
             scores[one[0]] = one[1]
         else:
-            await message.answer('Неверный формат данных!')
+            flag = True
+    if flag: await message.answer('Неверный формат данных!')
 
     await state.update_data(scores=scores)
     f = open ('scores.txt', 'r+')
