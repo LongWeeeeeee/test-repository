@@ -15,7 +15,7 @@ import os
 
 from openpyxl.workbook import Workbook
 
-bot = Bot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
+bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
 dp = Dispatcher()
 
 
