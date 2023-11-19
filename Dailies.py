@@ -122,9 +122,9 @@ async def download(message: Message, state: FSMContext) -> None:
     await state.set_state(ClientState.scores)
 @dp.message(F.text == 'Скачать таблицу')
 async def download(message: Message) -> None:
-    if os.path.exists(f'{message.from_user.id}_Diary.xlsx'):
+    if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
         await message.answer_document(
-            document=FSInputFile(f'{message.from_user.id}_Diary.xlsx'),
+            document=FSInputFile(f'{message.from_user.username}_Diary.xlsx'),
             disable_content_type_detection=True,
         )
     else:
