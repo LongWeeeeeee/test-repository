@@ -28,11 +28,11 @@ class ClientState(StatesGroup):
     about_day = State()
     personal_rate = State()
 
-async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores):
+async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores, user_name):
     # Загрузка существующего файла Excel
-    if os.path.exists(f'{user_id}_Diary.xlsx'):
+    if os.path.exists(f'{user_name}_Diary.xlsx'):
         # If the file exists, load the existing workbook
-        wb = load_workbook(f'{user_id}_Diary.xlsx')
+        wb = load_workbook(f'{user_name}_Diary.xlsx')
     else:
         # If the file doesn't exist, create a new workbook
         wb = Workbook()
@@ -255,7 +255,8 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     scores = user_states_data['scores']
     mysteps = user_states_data['mysteps']
     user_id = user_states_data['user_id']
-    await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores)
+    user_name = message.from_user.username
+    await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores, user_name)
     await state.set_state(ClientState.greet)
 
 async def main():
