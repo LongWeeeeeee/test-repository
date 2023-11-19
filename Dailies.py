@@ -89,8 +89,11 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
 
     # Сохранение изменений в файл
     wb.save(f'{user_id}_Diary.xlsx')
-    kb = [[types.KeyboardButton(text="Скачать таблицу")]]
-    keyboard = types.ReplyKeyboardMarkup(keyboard=kb)
+    kb = [[types.KeyboardButton(text="Скачать таблицу"), types.KeyboardButton(text="Изменить список дел")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
     await message.answer('Готово! Вы в любой момент можете скачать дневник по кнопке ниже', reply_markup=keyboard)
 async def send_message(message) -> None:
     with open('scores.txt', 'w+') as f:
@@ -101,7 +104,13 @@ async def send_message(message) -> None:
 
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
     await message.answer(', '.join(scores.keys()))
-
+@dp.message(F.text == 'Изменить список дел')
+async def download(message: Message, state: FSMContext) -> None:
+    await message.answer('Введите новый список дел и их "стоимость". Например:')
+    await message.answer('встал в 6:30 : 1, лег в 11 : 1, зарядка утром : 5, массаж : 3, пп : 1')
+    await message.answer(
+        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
+    await state.set_state(ClientState.scores)
 @dp.message(F.text == 'Скачать таблицу')
 async def download(message: Message) -> None:
     if os.path.exists(f'{message.from_user.id}_Diary.xlsx'):
@@ -127,8 +136,11 @@ async def greetings(message: Message, state: FSMContext) -> None:
                     flag = True
                     scores = line['scores']
                     await state.update_data(scores=scores)
-                    kb = [[types.KeyboardButton(text="Скачать таблицу")]]
-                    keyboard = types.ReplyKeyboardMarkup(keyboard=kb)
+                    kb = [[types.KeyboardButton(text="Скачать таблицу"), types.KeyboardButton(text="Изменить список дел")]]
+                    keyboard = types.ReplyKeyboardMarkup(
+                        keyboard=kb,
+                        resize_keyboard=True,
+                    )
                     await message.answer(
                         'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
                     await message.answer(', '.join(scores.keys()), reply_markup=keyboard)
@@ -139,7 +151,8 @@ async def greetings(message: Message, state: FSMContext) -> None:
         json.dump([], file)
         file.close()
     if not flag:
-        await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
+        markup = types.ReplyKeyboardRemove()
+        await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA', reply_markup=markup)
         await message.answer(
             'Привет, ' + message.from_user.full_name + '!' + '\n' + 'Добро пожаловать в ' + name + '!' + '\n' + 'Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим')
         await message.answer('Для начала нужно задать список дел и их "стоимость". Например:')
@@ -171,8 +184,20 @@ async def command_start(message: Message, state: FSMContext):
     f.seek(0)
     json.dump(score_list, f)
     f.close()
+    if os.path.exists(f'{message.from_user.id}_Diary.xlsx'):
+        kb = [[types.KeyboardButton(text="Скачать таблицу"), types.KeyboardButton(text="Изменить список дел")]]
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=kb,
+            resize_keyboard=True,
+        )
+    else:
+        kb = [[types.KeyboardButton(text="Изменить список дел")]]
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=kb,
+            resize_keyboard=True,
+        )
     await message.answer(
-        'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
+        'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:', reply_markup=keyboard)
     await message.answer(', '.join(scores.keys()))
     await state.set_state(ClientState.greet)
 @dp.message(ClientState.greet)
