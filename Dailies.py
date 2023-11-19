@@ -9,6 +9,7 @@ from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import types
 from aiogram import F
+import re
 from aiogram.types import FSInputFile
 import json
 import os
@@ -19,6 +20,7 @@ bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
 dp = Dispatcher()
 
 
+
 class ClientState(StatesGroup):
     greet = State()
     scores = State()
@@ -27,6 +29,8 @@ class ClientState(StatesGroup):
     deep_sleep = State()
     about_day = State()
     personal_rate = State()
+
+
 
 async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores, user_name):
     # Загрузка существующего файла Excel
@@ -104,8 +108,15 @@ async def send_message(message) -> None:
     await message.answer(', '.join(scores.keys()))
 @dp.message(F.text == 'Изменить список дел')
 async def download(message: Message, state: FSMContext) -> None:
-    await message.answer('Введите новый список дел и их "стоимость". Например:')
-    await message.answer('встал в 6:30 : 1, лег в 11 : 1, зарядка утром : 5, массаж : 3, пп : 1')
+    await message.answer('Введите новый список дел и их "стоимость". Ваш предыдущий список: ')
+    user_states_data = await state.get_data()
+    scores = user_states_data['scores']
+    formatted_string = ""
+    for key, value in scores.items():
+        formatted_string += f"{key} : {value}, "
+    formatted_string = formatted_string[:-2]
+
+    await message.answer(formatted_string)
     await message.answer(
         'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
     await state.set_state(ClientState.scores)
@@ -163,15 +174,15 @@ async def greetings(message: Message, state: FSMContext) -> None:
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(send_message, 'cron', hour=7, minute=10, args=(message,))
     scheduler.start()
+
 @dp.message(ClientState.scores)
 async def command_start(message: Message, state: FSMContext):
-    global scores
     scores = dict()
     user_message = message.text
     str_data = user_message.split(', ')
     for one in str_data:
         one = one.split(' : ')
-        if len(one) == 2:
+        if len(one) == 2 and one[1].isdigit():
             scores[one[0]] = one[1]
         else:
             await message.answer('Неверный формат данных!')
@@ -201,6 +212,7 @@ async def command_start(message: Message, state: FSMContext):
     await message.answer(', '.join(scores.keys()))
     await message.answer('Впишите дела которые вы вчера делали из предложенного списка через запятую' + '\n' + 'Вы можете изменить список в любой момент')
     await state.set_state(ClientState.greet)
+
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
     user_states_data = await state.get_data()
