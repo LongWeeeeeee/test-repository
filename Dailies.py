@@ -6,7 +6,6 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
-from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import types
 from aiogram import F
@@ -16,8 +15,7 @@ import os
 
 from openpyxl.workbook import Workbook
 
-load_dotenv()
-bot = Bot(token=os.getenv('TOKEN'))
+bot = Bot(token='6635829285:AAGhpvRdh-6DtnT6DveZEky0tt5U_PejLXs')
 dp = Dispatcher()
 
 
