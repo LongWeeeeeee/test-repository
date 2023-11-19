@@ -141,7 +141,9 @@ async def greetings(message: Message, state: FSMContext) -> None:
                     )
                     await message.answer(
                         'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
+
                     await message.answer(', '.join(scores.keys()), reply_markup=keyboard)
+                    await message.answer('Впишите дела которые вы вчера делали из предложенного списка через запятую')
                     await state.set_state(ClientState.greet)
                     file.close()
     else:
@@ -197,6 +199,7 @@ async def command_start(message: Message, state: FSMContext):
     await message.answer(
         'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:', reply_markup=keyboard)
     await message.answer(', '.join(scores.keys()))
+    await message.answer('Впишите дела которые вы вчера делали из предложенного списка через запятую')
     await state.set_state(ClientState.greet)
 @dp.message(ClientState.greet)
 async def command_start(message: Message, state: FSMContext):
