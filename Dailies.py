@@ -157,6 +157,9 @@ async def greetings(message: Message, state: FSMContext) -> None:
                     await message.answer('Впишите дела которые вы вчера делали из предложенного списка через запятую' + '\n' + 'Вы можете изменить список в любой момент')
                     await state.set_state(ClientState.greet)
                     file.close()
+        else:
+            json.dump([], file)
+            file.close()
     else:
         file = open('scores.txt', 'w')
         json.dump([], file)
@@ -172,7 +175,7 @@ async def greetings(message: Message, state: FSMContext) -> None:
             'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
         await state.set_state(ClientState.scores)
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(send_message, 'cron', hour=7, minute=10, args=(message,))
+    scheduler.add_job(send_message, 'cron', hour=10, minute=3, args=(message,))
     scheduler.start()
 
 @dp.message(ClientState.scores)
