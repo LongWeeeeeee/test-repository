@@ -98,11 +98,12 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     )
     await message.answer('Готово! Вы в любой момент можете скачать дневник по кнопке ниже', reply_markup=keyboard)
 async def send_message(message) -> None:
-    with open('scores.txt', 'w+') as f:
+    with open('scores.txt', 'r+') as f:
         for line in f:
             line = json.loads(line.strip())
-            if message.from_user.id == line['id']:
-                scores = line['scores']
+            for user in line:
+                if message.from_user.id == user['user_id']:
+                    scores = user['scores']
 
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
     await message.answer(', '.join(scores.keys()))
@@ -175,7 +176,7 @@ async def greetings(message: Message, state: FSMContext) -> None:
             'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
         await state.set_state(ClientState.scores)
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(send_message, 'cron', hour=10, minute=3, args=(message,))
+    scheduler.add_job(send_message, 'cron', hour=9, minute=00, args=(message,))
     scheduler.start()
 
 @dp.message(ClientState.scores)
