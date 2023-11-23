@@ -87,7 +87,7 @@ async def greetings(message: Message, state: FSMContext):
             'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно')
         await state.set_state(ClientState.new_scores)
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(send_message, 'cron', hour=9, minute=00, args=(message,))
+    scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
     scheduler.start()
 @dp.message(F.text == 'Изменить Настройки')
 async def settings(message: Message):
@@ -102,26 +102,13 @@ async def settings(message: Message):
 
 @dp.message(F.text == 'Заполнить дневник')
 async def fill_diary(message: Message, state: FSMContext = None) -> None:
-    kb = [[types.KeyboardButton(text="Скачать дневник"), types.KeyboardButton(text="Изменить Настройки")]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-    await message.answer(reply_markup=keyboard)
     await greetings()
 
 
 @dp.message(F.text == 'Изменить Стоимость')
 async def download(message: Message, state: FSMContext = None) -> None:
-    kb = [[types.KeyboardButton(text="Скачать дневник"), types.KeyboardButton(text="Изменить Дела"),
-           types.KeyboardButton(text='''Что такое "стоимость"?''')]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
     await message.answer(
-        'Ниже представлен ваш список дел и его стоимость в формате "дело: оценка"' + '\n' + 'Скопируйте список и отправьте его с обновленными оценками',
-        reply_markup=keyboard)
+        'Ниже представлен ваш список дел и его стоимость в формате "дело: оценка"' + '\n' + 'Скопируйте список и отправьте его с обновленными оценками')
     user_states_data = await state.get_data()
     file = open('scores.txt', 'r+')
     data = file.read()
@@ -140,13 +127,6 @@ async def download(message: Message, state: FSMContext = None) -> None:
 async def download(message: Message, state: FSMContext) -> None:
     await message.answer(
         'Стоимость нужна для подсчета очков за ваш день. Изначально стоимость любого дела равна 1, но вы можете переназначить собственное значение. Нужны они для того составить обьективную картину. ' + '\n' + '\n' + 'Представим ситуацию, у вас был тяжелый день, и вы чувтсвуете себя совершенно разбитым под конец дня и ставите этому дню оценку 0, однако за этот же день вы делали что-то из списка своих дел, например правильно питались, учили новые языки или еще что-то, и день уже не кажется таким плохим, потому что вы сделали свою рутину. Очки это обьективная оценка дня, тогда как ваша персональная оценка это субьективная оценка и может быть не до конца точной')
-    kb = [[types.KeyboardButton(text="Скачать дневник"), types.KeyboardButton(text="Изменить Дела"),
-           types.KeyboardButton(text='''Что такое "стоимость"?''')]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-
 @dp.message(F.text == 'Изменить Дела')
 async def download(message: Message, state: FSMContext) -> None:
     await message.answer('Введите новый список дел и их "стоимость". Ваш предыдущий список: ')
@@ -266,11 +246,10 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     rate = user_states_data['rate']
     scores = user_states_data['scores']
     mysteps = user_states_data['mysteps']
-    user_id = user_states_data['user_id']
     user_name = message.from_user.username
-    await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores, user_name)
+    await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, scores, user_name)
     await state.set_state(ClientState.greet)
-async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, user_id, scores, user_name):
+async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, scores, user_name):
     # Загрузка существующего файла Excel
     if os.path.exists(f'{user_name}_Diary.xlsx'):
         # If the file exists, load the existing workbook
