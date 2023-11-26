@@ -9,8 +9,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import types
 from aiogram import F
 from aiogram.filters import Command
-from aiogram.filters import CommandStart, StateFilter
-import re
 from aiogram.types import FSInputFile
 import json
 import os
@@ -92,7 +90,7 @@ async def greetings(message: Message, state: FSMContext):
     if start:
         start = False
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
+        scheduler.add_job(send_message, 'cron', hour=12, minute=44, args=(message,))
         scheduler.start()
 @dp.message(F.text == 'Изменить Настройки')
 async def settings(message: Message):
@@ -172,7 +170,6 @@ async def command_start(message: Message, state: FSMContext):
         one_job = one_job.split(' : ')
         if len(one_job) == 1:
             scores[one_job[0]] = 1
-
         else:
             job_value = True
             scores[one_job[0]] = one_job[1]
@@ -188,6 +185,9 @@ async def command_start(message: Message, state: FSMContext):
     for user in score_list:
         if message.from_user.id == user['user_id']:
             flag = True
+            for old_job in user['scores']:
+                if old_job in scores:
+                    scores[old_job] = user['scores'][old_job]
             user['scores'] = scores
     if not flag:
         score_list.append({'scores':scores, 'user_id': message.from_user.id})
