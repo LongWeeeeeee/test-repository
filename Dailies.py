@@ -10,15 +10,12 @@ from aiogram import types
 from aiogram import F
 from aiogram.filters import Command
 import pandas as pd
-
 from aiogram.types import FSInputFile
 import json
 import os
-
 from openpyxl.workbook import Workbook
-
-bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
-# bot = Bot(token='5967722772:AAHeXJ3jvfY3XPK_OdTxwUnxU6t114TPtFk') #тестовый
+import keys
+bot = Bot(token=keys.Token)
 dp = Dispatcher()
 start = True
 
@@ -55,7 +52,8 @@ async def greetings(message: Message, state: FSMContext):
                     await state.update_data(scores=scores)
                     if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
                         kb = [[types.KeyboardButton(text="Скачать дневник"),
-                               types.KeyboardButton(text="Изменить Настройки")]]
+                               types.KeyboardButton(text="Изменить Настройки"),
+                               types.KeyboardButton(text="Вывести дневник")]]
                         keyboard = types.ReplyKeyboardMarkup(
                             keyboard=kb,
                             resize_keyboard=True,
@@ -99,7 +97,7 @@ async def greetings(message: Message, state: FSMContext):
         scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
         scheduler.start()
 
-@dp.message(F.text == 'Вывести таблицу')
+@dp.message(F.text == 'Вывести дневник')
 async def settings(message: Message, state: FSMContext):
     user_name = message.from_user.username
     # Получение активного листа
@@ -123,8 +121,8 @@ async def settings(message: Message, state: FSMContext):
 
 @dp.message(F.text == 'Изменить Настройки')
 async def settings(message: Message):
-    kb = [[types.KeyboardButton(text="Скачать дневник"), types.KeyboardButton(text="Изменить Дела"),
-           types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость")]]
+    kb = [[types.KeyboardButton(text="Изменить Дела"),
+           types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость"), types.KeyboardButton(text="Заполнить дневник")]]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
@@ -133,8 +131,8 @@ async def settings(message: Message):
 
 
 @dp.message(F.text == 'Заполнить дневник')
-async def fill_diary(message: Message, state: FSMContext = None) -> None:
-    await greetings()
+async def fill_diary(message: Message, state: FSMContext) -> None:
+    await greetings(message, state)
 
 
 @dp.message(F.text == 'Изменить Стоимость')
