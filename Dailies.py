@@ -10,7 +10,6 @@ from aiogram import types
 from aiogram import F
 from aiogram.filters import Command
 import pandas as pd
-from tabulate import tabulate
 
 from aiogram.types import FSInputFile
 import json
@@ -18,8 +17,8 @@ import os
 
 from openpyxl.workbook import Workbook
 
-# bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
-bot = Bot(token='5967722772:AAHeXJ3jvfY3XPK_OdTxwUnxU6t114TPtFk')
+bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
+# bot = Bot(token='5967722772:AAHeXJ3jvfY3XPK_OdTxwUnxU6t114TPtFk') #тестовый
 dp = Dispatcher()
 start = True
 
