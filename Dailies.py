@@ -19,6 +19,7 @@ from openpyxl.workbook import Workbook
 
 bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
 dp = Dispatcher()
+start = True
 
 
 
@@ -35,10 +36,12 @@ class ClientState(StatesGroup):
 
 @dp.message(Command(commands=["start"]))
 async def greetings(message: Message, state: FSMContext):
+    global start
     await state.update_data(user_id=message.from_user.id)
     info = await bot.get_me()
     name = info.username
     flag = False
+
     if os.path.exists('scores.txt'):
         file =  open('scores.txt', 'r+')
         data = file.read()
@@ -86,9 +89,11 @@ async def greetings(message: Message, state: FSMContext):
         await message.answer(
             'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно')
         await state.set_state(ClientState.new_scores)
-    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
-    scheduler.start()
+    if start:
+        start = False
+        scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+        scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
+        scheduler.start()
 @dp.message(F.text == 'Изменить Настройки')
 async def settings(message: Message):
     kb = [[types.KeyboardButton(text="Скачать дневник"), types.KeyboardButton(text="Изменить Дела"),
@@ -324,7 +329,6 @@ async def send_message(message) -> None:
 
     await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
     await message.answer(', '.join(scores.keys()))
-
 
 
 async def main():
