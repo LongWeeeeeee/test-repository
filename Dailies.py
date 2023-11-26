@@ -9,13 +9,17 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import types
 from aiogram import F
 from aiogram.filters import Command
+import pandas as pd
+from tabulate import tabulate
+
 from aiogram.types import FSInputFile
 import json
 import os
 
 from openpyxl.workbook import Workbook
 
-bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
+# bot = Bot(token='6952815695:AAF3AvrU4_kmja7ba3MorNx0UA_lRJrcCOU')
+bot = Bot(token='5967722772:AAHeXJ3jvfY3XPK_OdTxwUnxU6t114TPtFk')
 dp = Dispatcher()
 start = True
 
@@ -95,6 +99,27 @@ async def greetings(message: Message, state: FSMContext):
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
         scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
         scheduler.start()
+
+@dp.message(F.text == 'Вывести таблицу')
+async def settings(message: Message, state: FSMContext):
+    user_name = message.from_user.username
+    # Получение активного листа
+    data = pd.read_excel(f'{user_name}_Diary.xlsx')
+
+    async def format_message(row):
+        message = "{} | {} | {} | {} | {} | {} | {} | {}".format(row["Дата"], row["Дела за день"], row["Шаги"], row["Total sleep"], row['Deep sleep'], row['О дне'], row['My rate'], row['Total'])
+        return message
+    await message.answer("{} | {} | {} | {} | {} | {} | {} | {}".format("Дата", "Дела за день", "Шаги", "Total sleep", 'Deep sleep', 'О дне', 'My rate', 'Total'))
+    for index, row in data.iterrows():
+        message_sheet =await format_message(row)
+
+        # разделение длинного сообщения на части
+        message_parts = [message_sheet[i:i + 4096] for i in range(0, len(message_sheet), 4096)]
+
+        for part in message_parts:
+            await message.answer(part)
+    await state.set_state(ClientState.greet)
+    # Вывод данных в консоль
 
 
 @dp.message(F.text == 'Изменить Настройки')
@@ -220,13 +245,24 @@ async def command_start(message: Message, state: FSMContext):
 
 @dp.message(ClientState.greet)
 async def my_steps(message: Message, state: FSMContext):
-    user_states_data = await state.get_data()
-    scores = user_states_data['scores']
+    error = False
+    with open('scores.txt', 'r+') as f:
+        for line in f:
+            line = json.loads(line.strip())
+            for user in line:
+                if message.from_user.id == user['user_id']:
+                    scores = user['scores']
     if len(scores) > 1:
-        activities = [activity for activity in message.text.split(', ') if activity in scores]
+        activities = []
+        for activity in message.text.split(', '):
+            if activity in scores:
+                activities.append(activity)
+            else:
+                await message.answer(f"{activity} нету в списке!")
+                error = True
     else:
         activities = message.text.strip(',')
-    if len(activities) >= 1:
+    if len(activities) >= 1 and not error:
         await state.update_data(activities=activities)
         await message.answer("Сколько сделал шагов?")
         await state.set_state(ClientState.steps)
@@ -264,7 +300,14 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
 
 @dp.message(ClientState.personal_rate)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
+
     await state.update_data(rate=message.text)
+    with open('scores.txt', 'r+') as f:
+        for line in f:
+            line = json.loads(line.strip())
+            for user in line:
+                if message.from_user.id == user['user_id']:
+                    scores = user['scores']
     date = datetime.now()
     user_states_data = await state.get_data()
     activities = user_states_data['activities']
@@ -272,7 +315,6 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     total_sleep = user_states_data['total_sleep']
     deep_sleep = user_states_data['deep_sleep']
     rate = user_states_data['rate']
-    scores = user_states_data['scores']
     mysteps = user_states_data['mysteps']
     user_name = message.from_user.username
     await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message, scores,
@@ -345,8 +387,37 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
         keyboard=kb,
         resize_keyboard=True,
     )
-    await message.answer('Готово! Вы в любой момент можете скачать дневник по кнопке ниже', reply_markup=keyboard)
+    async def counter(current_word):
+        data = pd.read_excel(f'{user_name}_Diary.xlsx')
 
+        # Выбор нужной колонки
+        column = data['Дела за день']
+
+        # Переменные для подсчета повторений
+        count = 0
+        max_count = 0
+
+        # Проход по каждой строке колонки в обратном порядке
+        for words in column.iloc[-2::-1]:
+            flag = False
+            for word in words.split(', '):
+                if word == current_word:
+                    # Если текущее слово совпадает с предыдущим,
+                    # увеличиваем счетчик повторений
+                    count += 1
+                    flag = True
+            if not flag:
+                if count != 0:
+                    return count
+                break
+    total_days = dict()
+    for current_word in activities:
+        counter_days = await counter(current_word)
+        if counter_days is not None:
+            total_days[current_word] = str(counter_days) + ' дней'
+    output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
+    result = '\n'.join(output)
+    await message.answer('Поздравляю! Вы соблюдаете эти дела уже столько дней: ' + '\n' + result)
 
 async def send_message(message) -> None:
     with open('scores.txt', 'r+') as f:
