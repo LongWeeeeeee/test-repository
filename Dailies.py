@@ -93,7 +93,7 @@ async def greetings(message: Message, state: FSMContext):
     if start:
         start = False
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(send_message, 'cron', hour=12, minute=44, args=(message,))
+        scheduler.add_job(send_message, 'cron', hour=8, minute=00, args=(message,))
         scheduler.start()
 
 
