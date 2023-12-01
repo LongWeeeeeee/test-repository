@@ -420,7 +420,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
         max_count = 0
 
         # Проход по каждой строке колонки в обратном порядке
-        for words in column.iloc[-2::-1]:
+        for words in column.iloc[-1::-1]:
             flag = False
             for word in words.split(', '):
                 if word == current_word:
@@ -443,7 +443,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
         max_count = 0
 
         # Проход по каждой строке колонки в обратном порядке
-        for words in column.iloc[-2::-1]:
+        for words in column.iloc[-1::-1]:
             flag = False
             for word in words.split(', '):
                 if word == current_word:
@@ -455,16 +455,19 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
                 if count != 0:
                     return count
                 break
+        if count >=2:
+            return count
 
     total_days = dict()
     for current_word in daily_scores:
         counter_days = await counter_negavite(current_word)
-        if counter_days is not None and counter_days >=7:
+        if counter_days is not None and counter_days >=3:
             total_days[current_word] = str(counter_days) + ' дней'
     output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
     result = '\n'.join(output)
-    await message.answer(
-        'Вы не делали эти дела уже столько дней: ' + '\n' + result + '\n Может стоит дать им еще 1 шанс?')
+    if result != '':
+        await message.answer(
+            'Вы не делали эти дела уже столько дней: ' + '\n' + result + '\n Может стоит дать им еще 1 шанс?')
     total_days = dict()
     for current_word in activities:
         counter_days = await counter_positive(current_word)
@@ -472,9 +475,10 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
             total_days[current_word] = str(counter_days) + ' дней'
     output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
     result = '\n'.join(output)
-    await message.answer('Поздравляю! Вы соблюдаете эти дела уже столько дней: ' + '\n' + result, reply_markup=keyboard)
-
-
+    if result != '':
+        await message.answer('Поздравляю! Вы соблюдаете эти дела уже столько дней: ' + '\n' + result, reply_markup=keyboard)
+    else:
+        await message.answer('Дневник заполнен!' ,reply_markup=keyboard)
 async def send_message(message) -> None:
     with open('daily_scores.txt', 'r+') as f:
         for line in f:
