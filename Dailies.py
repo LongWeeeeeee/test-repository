@@ -139,7 +139,6 @@ async def fill_diary(message: Message, state: FSMContext) -> None:
 async def download(message: Message, state: FSMContext = None) -> None:
     await message.answer(
         'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка"' + '\n' + 'Скопируйте список и отправьте его с обновленными оценками')
-    user_states_data = await state.get_data()
     file = open('daily_scores.txt', 'r+')
     data = file.read()
     if data != '':
@@ -200,10 +199,10 @@ async def command_start(message: Message, state: FSMContext):
     for one_job in str_data:
         one_job = one_job.split(' : ')
         if len(one_job) == 1:
-            daily_scores[one_job[0].lower()] = 1
+            daily_scores[one_job[0].lower().replace('ё', 'е')] = 1
         else:
             job_value = True
-            daily_scores[one_job[0].lower()] = one_job[1]
+            daily_scores[one_job[0].lower().replace('ё', 'е')] = one_job[1]
     if job_value:
         string = ''
         for key, value in daily_scores.items():
@@ -213,24 +212,39 @@ async def command_start(message: Message, state: FSMContext):
     f = open('daily_scores.txt', 'r+')
     data = f.read()
     score_list = json.loads(data)
-    for user in score_list:
-        if message.from_user.id == user['user_id']:
-            flag = True
-            for old_job in user['daily_scores']:
-                if old_job in daily_scores:
-                    daily_scores[old_job] = user['daily_scores'][old_job]
-            user['daily_scores'] = daily_scores
-    if not flag:
+    found = False
+    if score_list != []:
+        for user in score_list:
+            if message.from_user.id == user['user_id']:
+                found = True
+                if not job_value:
+                    for old_job in user['daily_scores']:
+                        if old_job in daily_scores:
+                            daily_scores[old_job] = user['daily_scores'][old_job]
+                    user['daily_scores'] = daily_scores
+                    f.truncate(0)
+                    f.seek(0)
+                    json.dump(score_list, f)
+                    f.close()
+                else:
+                    user['daily_scores'] = daily_scores
+                    f.truncate(0)
+                    f.seek(0)
+                    json.dump(score_list, f)
+                    f.close()
+        if not found:
+            score_list.append({'daily_scores': daily_scores, 'user_id': message.from_user.id})
+            f.truncate(0)
+            f.seek(0)
+            json.dump(score_list, f)
+            f.close()
+    else:
         score_list.append({'daily_scores': daily_scores, 'user_id': message.from_user.id})
         f.truncate(0)
         f.seek(0)
         json.dump(score_list, f)
         f.close()
-    if flag:
-        f.truncate(0)
-        f.seek(0)
-        json.dump(score_list, f)
-        f.close()
+
     await message.answer(
         'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
     await message.answer(', '.join(daily_scores.keys()))
@@ -251,7 +265,7 @@ async def my_steps(message: Message, state: FSMContext):
     if len(daily_scores) > 1:
         activities = []
         for activity in message.text.split(', '):
-            activity = activity.lower()
+            activity = activity.lower().replace('ё', 'е')
             if activity in daily_scores:
                 activities.append(activity)
             else:
