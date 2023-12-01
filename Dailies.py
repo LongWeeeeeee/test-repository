@@ -82,14 +82,10 @@ async def greetings(message: Message, state: FSMContext):
         file.close()
     if not flag:
         markup = types.ReplyKeyboardRemove()
-        await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA',
-                                     reply_markup=markup)
-        await message.answer(
-            'Привет, ' + message.from_user.full_name + '!' + '\n' + 'Добро пожаловать в ' + name + '!' + '\n' + 'Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим')
-        await message.answer('Для начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:')
+        await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
+        await message.answer(f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {name}! \nОн поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим \nДля начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:''')
         await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
-        await message.answer(
-            'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно')
+        await message.answer('Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно', reply_markup=markup)
         await state.set_state(ClientState.new_daily_scores)
     if start:
         start = False
