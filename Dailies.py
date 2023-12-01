@@ -244,9 +244,14 @@ async def command_start(message: Message, state: FSMContext):
         f.seek(0)
         json.dump(score_list, f)
         f.close()
-
+    kb = [[types.KeyboardButton(text="Изменить Настройки")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
     await message.answer(
-        'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
+        'Отлично! А теперь расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:',
+        reply_markup=keyboard)
     await message.answer(', '.join(daily_scores.keys()))
     await message.answer(
         'Впишите дела которые вы вчера делали из предложенного списка через запятую' + '\n' + 'Вы можете изменить список в любой момент')
