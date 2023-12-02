@@ -222,20 +222,18 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 async def daily_jobs(message: Message, state: FSMContext) -> None:
     await message.answer('Введите новый список ежедневных дел и их "стоимость". Ваш предыдущий список: ')
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        data = f.read()
-        if data != '':
-            score_list = json.load(f)
-            for line in score_list:
-                if message.from_user.id == line['user_id']:
-                    daily_scores = line['daily_scores']
-                    formatted_string = ""
-                    for key, value in daily_scores.items():
-                        formatted_string += f"{key}, "
+        score_list = json.load(f)
+        for line in score_list:
+            if message.from_user.id == line['user_id']:
+                daily_scores = line['daily_scores']
+                formatted_string = ""
+                for key, value in daily_scores.items():
+                    formatted_string += f"{key}, "
 
-                    await message.answer(formatted_string[:-2])
-                    await message.answer(
-                        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
-                    await state.set_state(ClientState.new_daily_scores)
+                await message.answer(formatted_string[:-2])
+                await message.answer(
+                    'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно, очки нужны для отчетности о том насколько продуктивен был день.' + '\n' + 'Соблюдайте формат данных!')
+                await state.set_state(ClientState.new_daily_scores)
 
 
 @dp.message(F.text == 'Скачать дневник')
@@ -563,7 +561,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
                     count += 1
                     flag = True
             if not flag:
-                if count != 0:
+                if not count and count >= 2:
                     return count
                 break
         if count >= 2:
@@ -573,7 +571,10 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     for current_word in daily_scores:
         counter_days = await counter_negavite(current_word)
         if counter_days is not None and counter_days >= 3:
-            total_days[current_word] = str(counter_days) + ' дней'
+            if counter_days in [2,3,4]:
+                total_days[current_word] = str(counter_days) + ' дня'
+            else:
+                total_days[current_word] = str(counter_days) + ' дней'
     output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
     result = '\n'.join(output)
     if result != '':
@@ -582,7 +583,9 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     total_days = dict()
     for current_word in activities:
         counter_days = await counter_positive(current_word)
-        if counter_days is not None:
+        if counter_days in [2, 3, 4] and counter_days is not None:
+            total_days[current_word] = str(counter_days) + ' дня'
+        elif counter_days is not None:
             total_days[current_word] = str(counter_days) + ' дней'
     output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
     result = '\n'.join(output)
