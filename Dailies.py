@@ -280,7 +280,7 @@ async def command_start(message: Message, state: FSMContext):
         string = ''
         for key, value in daily_scores.items():
             string += f'{key} : {value}, '
-        await message.answer('Стоимость изменена. Теперь она выглядит так: \n' + string)
+        await message.answer('Стоимость изменена. Теперь она выглядит так: \n' + string[:-1])
     await state.update_data(daily_scores=daily_scores)
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         score_list = json.load(f)
