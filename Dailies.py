@@ -320,7 +320,7 @@ async def command_start(message: Message, state: FSMContext):
         await message.answer(
             'Впишите дела которые вы вчера делали из предложенного списка через запятую'
             '\nВы можете изменить список в любой момент')
-        await state.set_state(ClientState.greet)
+        await state.set_state(ClientState.settings)
 
 
 @dp.message(ClientState.greet)
