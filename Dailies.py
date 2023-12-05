@@ -212,7 +212,7 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 
 
 @dp.message(ClientState.one_time_job_2)
-async def one_time_job(message: Message) -> None:
+async def one_time_job(message: Message, state: FSMContext) -> None:
     one_time_job_str = message.text.split(', ')
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         data = json.load(f)
@@ -225,8 +225,7 @@ async def one_time_job(message: Message) -> None:
         json.dump(data, f, ensure_ascii=False, indent=4)
         await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
         await message.answer(', '.join(one_time_job_str))
-        await settings(message)
-
+        await state.set_state(ClientState.settings)
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
 async def daily_jobs(message: Message, state: FSMContext) -> None:
