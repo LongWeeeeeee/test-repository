@@ -148,9 +148,10 @@ async def fill_diary(message: Message, state: FSMContext) -> None:
 
 @dp.message(F.text == 'Изменить Стоимость', ClientState.settings)
 async def download(message: Message, state: FSMContext = None) -> None:
+    markup = types.ReplyKeyboardRemove()
     await message.answer(
-        'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка"'
-        'Скопируйте список и отправьте его с обновленными оценками')
+        'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка" '
+        'Скопируйте список и отправьте его с обновленными оценками', reply_markup=markup)
     file = open('daily_scores.txt', 'r+', encoding='utf-8')
     data = file.read()
     if data != '':
@@ -199,15 +200,17 @@ async def date_job(message: Message, state: FSMContext) -> None:
 async def one_time_job(message: Message, state: FSMContext) -> None:
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         line = json.load(f)
+        markup = types.ReplyKeyboardRemove()
         for user in line:
             if message.from_user.id == user['user_id']:
                 if 'one_time_jobs' in user:
                     one_time_jobs = user['one_time_jobs']
                     await message.answer(
-                        'Введите новый список разовых дел через запятую. Ваш предыдущий список:')
+                        'Введите новый список разовых дел через запятую. Ваш предыдущий список:', reply_markup=markup)
+
                     await message.answer(', '.join(one_time_jobs))
                 else:
-                    await message.answer('Введите новый список разовых дел через запятую')
+                    await message.answer('Введите новый список разовых дел через запятую', reply_markup=markup)
                 await state.set_state(ClientState.one_time_job_2)
 
 
@@ -230,7 +233,8 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
 async def daily_jobs(message: Message, state: FSMContext) -> None:
-    await message.answer('Введите новый список ежедневных дел и их "стоимость". Ваш предыдущий список: ')
+    markup = types.ReplyKeyboardRemove()
+    await message.answer('Введите новый список ежедневных. Ваш предыдущий список: ', reply_markup=markup)
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         score_list = json.load(f)
         for line in score_list:
@@ -308,20 +312,8 @@ async def command_start(message: Message, state: FSMContext):
             f.truncate(0)
             f.seek(0)
             json.dump(score_list, f, ensure_ascii=False, indent=4)
-        kb = [[types.KeyboardButton(text="Изменить Настройки")]]
-        keyboard = types.ReplyKeyboardMarkup(
-            keyboard=kb,
-            resize_keyboard=True,
-        )
-        await message.answer(
-            'Отлично! А теперь расскажи мне как провел вчерашний день?'
-            '\nВот возможный список дел:',
-            reply_markup=keyboard)
-        await message.answer(', '.join(daily_scores.keys()))
-        await message.answer(
-            'Впишите дела которые вы вчера делали из предложенного списка через запятую'
-            '\nВы можете изменить список в любой момент')
         await state.set_state(ClientState.settings)
+        await settings(message, state)
 
 
 @dp.message(ClientState.greet)
