@@ -227,7 +227,6 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
                 json.dump(data, f, ensure_ascii=False, indent=4)
                 await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
                 await message.answer(', '.join(one_time_job_str))
-                await state.set_state(ClientState.settings)
                 await settings(message, state)
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
@@ -279,7 +278,8 @@ async def command_start(message: Message, state: FSMContext):
         string = ''
         for key, value in daily_scores.items():
             string += f'{key} : {value}, '
-        await message.answer('Стоимость изменена. Теперь она выглядит так: \n' + string[:-1])
+        await message.answer('Стоимость изменена. Теперь она выглядит так:')
+        await message.answer(string[:-1])
     await state.update_data(daily_scores=daily_scores)
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         score_list = json.load(f)
