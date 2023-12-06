@@ -151,18 +151,18 @@ async def download(message: Message, state: FSMContext = None) -> None:
     await message.answer(
         'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка" '
         'Скопируйте список и отправьте его с обновленными оценками', reply_markup=markup)
-    file = open('daily_scores.txt', 'r+', encoding='utf-8')
-    data = file.read()
-    if data != '':
-        score_list = json.loads(data)
-        for line in score_list:
-            if message.from_user.id == line['user_id']:
-                daily_scores = line['daily_scores']
-                formatted_string = ''
-                for key, value in daily_scores.items():
-                    formatted_string += f"{key} : {value}, "
-                await message.answer(formatted_string[:-2])
-                await state.set_state(ClientState.new_daily_scores)
+    with open('daily_scores.txt', 'r+', encoding='utf-8') as file:
+        data = file.read()
+        if data != '':
+            score_list = json.loads(data)
+            for line in score_list:
+                if message.from_user.id == line['user_id']:
+                    daily_scores = line['daily_scores']
+                    formatted_string = ''
+                    for key, value in daily_scores.items():
+                        formatted_string += f"{key} : {value}, "
+                    await message.answer(formatted_string[:-2])
+                    await state.set_state(ClientState.new_daily_scores)
 
 
 @dp.message(F.text == '''Что такое "стоимость"?''', ClientState.settings)
