@@ -215,7 +215,7 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 
 @dp.message(ClientState.one_time_job_2)
 async def one_time_job(message: Message, state: FSMContext) -> None:
-    one_time_job_str = message.text.split(', ')
+    one_time_job_str = message.text.lower().split(', ')
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         data = json.load(f)
         for user in data:
@@ -361,7 +361,7 @@ async def process_one_time(message: Message, state: FSMContext):
                 if 'one_time_jobs' in user:
                     one_time_jobs = user['one_time_jobs']
                     for job in text:
-                        if job.lower().replace('ё', 'е') in one_time_jobs:
+                        if job.lower().replace('ё', 'е') in one_time_jobs.lower():
                             one_time_jobs.remove(job.lower().replace('ё', 'е'))
                         else:
                             if job.lower().replace('ё', 'е') in ['не', 'нет', '-', 'pass', 'пасс', 'не хочу', 'скип',
