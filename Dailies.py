@@ -222,13 +222,13 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
             if message.from_user.id == user['user_id']:
                 user['one_time_jobs'] = one_time_job_str
 
-        f.truncate()  # Обрезать файл после чтения данных
-        f.seek(0)  # Переставить указатель на начало файла
-        json.dump(data, f, ensure_ascii=False, indent=4)
-        await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
-        await message.answer(', '.join(one_time_job_str))
-        await state.set_state(ClientState.settings)
-        await settings(message, state)
+                f.truncate()  # Обрезать файл после чтения данных
+                f.seek(0)  # Переставить указатель на начало файла
+                json.dump(data, f, ensure_ascii=False, indent=4)
+                await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
+                await message.answer(', '.join(one_time_job_str))
+                await state.set_state(ClientState.settings)
+                await settings(message, state)
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
 async def daily_jobs(message: Message, state: FSMContext) -> None:
