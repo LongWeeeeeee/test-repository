@@ -361,7 +361,7 @@ async def process_one_time(message: Message, state: FSMContext):
                 if 'one_time_jobs' in user:
                     one_time_jobs = user['one_time_jobs']
                     for job in text:
-                        if job.lower().replace('ё', 'е') in one_time_jobs.lower():
+                        if job.lower().replace('ё', 'е') in one_time_jobs:
                             one_time_jobs.remove(job.lower().replace('ё', 'е'))
                         else:
                             if job.lower().replace('ё', 'е') in ['не', 'нет', '-', 'pass', 'пасс', 'не хочу', 'скип',
