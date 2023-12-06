@@ -50,7 +50,9 @@ async def greetings(message: Message, state: FSMContext):
                 if message.from_user.id == line['user_id']:
                     flag = True
                     daily_scores = line['daily_scores']
+                    one_time_jobs = line['one_time_jobs']
                     await state.update_data(daily_scores=daily_scores)
+                    await state.update_data(one_time_jobs=one_time_jobs)
                     if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
                         kb = [[types.KeyboardButton(text="Скачать дневник"),
                                types.KeyboardButton(text="Изменить Настройки"),
@@ -151,18 +153,13 @@ async def download(message: Message, state: FSMContext = None) -> None:
     await message.answer(
         'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка" '
         'Скопируйте список и отправьте его с обновленными оценками', reply_markup=markup)
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as file:
-        data = file.read()
-        if data != '':
-            score_list = json.loads(data)
-            for line in score_list:
-                if message.from_user.id == line['user_id']:
-                    daily_scores = line['daily_scores']
-                    formatted_string = ''
-                    for key, value in daily_scores.items():
-                        formatted_string += f"{key} : {value}, "
-                    await message.answer(formatted_string[:-2])
-                    await state.set_state(ClientState.new_daily_scores)
+    user_states_data = await state.get_data()
+    daily_scores = user_states_data['daily_scores']
+    formatted_string = ''
+    for key, value in daily_scores.items():
+        formatted_string += f"{key} : {value}, "
+    await message.answer(formatted_string[:-2])
+    await state.set_state(ClientState.new_daily_scores)
 
 
 @dp.message(F.text == '''Что такое "стоимость"?''', ClientState.settings)
@@ -197,57 +194,53 @@ async def date_job(message: Message, state: FSMContext) -> None:
 
 @dp.message(F.text == 'Разовые дела', ClientState.jobs)
 async def one_time_job(message: Message, state: FSMContext) -> None:
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        line = json.load(f)
-        markup = types.ReplyKeyboardRemove()
-        for user in line:
-            if message.from_user.id == user['user_id']:
-                if 'one_time_jobs' in user:
-                    one_time_jobs = user['one_time_jobs']
-                    await message.answer(
-                        'Введите новый список разовых дел через запятую. Ваш предыдущий список:', reply_markup=markup)
-
-                    await message.answer(', '.join(one_time_jobs))
-                else:
-                    await message.answer('Введите новый список разовых дел через запятую', reply_markup=markup)
-                await state.set_state(ClientState.one_time_job_2)
+    markup = types.ReplyKeyboardRemove()
+    user_states_data = await state.get_data()
+    if 'one_time_jobs' in user_states_data:
+        one_time_jobs = user_states_data['one_time_jobs']
+        await message.answer(
+            'Введите новый список разовых дел через запятую. Ваш предыдущий список:', reply_markup=markup)
+        await message.answer(', '.join(one_time_jobs))
+        await state.set_state(ClientState.one_time_job_2)
+    else:
+        await message.answer('Введите новый список разовых дел через запятую', reply_markup=markup)
+        await state.set_state(ClientState.one_time_job_2)
 
 
 @dp.message(ClientState.one_time_job_2)
 async def one_time_job(message: Message, state: FSMContext) -> None:
     one_time_job_str = message.text.lower().split(', ')
+    succes = False
     with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
         data = json.load(f)
         for user in data:
             if message.from_user.id == user['user_id']:
                 user['one_time_jobs'] = one_time_job_str
+                succes = True
 
                 f.truncate()  # Обрезать файл после чтения данных
                 f.seek(0)  # Переставить указатель на начало файла
                 json.dump(data, f, ensure_ascii=False, indent=4)
-                await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
-                await message.answer(', '.join(one_time_job_str))
-                await settings(message, state)
+    if succes:
+        await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
+        await message.answer(', '.join(one_time_job_str))
+        await settings(message, state)
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
 async def daily_jobs(message: Message, state: FSMContext) -> None:
     markup = types.ReplyKeyboardRemove()
     await message.answer('Введите новый список ежедневных. Ваш предыдущий список: ', reply_markup=markup)
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        score_list = json.load(f)
-        for line in score_list:
-            if message.from_user.id == line['user_id']:
-                daily_scores = line['daily_scores']
-                formatted_string = ""
-                for key, value in daily_scores.items():
-                    formatted_string += f"{key}, "
-
-                await message.answer(formatted_string[:-2])
-                await message.answer(
-                    'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие '
-                    'угодно, очки нужны для отчетности о том насколько продуктивен был день.\nСоблюдайте формат '
-                    'данных!')
-                await state.set_state(ClientState.new_daily_scores)
+    user_states_data = await state.get_data()
+    daily_scores = user_states_data['daily_scores']
+    formatted_string = ""
+    for key, value in daily_scores.items():
+        formatted_string += f"{key}, "
+    await message.answer(formatted_string[:-2])
+    await message.answer(
+        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие '
+        'угодно, очки нужны для отчетности о том насколько продуктивен был день.\nСоблюдайте формат '
+        'данных!')
+    await state.set_state(ClientState.new_daily_scores)
 
 
 @dp.message(F.text == 'Скачать дневник')
@@ -311,6 +304,7 @@ async def command_start(message: Message, state: FSMContext):
             f.truncate(0)
             f.seek(0)
             json.dump(score_list, f, ensure_ascii=False, indent=4)
+        await message.answer('Отлично, ваш список ежедневных дел обновлен!')
         await state.set_state(ClientState.settings)
         await settings(message, state)
 
@@ -318,35 +312,32 @@ async def command_start(message: Message, state: FSMContext):
 @dp.message(ClientState.greet)
 async def my_steps(message: Message, state: FSMContext):
     error = False
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        line = json.load(f)
-        for user in line:
-            if message.from_user.id == user['user_id']:
-                daily_scores = user['daily_scores']
-                # обработка ежедневных дел
-                if len(daily_scores) > 1:
-                    activities = []
-                    for activity in message.text.split(', '):
-                        activity = activity.lower().replace('ё', 'е')
-                        if activity in daily_scores:
-                            activities.append(activity)
-                        else:
-                            await message.answer(f"{activity} нету в списке!")
-                            error = True
-                    if error:
-                        await message.answer(message.text + ' содержит ошибку')
-                else:
-                    activities = message.text.strip(',')
-                if len(activities) >= 1 and not error:
-                    await state.update_data(activities=activities)
-                    if 'one_time_jobs' in user:
-                        one_time_jobs = user['one_time_jobs']
-                        await message.answer('Введите разовые дела, которые выполнили. Список разовых дел:')
-                        await message.answer(', '.join(one_time_jobs))
-                        await state.set_state(ClientState.one_time_job_proceed)
-                    else:
-                        await message.answer("Сколько сделал шагов?")
-                        await state.set_state(ClientState.steps)
+    user_states_data = await state.get_data()
+    daily_scores = user_states_data['daily_scores']
+    # обработка ежедневных дел
+    if len(daily_scores) > 1:
+        activities = []
+        for activity in message.text.split(', '):
+            activity = activity.lower().replace('ё', 'е')
+            if activity in daily_scores:
+                activities.append(activity)
+            else:
+                await message.answer(f"{activity} нету в списке!")
+                error = True
+        if error:
+            await message.answer(message.text + ' содержит ошибку')
+    else:
+        activities = message.text.strip(',')
+    if len(activities) >= 1 and not error:
+        await state.update_data(activities=activities)
+        if 'one_time_jobs' in user_states_data:
+            one_time_jobs = user_states_data['one_time_jobs']
+            await message.answer('Введите разовые дела, которые выполнили. Список разовых дел:')
+            await message.answer(', '.join(one_time_jobs))
+            await state.set_state(ClientState.one_time_job_proceed)
+        else:
+            await message.answer("Сколько сделал шагов?")
+            await state.set_state(ClientState.steps)
 
 
 @dp.message(ClientState.one_time_job_proceed)
@@ -423,13 +414,9 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
 @dp.message(ClientState.personal_rate)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
     await state.update_data(rate=message.text)
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        line = json.load(f)
-        for user in line:
-            if message.from_user.id == user['user_id']:
-                daily_scores = user['daily_scores']
-    date = datetime.now()
     user_states_data = await state.get_data()
+    daily_scores = user_states_data['daily_scores']
+    date = datetime.now()
     activities = user_states_data['activities']
     user_message = user_states_data['user_message']
     total_sleep = user_states_data['total_sleep']
@@ -589,11 +576,6 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
                              reply_markup=keyboard)
     else:
         await message.answer('Дневник заполнен!', reply_markup=keyboard)
-
-
-
-
-
 
 async def main():
     await dp.start_polling(bot)
