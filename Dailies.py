@@ -83,6 +83,7 @@ async def greetings(message: Message, state: FSMContext):
     else:
         with open('daily_scores.txt', 'w') as file:
             json.dump([], file, ensure_ascii=False, indent=4)
+            file.close()
     if not flag:
         markup = types.ReplyKeyboardRemove()
         await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
@@ -290,21 +291,25 @@ async def command_start(message: Message, state: FSMContext):
                         f.truncate(0)
                         f.seek(0)
                         json.dump(score_list, f, ensure_ascii=False, indent=4)
+                        f.close()
                     else:
                         user['daily_scores'] = daily_scores
                         f.truncate(0)
                         f.seek(0)
                         json.dump(score_list, f, ensure_ascii=False, indent=4)
+                        f.close()
             if not found:
                 score_list.append({'daily_scores': daily_scores, 'user_id': message.from_user.id})
                 f.truncate(0)
                 f.seek(0)
                 json.dump(score_list, f, ensure_ascii=False, indent=4)
+                f.close()
         else:
             score_list.append({'daily_scores': daily_scores, 'user_id': message.from_user.id})
             f.truncate(0)
             f.seek(0)
             json.dump(score_list, f, ensure_ascii=False, indent=4)
+            f.close()
         await message.answer('Отлично, ваш список ежедневных дел обновлен!')
         await state.set_state(ClientState.settings)
         await settings(message, state)
@@ -375,11 +380,12 @@ async def process_one_time(message: Message, state: FSMContext):
 
         if not error and not exit:
             # Move the file pointer to the beginning of the file
+            f.truncate(0)
             f.seek(0)
             # Write the modified data back to the file
             json.dump(data, f, ensure_ascii=False, indent=4)
+            f.close()
             # Truncate any remaining content in the file (in case the new data is shorter)
-            f.truncate()
             await message.answer("Сколько сделал шагов?")
             await state.set_state(ClientState.steps)
 
