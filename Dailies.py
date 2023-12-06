@@ -35,15 +35,6 @@ class ClientState(StatesGroup):
     one_time_job_2 = State()
     one_time_job_proceed = State()
 
-async def send_message(message, state: FSMContext) -> None:
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
-        line = json.load(f)
-        for user in line:
-            if message.from_user.id == user['user_id']:
-                daily_scores = user['daily_scores']
-                await message.answer('Расскажи мне как провел вчерашний день?' + '\n' + 'Вот возможный список дел:')
-                await message.answer(', '.join(daily_scores.keys()))
-                await state.set_state(ClientState.greet)
 @dp.message(Command(commands=["start"]))
 async def greetings(message: Message, state: FSMContext):
     global start
@@ -105,7 +96,7 @@ async def greetings(message: Message, state: FSMContext):
     if start:
         start = False
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(send_message, 'cron', hour=8, minute=27, args=(message, state))
+        scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
         scheduler.start()
 
 
