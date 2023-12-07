@@ -36,103 +36,6 @@ class ClientState(StatesGroup):
     one_time_job_proceed = State()
 
 
-def write_to_file(data, f):
-    f.truncate(0)
-    f.seek(0)
-    json.dump(data, f, ensure_ascii=False, indent=4)
-
-
-async def existing_user(message, state):
-    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
-        data = json.load(f)
-        if str(message.from_user.id) in data:
-            if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
-                keyboard = create_main_keyboard()
-            else:
-                keyboard = create_change_settings_keyboard()
-
-            daily_scores = data[str(message.from_user.id)]['daily_scores']
-            await state.update_data(daily_scores=daily_scores)
-            await message.answer(
-                'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот список ежедневных дел:')
-            await message.answer(', '.join(daily_scores.keys()), reply_markup=keyboard)
-            await message.answer(
-                'Впишите ежедневные дела которые вы вчера делали' + '\n'
-                + 'Вы можете изменить списки в любой момент')
-            if data[str(message.from_user.id)]['one_time_job'] != '':
-                one_time_job = data[str(message.from_user.id)]['one_time_job']
-                await state.update_data(one_time_job=one_time_job)
-                await message.answer(
-                    'Разовые дела:')
-                await message.answer(', '.join(data[str(message.from_user.id)]['one_time_job']))
-            await state.set_state(ClientState.greet)
-
-
-def create_main_keyboard():
-    kb = [[types.KeyboardButton(text="Скачать дневник"),
-           types.KeyboardButton(text="Изменить Настройки"),
-           types.KeyboardButton(text="Вывести дневник")]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-    return keyboard
-
-
-def create_change_settings_keyboard():
-    kb = [[types.KeyboardButton(text="Изменить Настройки")]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-    return keyboard
-
-
-def create_settings_keyboard():
-    kb = [[types.KeyboardButton(text="Изменить Дела"),
-           types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость"),
-           types.KeyboardButton(text="Заполнить дневник")]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-    return keyboard
-
-
-def create_jobs_keyboard():
-    kb = [[types.KeyboardButton(text="Ежедневные дела"),
-           types.KeyboardButton(text="Разовые дела"),
-           types.KeyboardButton(text='В определенную дату')]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-    return keyboard
-
-
-async def handle_new_user(message: Message, state):
-    info = await bot.get_me()
-    with open('daily_scores.txt', 'w') as f:
-        json.dump({int(message.from_user.id): {'daily_scores': '', 'one_time_job': ''}}, f, ensure_ascii=False, indent=4)
-    markup = types.ReplyKeyboardRemove()
-    await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
-    await message.answer(
-        f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {info.username}!
-Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим
-Для начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:''')
-    await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
-    await message.answer(
-        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно',
-        reply_markup=markup)
-    await state.set_state(ClientState.new_daily_scores)
-
-
-def start_scheduler(message, state):
-    if not hasattr(start_scheduler, "called"):
-        scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
-        scheduler.start()
-
 
 @dp.message(Command(commands=["start"]))
 async def greetings(message: Message, state: FSMContext):
@@ -145,27 +48,8 @@ async def greetings(message: Message, state: FSMContext):
 
 @dp.message(F.text == 'Вывести дневник')
 async def settings(message: Message, state: FSMContext):
-    data = pd.read_excel(f'{message.from_user.username}_Diary.xlsx')
-
-    async def format_message(row):
-        message = "{} | {} | {} | {} | {} | {} | {} | {}".format(row["Дата"], row["Дела за день"], row["Шаги"],
-                                                                 row["Total sleep"], row['Deep sleep'], row['О дне'],
-                                                                 row['My rate'], row['Total'])
-        return message
-
-    await message.answer(
-        "{} | {} | {} | {} | {} | {} | {} | {}".format("Дата", "Дела за день", "Шаги", "Total sleep", 'Deep sleep',
-                                                       'О дне', 'My rate', 'Total'))
-    for index, row in data.iterrows():
-        message_sheet = await format_message(row)
-
-        # разделение длинного сообщения на части
-        message_parts = [message_sheet[i:i + 4096] for i in range(0, len(message_sheet), 4096)]
-
-        for part in message_parts:
-            await message.answer(part)
+    await diary_out(message)
     await state.set_state(ClientState.greet)
-    # Вывод данных в консоль
 
 
 @dp.message(F.text == 'Изменить Настройки')
@@ -301,20 +185,15 @@ async def my_steps(message: Message, state: FSMContext):
     user_states_data = await state.get_data()
     daily_scores = user_states_data['daily_scores']
     # обработка ежедневных дел
-    if len(daily_scores) > 1:
-        activities = []
-        for activity in message.text.split(', '):
-            activity = activity.lower().replace('ё', 'е')
-            if activity in daily_scores:
-                activities.append(activity)
-            else:
-                await message.answer(f"{activity} нету в списке!")
-                error = True
-        if error:
-            await message.answer(message.text + ' содержит ошибку')
-    else:
-        activities = message.text.strip(',')
-    if len(activities) >= 1 and not error:
+    activities = []
+    for activity in message.text.split(', '):
+        activity = activity.lower().replace('ё', 'е')
+        if activity in daily_scores:
+            activities.append(activity)
+        else:
+            await message.answer(f"{activity} нету в списке!")
+            error = True
+    if not error:
         await state.update_data(activities=activities)
         if user_states_data['one_time_job'] != '':
             one_time_job = user_states_data['one_time_job']
@@ -545,7 +424,119 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     else:
         await message.answer('Дневник заполнен!', reply_markup=keyboard)
 
+def write_to_file(data, f):
+    f.truncate(0)
+    f.seek(0)
+    json.dump(data, f, ensure_ascii=False, indent=4)
 
+
+async def existing_user(message, state):
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
+        data = json.load(f)
+        if str(message.from_user.id) in data:
+            if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
+                keyboard = create_main_keyboard()
+            else:
+                keyboard = create_change_settings_keyboard()
+
+            daily_scores = data[str(message.from_user.id)]['daily_scores']
+            await state.update_data(daily_scores=daily_scores)
+            await message.answer(
+                'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот список ежедневных дел:')
+            await message.answer(', '.join(daily_scores.keys()), reply_markup=keyboard)
+            await message.answer(
+                'Впишите ежедневные дела которые вы вчера делали' + '\n'
+                + 'Вы можете изменить списки в любой момент')
+            if data[str(message.from_user.id)]['one_time_job'] != '':
+                one_time_job = data[str(message.from_user.id)]['one_time_job']
+                await state.update_data(one_time_job=one_time_job)
+                await message.answer(
+                    'Разовые дела:')
+                await message.answer(', '.join(data[str(message.from_user.id)]['one_time_job']))
+            await state.set_state(ClientState.greet)
+
+
+def create_main_keyboard():
+    kb = [[types.KeyboardButton(text="Скачать дневник"),
+           types.KeyboardButton(text="Изменить Настройки"),
+           types.KeyboardButton(text="Вывести дневник")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+
+def create_change_settings_keyboard():
+    kb = [[types.KeyboardButton(text="Изменить Настройки")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+
+def create_settings_keyboard():
+    kb = [[types.KeyboardButton(text="Изменить Дела"),
+           types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость"),
+           types.KeyboardButton(text="Заполнить дневник")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+
+def create_jobs_keyboard():
+    kb = [[types.KeyboardButton(text="Ежедневные дела"),
+           types.KeyboardButton(text="Разовые дела"),
+           types.KeyboardButton(text='В определенную дату')]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+
+async def handle_new_user(message: Message, state):
+    info = await bot.get_me()
+    with open('daily_scores.txt', 'w') as f:
+        json.dump({int(message.from_user.id): {'daily_scores': '', 'one_time_job': ''}}, f, ensure_ascii=False, indent=4)
+    markup = types.ReplyKeyboardRemove()
+    await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
+    await message.answer(
+        f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {info.username}!
+Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим
+Для начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:''')
+    await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
+    await message.answer(
+        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно',
+        reply_markup=markup)
+    await state.set_state(ClientState.new_daily_scores)
+
+
+def start_scheduler(message, state):
+    if not hasattr(start_scheduler, "called"):
+        scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+        scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
+        scheduler.start()
+
+async def diary_out(message):
+    data = pd.read_excel(f'{message.from_user.username}_Diary.xlsx')
+    await message.answer(
+        "{} | {} | {} | {} | {} | {} | {} | {}".format("Дата", "Дела за день", "Шаги", "Total sleep", 'Deep sleep',
+                                                       'О дне', 'My rate', 'Total'))
+    for index, row in data.iterrows():
+        message_sheet = "{} | {} | {} | {} | {} | {} | {} | {}".format(row["Дата"], row["Дела за день"], row["Шаги"],
+                                                                       row["Total sleep"], row['Deep sleep'],
+                                                                       row['О дне'],
+                                                                       row['My rate'], row['Total'])
+
+        # разделение длинного сообщения на части
+        message_parts = [message_sheet[i:i + 4096] for i in range(0, len(message_sheet), 4096)]
+
+        for part in message_parts:
+            await message.answer(part)
 async def main():
     await dp.start_polling(bot)
 
