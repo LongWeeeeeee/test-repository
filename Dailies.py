@@ -181,19 +181,15 @@ async def command_start(message: Message, state: FSMContext):
 
 @dp.message(ClientState.greet)
 async def my_steps(message: Message, state: FSMContext):
-    error = False
     user_states_data = await state.get_data()
     daily_scores = user_states_data['daily_scores']
     # обработка ежедневных дел
-    activities = []
-    for activity in message.text.split(', '):
-        activity = activity.lower().replace('ё', 'е')
-        if activity in daily_scores:
-            activities.append(activity)
-        else:
-            await message.answer(f"{activity} нету в списке!")
-            error = True
-    if not error:
+    errors = [activity for activity in message.text.split(', ') if activity.lower().replace('ё', 'е') not in daily_scores]
+    if errors:
+        for error in errors:
+            await message.answer(f"{error} нету в списке!")
+    else:
+        activities = [activity.lower().replace('ё', 'е') for activity in message.text.split(', ')]
         await state.update_data(activities=activities)
         if user_states_data['one_time_job'] != '':
             one_time_job = user_states_data['one_time_job']
@@ -211,39 +207,30 @@ async def process_one_time(message: Message, state: FSMContext):
     with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
         data = json.load(f)
         one_time_job = data[str(message.from_user.id)]['one_time_job']
-        try:
-            for job in text:
-                if job.lower().replace('ё', 'е') in ['не', 'нет', '-', 'pass', 'пасс', 'не хочу', 'скип',
-                                                         'пососи', 'пошел нахуй', 'неа', 'не-а', 0]:
-                    await message.answer("Сколько сделал шагов?")
-                    await state.set_state(ClientState.steps)
-                    raise NameError
-                elif job.lower().replace('ё', 'е') in one_time_job:
-                    await message.answer(f'{job} нету в списке разовых дел!')
-                    raise TypeError
-                else:
-                    one_time_job.remove(job.lower().replace('ё', 'е'))
-            if job == []:
-                await message.answer('Поздравляю! Вы выполнили все разовые дела, так держать')
-        except NameError:
-            await message.answer("Сколько сделал шагов?")
-            await state.set_state(ClientState.steps)
-        except TypeError:
-            pass
-
+        for job in text:
+            if job.lower().replace('ё', 'е') in ['не', 'нет', '-', 'pass', 'пасс', 'не хочу', 'скип',
+                                                     'пососи', 'пошел нахуй', 'неа', 'не-а', 0]:
+                await message.answer("Сколько сделал шагов?")
+                await state.set_state(ClientState.steps)
+                return
+            elif job.lower().replace('ё', 'е') in one_time_job:
+                await message.answer(f'{job} нету в списке разовых дел!')
+                return
+            else:
+                one_time_job.remove(job.lower().replace('ё', 'е'))
+        if job == []:
+            await message.answer('Поздравляю! Вы выполнили все разовые дела, так держать')
 @dp.message(ClientState.steps)
 async def process_name(message: Message, state: FSMContext):
     await state.update_data(mysteps=message.text)
     await message.answer('Сколько всего спал?')
     await state.set_state(ClientState.total_sleep)
 
-
 @dp.message(ClientState.total_sleep)
 async def process_dont_like_write_bots(message: Message, state: FSMContext):
     await state.update_data(total_sleep=message.text)
     await message.answer('Сколько из них глубокий сон?')
     await state.set_state(ClientState.deep_sleep)
-
 
 @dp.message(ClientState.deep_sleep)
 async def process_like_write_bots(message: Message, state: FSMContext):
@@ -258,10 +245,8 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     await message.answer('Насколько из 10 сам оцениваешь день?')
     await state.set_state(ClientState.personal_rate)
 
-
 @dp.message(ClientState.personal_rate)
 async def process_unknown_write_bots(message: Message, state: FSMContext):
-    await state.update_data(rate=message.text)
     user_states_data = await state.get_data()
     daily_scores = user_states_data['daily_scores']
     date = datetime.now()
@@ -269,7 +254,7 @@ async def process_unknown_write_bots(message: Message, state: FSMContext):
     user_message = user_states_data['user_message']
     total_sleep = user_states_data['total_sleep']
     deep_sleep = user_states_data['deep_sleep']
-    rate = user_states_data['rate']
+    rate= message.text
     mysteps = user_states_data['mysteps']
     user_name = message.from_user.username
     await add_day_to_excel(date, activities, user_message, total_sleep, deep_sleep, rate, mysteps, message,
