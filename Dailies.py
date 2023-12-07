@@ -34,43 +34,36 @@ class ClientState(StatesGroup):
     jobs = State()
     one_time_job_2 = State()
     one_time_job_proceed = State()
+def write_to_file(data, f):
+    f.truncate(0)
+    f.seek(0)
+    json.dump(data, f, ensure_ascii=False, indent=4)
 
-@dp.message(Command(commands=["start"]))
-async def greetings(message: Message, state: FSMContext):
-    await state.update_data(user_id=message.from_user.id)
-    info = await bot.get_me()
-    name = info.username
+async def existing_user(message, state):
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
+        score_list = json.load(f)
+        for line in score_list:
+            if message.from_user.id == line['user_id']:
+                if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
+                    keyboard = create_main_keyboard()
+                else:
+                    keyboard = create_change_settings_keyboard()
 
-    if os.path.exists('daily_scores.txt'):
-        with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
-            score_list = json.load(f)
-            for line in score_list:
-                if message.from_user.id == line['user_id']:
-                    if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
-                        keyboard = create_main_keyboard()
-                    else:
-                        keyboard = create_settings_keyboard()
-
-                    daily_scores = line['daily_scores']
-                    await state.update_data(daily_scores=daily_scores)
+                daily_scores = line['daily_scores']
+                await state.update_data(daily_scores=daily_scores)
+                await message.answer(
+                    'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот список ежедневных дел:')
+                await message.answer(', '.join(daily_scores.keys()), reply_markup=keyboard)
+                await message.answer(
+                    'Впишите ежедневные дела которые вы вчера делали' + '\n'
+                    + 'Вы можете изменить списки в любой момент')
+                if 'one_time_jobs' in line:
+                    one_time_jobs = line['one_time_jobs']
+                    await state.update_data(one_time_jobs=one_time_jobs)
                     await message.answer(
-                        'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот список ежедневных дел:')
-                    await message.answer(', '.join(daily_scores.keys()), reply_markup=keyboard)
-                    await message.answer(
-                        'Впишите ежедневные дела которые вы вчера делали' + '\n'
-                        + 'Вы можете изменить списки в любой момент')
-                    if 'one_time_jobs' in line:
-                        one_time_jobs = line['one_time_jobs']
-                        await state.update_data(one_time_jobs=one_time_jobs)
-                        await message.answer(
-                            'Разовые дела:')
-                        await message.answer(', '.join(line['one_time_jobs']))
-                    await state.set_state(ClientState.greet)
-    else:
-        with open('daily_scores.txt', 'w') as f:
-            json.dump([], f, ensure_ascii=False, indent=4)
-        await handle_new_user(message, name, state)
-    start_scheduler(message, state)
+                        'Разовые дела:')
+                    await message.answer(', '.join(line['one_time_jobs']))
+                await state.set_state(ClientState.greet)
 
 def create_main_keyboard():
     kb = [[types.KeyboardButton(text="Скачать дневник"),
@@ -82,19 +75,40 @@ def create_main_keyboard():
     )
     return keyboard
 
-def create_settings_keyboard():
+def create_change_settings_keyboard():
     kb = [[types.KeyboardButton(text="Изменить Настройки")]]
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
         resize_keyboard=True,
     )
     return keyboard
+def create_settings_keyboard():
+    kb = [[types.KeyboardButton(text="Изменить Дела"),
+               types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость"),
+               types.KeyboardButton(text="Заполнить дневник")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+def create_jobs_keyboard():
+    kb = [[types.KeyboardButton(text="Ежедневные дела"),
+           types.KeyboardButton(text="Разовые дела"),
+           types.KeyboardButton(text='В определенную дату')]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
 
-async def handle_new_user(message: Message, name: str, state):
+async def handle_new_user(message: Message, state):
+    info = await bot.get_me()
+    with open('daily_scores.txt', 'w') as f:
+        json.dump([], f, ensure_ascii=False, indent=4)
     markup = types.ReplyKeyboardRemove()
     await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
     await message.answer(
-        f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {name}!
+        f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {info.username}!
 Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим
 Для начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:''')
     await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
@@ -109,12 +123,17 @@ def start_scheduler(message, state):
         scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
         scheduler.start()
 
+@dp.message(Command(commands=["start"]))
+async def greetings(message: Message, state: FSMContext):
+    if os.path.exists('daily_scores.txt'):
+        await existing_user(message, state)
+    else:
+        await handle_new_user(message, state)
+    start_scheduler(message, state)
 
 @dp.message(F.text == 'Вывести дневник')
 async def settings(message: Message, state: FSMContext):
-    user_name = message.from_user.username
-    # Получение активного листа
-    data = pd.read_excel(f'{user_name}_Diary.xlsx')
+    data = pd.read_excel(f'{message.from_user.username}_Diary.xlsx')
 
     async def format_message(row):
         message = "{} | {} | {} | {} | {} | {} | {} | {}".format(row["Дата"], row["Дела за день"], row["Шаги"],
@@ -139,13 +158,7 @@ async def settings(message: Message, state: FSMContext):
 
 @dp.message(F.text == 'Изменить Настройки')
 async def settings(message: Message, state: FSMContext):
-    kb = [[types.KeyboardButton(text="Изменить Дела"),
-           types.KeyboardButton(text='''Что такое "стоимость"?'''), types.KeyboardButton(text="Изменить Стоимость"),
-           types.KeyboardButton(text="Заполнить дневник")]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
+    keyboard = create_settings_keyboard()
     await message.answer(text='Здесь вы можете изменить свои настройки', reply_markup=keyboard)
     await state.set_state(ClientState.settings)
 
@@ -154,13 +167,11 @@ async def settings(message: Message, state: FSMContext):
 async def fill_diary(message: Message, state: FSMContext) -> None:
     await greetings(message, state)
 
-
 @dp.message(F.text == 'Изменить Стоимость', ClientState.settings)
 async def download(message: Message, state: FSMContext = None) -> None:
-    markup = types.ReplyKeyboardRemove()
     await message.answer(
         'Ниже представлен ваш ежедневный список дел и его стоимость в формате "дело: оценка" '
-        'Скопируйте список и отправьте его с обновленными оценками', reply_markup=markup)
+        'Скопируйте список и отправьте его с обновленными оценками', reply_markup=types.ReplyKeyboardRemove())
     user_states_data = await state.get_data()
     daily_scores = user_states_data['daily_scores']
     formatted_string = ''
@@ -184,13 +195,7 @@ async def download(message: Message) -> None:
 
 @dp.message(F.text == 'Изменить Дела', ClientState.settings)
 async def jobs_change(message: Message, state: FSMContext = None) -> None:
-    kb = [[types.KeyboardButton(text="Ежедневные дела"),
-           types.KeyboardButton(text="Разовые дела"),
-           types.KeyboardButton(text='В определенную дату')]]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
+    keyboard = create_jobs_keyboard()
     await message.answer(text='Вывожу список...', reply_markup=keyboard)
     await state.set_state(ClientState.jobs)
 
@@ -202,16 +207,15 @@ async def date_job(message: Message, state: FSMContext) -> None:
 
 @dp.message(F.text == 'Разовые дела', ClientState.jobs)
 async def one_time_job(message: Message, state: FSMContext) -> None:
-    markup = types.ReplyKeyboardRemove()
     user_states_data = await state.get_data()
     if 'one_time_jobs' in user_states_data:
         one_time_jobs = user_states_data['one_time_jobs']
         await message.answer(
-            'Введите новый список разовых дел через запятую. Ваш предыдущий список:', reply_markup=markup)
+            'Введите новый список разовых дел через запятую. Ваш предыдущий список:', reply_markup=types.ReplyKeyboardRemove())
         await message.answer(', '.join(one_time_jobs))
         await state.set_state(ClientState.one_time_job_2)
     else:
-        await message.answer('Введите новый список разовых дел через запятую', reply_markup=markup)
+        await message.answer('Введите новый список разовых дел через запятую', reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(ClientState.one_time_job_2)
 
 
@@ -223,10 +227,7 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
         for user in data:
             if message.from_user.id == user['user_id']:
                 user['one_time_jobs'] = one_time_job_str
-                f.seek(0)
-                f.truncate()
-                json.dump(data, f, ensure_ascii=False, indent=4)
-                f.close()
+                write_to_file(data, f)
                 await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
                 await message.answer(', '.join(one_time_job_str))
                 await state.update_data(one_time_jobs=one_time_job_str)
@@ -234,8 +235,7 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 
 @dp.message(F.text == 'Ежедневные дела', ClientState.jobs)
 async def daily_jobs(message: Message, state: FSMContext) -> None:
-    markup = types.ReplyKeyboardRemove()
-    await message.answer('Введите новый список ежедневных. Ваш предыдущий список: ', reply_markup=markup)
+    await message.answer('Введите новый список ежедневных. Ваш предыдущий список: ', reply_markup=types.ReplyKeyboardRemove())
     user_states_data = await state.get_data()
     daily_scores = user_states_data['daily_scores']
     formatted_string = ""
@@ -262,7 +262,6 @@ async def download(message: Message) -> None:
 
 @dp.message(ClientState.new_daily_scores)
 async def command_start(message: Message, state: FSMContext):
-    job_value = False
     daily_scores = dict()
     user_message = message.text
     str_data = user_message.split(', ')
@@ -271,7 +270,6 @@ async def command_start(message: Message, state: FSMContext):
         if len(one_job) == 1:
             daily_scores[one_job[0]] = 1
         else:
-            job_value = True
             daily_scores[one_job[0]] = one_job[1]
     await state.update_data(daily_scores=daily_scores)
     with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
@@ -281,29 +279,21 @@ async def command_start(message: Message, state: FSMContext):
             for user in data:
                 if message.from_user.id == user['user_id']:
                     found = True
-                    if not job_value:
+                    if len(str_data[0]) != 1:
                         for old_job in user['daily_scores']:
                             if old_job in daily_scores:
                                 daily_scores[old_job] = user['daily_scores'][old_job]
                         user['daily_scores'] = daily_scores
-                        f.seek(0)
-                        f.truncate()
-                        json.dump(data, f, ensure_ascii=False, indent=4)
+                        write_to_file(data, f)
                     else:
                         user['daily_scores'] = daily_scores
-                        f.truncate(0)
-                        f.seek(0)
-                        json.dump(data, f, ensure_ascii=False, indent=4)
+                        write_to_file(data, f)
             if not found:
                 data.append({'user_id': message.from_user.id, 'daily_scores': daily_scores})
-                f.seek(0)
-                f.truncate()
-                json.dump(data, f, ensure_ascii=False, indent=4)
+                write_to_file(data, f)
         else:
             data.append({'user_id': message.from_user.id, 'daily_scores': daily_scores})
-            f.seek(0)
-            f.truncate()
-            json.dump(data, f, ensure_ascii=False, indent=4)
+            write_to_file(data, f)
         await message.answer('Отлично, ваш список ежедневных дел обновлен!')
         await state.set_state(ClientState.settings)
         await settings(message, state)
@@ -372,13 +362,7 @@ async def process_one_time(message: Message, state: FSMContext):
                         del user['one_time_jobs']
 
         if not error and not exit:
-            # Move the file pointer to the beginning of the file
-            f.seek(0)
-            f.truncate()
-            # Write the modified data back to the file
-            json.dump(data, f, ensure_ascii=False, indent=4)
-            f.close()
-            # Truncate any remaining content in the file (in case the new data is shorter)
+            write_to_file(data, f)
             await message.answer("Сколько сделал шагов?")
             await state.set_state(ClientState.steps)
 
