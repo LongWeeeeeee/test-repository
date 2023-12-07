@@ -37,38 +37,24 @@ class ClientState(StatesGroup):
 
 @dp.message(Command(commands=["start"]))
 async def greetings(message: Message, state: FSMContext):
-    global start
     await state.update_data(user_id=message.from_user.id)
     info = await bot.get_me()
     name = info.username
-    flag = False
 
     if os.path.exists('daily_scores.txt'):
-        with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
+        with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
             score_list = json.load(f)
             for line in score_list:
                 if message.from_user.id == line['user_id']:
                     if os.path.exists(f'{message.from_user.username}_Diary.xlsx'):
-                        kb = [[types.KeyboardButton(text="Скачать дневник"),
-                               types.KeyboardButton(text="Изменить Настройки"),
-                               types.KeyboardButton(text="Вывести дневник")]]
-                        keyboard = types.ReplyKeyboardMarkup(
-                            keyboard=kb,
-                            resize_keyboard=True,
-                        )
+                        keyboard = create_main_keyboard()
                     else:
-                        kb = [
-                            [types.KeyboardButton(text="Изменить Настройки")]]
-                        keyboard = types.ReplyKeyboardMarkup(
-                            keyboard=kb,
-                            resize_keyboard=True,
-                        )
-                    flag = True
+                        keyboard = create_settings_keyboard()
+
                     daily_scores = line['daily_scores']
                     await state.update_data(daily_scores=daily_scores)
                     await message.answer(
                         'Расскажи мне как провел вчерашний день?' + '\n' + 'Вот список ежедневных дел:')
-
                     await message.answer(', '.join(daily_scores.keys()), reply_markup=keyboard)
                     await message.answer(
                         'Впишите ежедневные дела которые вы вчера делали' + '\n'
@@ -83,20 +69,42 @@ async def greetings(message: Message, state: FSMContext):
     else:
         with open('daily_scores.txt', 'w') as f:
             json.dump([], f, ensure_ascii=False, indent=4)
-    if not flag:
-        markup = types.ReplyKeyboardRemove()
-        await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
-        await message.answer(
-            f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {name}!
+        await handle_new_user(message, name, state)
+    start_scheduler(message, state)
+
+def create_main_keyboard():
+    kb = [[types.KeyboardButton(text="Скачать дневник"),
+           types.KeyboardButton(text="Изменить Настройки"),
+           types.KeyboardButton(text="Вывести дневник")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+def create_settings_keyboard():
+    kb = [[types.KeyboardButton(text="Изменить Настройки")]]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    return keyboard
+
+async def handle_new_user(message: Message, name: str, state):
+    markup = types.ReplyKeyboardRemove()
+    await message.answer_sticker('CAACAgIAAxkBAAIsZGVY5wgzBq6lUUSgcSYTt99JnOBbAAIIAAPANk8Tb2wmC94am2kzBA')
+    await message.answer(
+        f'''Привет, {message.from_user.full_name}! \nДобро пожаловать в {name}!
 Он поможет тебе вести отчет о твоих днях и делать выводы почему день был плохим или хорошим
 Для начала нужно задать список дел. Какие у вас есть дела в течении дня? Например:''')
-        await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
-        await message.answer(
-            'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно',
-            reply_markup=markup)
-        await state.set_state(ClientState.new_daily_scores)
-    if start:
-        start = False
+    await message.answer('встал в 6:30, лег в 11, зарядка утром, массаж, пп')
+    await message.answer(
+        'Вы можете воспользоваться предложенным списком или написать свой. Данные могут быть какие угодно',
+        reply_markup=markup)
+    await state.set_state(ClientState.new_daily_scores)
+
+def start_scheduler(message, state):
+    if not hasattr(start_scheduler, "called"):
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
         scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
         scheduler.start()
@@ -210,14 +218,13 @@ async def one_time_job(message: Message, state: FSMContext) -> None:
 @dp.message(ClientState.one_time_job_2)
 async def one_time_job(message: Message, state: FSMContext) -> None:
     one_time_job_str = message.text.lower().split(', ')
-    succes = False
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
         data = json.load(f)
         for user in data:
             if message.from_user.id == user['user_id']:
                 user['one_time_jobs'] = one_time_job_str
-                f.truncate()  # Обрезать файл после чтения данных
-                f.seek(0)  # Переставить указатель на начало файла
+                f.seek(0)
+                f.truncate()
                 json.dump(data, f, ensure_ascii=False, indent=4)
                 f.close()
                 await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
@@ -260,20 +267,14 @@ async def command_start(message: Message, state: FSMContext):
     user_message = message.text
     str_data = user_message.split(', ')
     for one_job in str_data:
-        one_job = one_job.split(' : ')
+        one_job = one_job.lower().replace('ё', 'е').split(' : ')
         if len(one_job) == 1:
-            daily_scores[one_job[0].lower().replace('ё', 'е')] = 1
+            daily_scores[one_job[0]] = 1
         else:
             job_value = True
-            daily_scores[one_job[0].lower().replace('ё', 'е')] = one_job[1]
-    if job_value:
-        string = ''
-        for key, value in daily_scores.items():
-            string += f'{key} : {value}, '
-        await message.answer('Стоимость изменена. Теперь она выглядит так:')
-        await message.answer(string[:-1])
+            daily_scores[one_job[0]] = one_job[1]
     await state.update_data(daily_scores=daily_scores)
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
         data = json.load(f)
         found = False
         if data:
@@ -285,32 +286,27 @@ async def command_start(message: Message, state: FSMContext):
                             if old_job in daily_scores:
                                 daily_scores[old_job] = user['daily_scores'][old_job]
                         user['daily_scores'] = daily_scores
-                        f.truncate(0)
                         f.seek(0)
+                        f.truncate()
                         json.dump(data, f, ensure_ascii=False, indent=4)
-                        f.close()
                     else:
                         user['daily_scores'] = daily_scores
                         f.truncate(0)
                         f.seek(0)
                         json.dump(data, f, ensure_ascii=False, indent=4)
-                        f.close()
             if not found:
                 data.append({'user_id': message.from_user.id, 'daily_scores': daily_scores})
-                f.truncate(0)
                 f.seek(0)
+                f.truncate()
                 json.dump(data, f, ensure_ascii=False, indent=4)
-                f.close()
         else:
             data.append({'user_id': message.from_user.id, 'daily_scores': daily_scores})
-            f.truncate(0)
             f.seek(0)
+            f.truncate()
             json.dump(data, f, ensure_ascii=False, indent=4)
-            f.close()
         await message.answer('Отлично, ваш список ежедневных дел обновлен!')
         await state.set_state(ClientState.settings)
         await settings(message, state)
-
 
 @dp.message(ClientState.greet)
 async def my_steps(message: Message, state: FSMContext):
@@ -348,7 +344,7 @@ async def process_one_time(message: Message, state: FSMContext):
     text = message.text.split(', ')
     error = False
     exit = False
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
         data = json.load(f)
         for user in data:
             if message.from_user.id == user['user_id']:
@@ -377,8 +373,8 @@ async def process_one_time(message: Message, state: FSMContext):
 
         if not error and not exit:
             # Move the file pointer to the beginning of the file
-            f.truncate(0)
             f.seek(0)
+            f.truncate()
             # Write the modified data back to the file
             json.dump(data, f, ensure_ascii=False, indent=4)
             f.close()
@@ -438,7 +434,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
                            daily_scores,
                            user_name):
     # Загрузка существующего файла Excel
-    with open('daily_scores.txt', 'r+', encoding='utf-8') as f:
+    with open('daily_scores.txt', 'r+', encoding='utf-8-sig') as f:
         line = json.load(f)
         for user in line:
             if message.from_user.id == user['user_id']:
@@ -564,8 +560,7 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
     output = ['{}: {}'.format(key, value) for key, value in total_days.items()]
     result = '\n'.join(output)
     if result != '':
-        await message.answer(
-            'Вы не делали эти дела уже столько дней: ' + '\n' + result + '\n Может стоит дать им еще один шанс?')
+        await message.answer(f'Вы не делали эти дела уже столько дней:\nresult\nМожет стоит дать им еще один шанс?')
     total_days = dict()
     for current_word in activities:
         counter_days = await counter_positive(current_word)
