@@ -22,6 +22,7 @@ bot = Bot(token=keys.Token)
 dp = Dispatcher()
 start = True
 
+
 class ClientState(StatesGroup):
     greet = State()
     new_daily_scores = State()
@@ -37,8 +38,11 @@ class ClientState(StatesGroup):
     one_time_jobs_proceed = State()
     date_jobs = State()
     date_jobs_2 = State()
+
+
 async def on_startup():
     await db_start()
+
 
 @dp.message(Command(commands=["start"]))
 async def greetings(message: Message, state: FSMContext):
@@ -120,7 +124,8 @@ async def date_jobs(message: Message, state: FSMContext) -> None:
         output = "\n".join([f"{key} : {value}" for key, value in data['date_jobs'].items()])
         await message.answer(output)
         await message.answer(
-            'Введите дело о котором нужно будет напомнить в определенную дату и оно добавится к списку', reply_markup=types.ReplyKeyboardRemove())
+            'Введите дело о котором нужно будет напомнить в определенную дату и оно добавится к списку',
+            reply_markup=types.ReplyKeyboardRemove())
     else:
         await message.answer('Введите дело о котором нужно будет напомнить в определенную дату')
     await state.set_state(ClientState.date_jobs)
@@ -142,7 +147,7 @@ async def date_jobs(message: Message, state: FSMContext) -> None:
         date_jobs = user_states_data['date_jobs']
         date_jobs[new_date_jobs] = message.text
     else:
-        date_jobs = {new_date_jobs : message.text}
+        date_jobs = {new_date_jobs: message.text}
     await edit_database(date_jobs=date_jobs)
     await message.answer('Дело добавлено!')
     await state.update_data(date_jobs=date_jobs)
@@ -268,7 +273,7 @@ async def process_one_time(message: Message, state: FSMContext):
     one_time_jobs = data['one_time_jobs']
     for jobs in text:
         if jobs.lower().replace('ё', 'е') in ['не', 'нет', '-', 'pass', 'пасс', 'не хочу', 'скип',
-                                             'пососи', 'пошел нахуй', 'неа', 'не-а', 0]:
+                                              'пососи', 'пошел нахуй', 'неа', 'не-а', 0]:
             await message.answer("Сколько сделал шагов?")
             await state.set_state(ClientState.steps)
             return
@@ -410,45 +415,30 @@ async def add_day_to_excel(date, activities, user_message, total_sleep, deep_sle
         # Выбор нужной колонки
         column = data['Дела за день']
 
-        # Переменные для подсчета повторений
-        count = 0
-        # Проход по каждой строке колонки в обратном порядке
-        for words in column.iloc[-1::-1]:
-            flag = False
-            for word in words.split(', '):
-                if word == current_word:
-                    # Если текущее слово совпадает с предыдущим,
-                    # увеличиваем счетчик повторений
-                    flag = True
-            if not flag:
+        def perebor(count=0):
+            for words in column.iloc[-1::-1]:
+                for word in words.split(', '):
+                    if word == current_word:
+                        return count
                 count += 1
-            if flag:
-                return count
-        return count
-
+            return count
+        perebor()
     async def counter_positive(current_word):
         data = pd.read_excel(f'{user_name}_Diary.xlsx')
-
         # Выбор нужной колонки
         column = data['Дела за день']
 
-        # Переменные для подсчета повторений
-        count = 0
-        # Проход по каждой строке колонки в обратном порядке
-        for words in column.iloc[-1::-1]:
-            flag = False
-            for word in words.split(', '):
-                if word == current_word:
-                    # Если текущее слово совпадает с предыдущим,
-                    # увеличиваем счетчик повторений
+        def prohod(count=0):
+            for words in column.iloc[-1::-1]:
+                split_words = words.split(', ')
+                if current_word in split_words:
                     count += 1
-                    flag = True
-            if not flag:
-                if not count and count >= 2:
-                    return count
-                break
-        if count >= 2:
-            return count
+                else:
+                    if count >= 2: return count
+
+            if count >= 2: return count
+
+        prohod()
 
     total_days = dict()
     for current_word in daily_scores:
@@ -564,11 +554,10 @@ async def handle_new_user(message: Message, state):
 
 
 def start_scheduler(message, state):
-    pass
-    # if not hasattr(start_scheduler, "called"):
-    #     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-    #     scheduler.add_jobs(greetings, 'cron', hour=8, minute=45, args=(message, state))
-    #     scheduler.start()
+    if not hasattr(start_scheduler, "called"):
+        scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+        scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
+        scheduler.start()
 
 
 async def diary_out(message):
