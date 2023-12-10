@@ -556,7 +556,7 @@ async def handle_new_user(message: Message, state):
 def start_scheduler(message, state):
     if not hasattr(start_scheduler, "called"):
         scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
-        scheduler.add_job(greetings, 'cron', hour=8, minute=45, args=(message, state))
+        scheduler.add_job(greetings, 'cron', hour=8, minute=00, args=(message, state))
         scheduler.start()
 
 
