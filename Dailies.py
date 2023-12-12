@@ -48,7 +48,6 @@ async def greetings(message: Message, state: FSMContext):
             await state.update_data(one_time_jobs=json.loads(answer[2]))
         if answer[3] != '':
             await state.update_data(date_jobs=json.loads(answer[3]))
-        print(answer)
         await existing_user(message, state)
     else:
         await handle_new_user(message, state)
