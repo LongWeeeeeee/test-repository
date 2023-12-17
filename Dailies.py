@@ -136,10 +136,10 @@ async def date_jobs_name(message: Message, state: FSMContext) -> None:
     user_states_data = await state.get_data()
     date = message.text
     new_date_jobs = user_states_data['new_date_jobs']
-    if 'date_jobs' in user_states_data:
+    try:
         date_jobs = user_states_data['date_jobs']
         date_jobs[new_date_jobs] = date
-    else:
+    except KeyError:
         date_jobs = {new_date_jobs: date}
     date_jobs = dict(sorted(date_jobs.items(), key=lambda x: x[1]))
     await edit_database(date_jobs=date_jobs)
