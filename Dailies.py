@@ -228,7 +228,7 @@ async def one_time_jobs(message: Message, state: FSMContext) -> None:
 
 @dp.message(ClientState.one_time_jobs_2)
 async def one_time_jobs_1(message: Message, state: FSMContext) -> None:
-    one_time_jobs_str = message.text.lower().split(', ')
+    one_time_jobs_str = message.text.lower().replace('ё', 'е').split(', ')
     await edit_database(one_time_jobs=one_time_jobs_str)
     await message.answer('Отлично, теперь ваш список разовых дел выглядит так:')
     await message.answer(', '.join(one_time_jobs_str))
